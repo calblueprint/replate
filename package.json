@@ -1,0 +1,51 @@
+{
+  "name": "mobile-app-template",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "lint:check": "pnpm exec eslint .",
+    "lint:fix": "pnpm exec eslint . --fix",
+    "prettier:check": "pnpm exec prettier --check .",
+    "prettier:fix": "pnpm exec prettier --write .",
+    "tsc": "pnpm exec tsc --noEmit",
+    "prepare": "husky",
+    "pre-commit": "(pnpm run tsc || true) && (pnpm run lint:check || true) && pnpm run prettier:check",
+    "preinstall": "npx only-allow pnpm"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@rneui/base": "4.0.0-rc.8",
+    "@rneui/themed": "4.0.0-rc.8",
+    "@supabase/supabase-js": "^2.53.0",
+    "expo": "~53.0.20",
+    "expo-constants": "~17.1.7",
+    "expo-linking": "~7.1.7",
+    "expo-router": "~5.1.4",
+    "expo-status-bar": "~2.2.3",
+    "react": "19.0.0",
+    "react-native": "^0.79.5",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1",
+    "react-native-url-polyfill": "^2.0.0",
+    "typescript-eslint": "^8.38.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@eslint/js": "^9.32.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
+    "@types/react": "~19.0.14",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "eslint": "^9.32.0",
+    "eslint-config-expo": "^9.2.0",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-prettier": "^5.5.3",
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3",
+    "yarnhook": "^0.6.2"
+  },
+  "private": true
+}
