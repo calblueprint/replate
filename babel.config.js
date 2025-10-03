@@ -1,4 +1,4 @@
-export default function (api) {
+module.exports = function (api) {
   api.cache(true);
   return {
     presets: ['babel-preset-expo'],
@@ -15,6 +15,7 @@ export default function (api) {
           extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         },
       ],
+      'react-native-reanimated/plugin',
     ],
   };
 };
