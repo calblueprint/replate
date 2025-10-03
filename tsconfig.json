@@ -3,7 +3,7 @@
     "strict": true,
     "noEmit": true,
     "allowJs": false,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,
