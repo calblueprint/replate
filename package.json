@@ -10,7 +10,7 @@
     "lint:fix": "pnpm exec eslint . --fix",
     "prettier:check": "pnpm exec prettier --check .",
     "prettier:fix": "pnpm exec prettier --write .",
-    "typecheck": "pnpm exec tsc --noEmit",
+    "tsc": "pnpm exec tsc --noEmit",
     "prepare": "husky",
     "pre-commit": "(pnpm run tsc || true) && (pnpm run lint:check || true) && pnpm run prettier:check",
     "preinstall": "npx only-allow pnpm"
