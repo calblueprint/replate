@@ -1,0 +1,161 @@
+import React, { useState } from 'react';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import Button from '../../../components/Button/Button';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const navigation = useNavigation();
+
+  const handleLogin = () => {
+    console.log('Logging in with:', { email, password });
+    Alert.alert('Login successful!');
+  };
+
+  const handleSignUp = () => {
+    navigation.navigate('Signup' as never);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.logo}>Logo</Text>
+        <Text style={styles.title}>Welcome</Text>
+        <Text style={styles.subtitle}>Please input your details</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="youremailaddress@address.com"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Enter password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            style={styles.showButton}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Text style={styles.showButtonText}>
+              {showPassword ? 'Hide' : 'Show'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.orText}>OR</Text>
+        <View style={styles.buttonContainer}>
+          <Button
+            text="Continue with NPO Portal"
+            disabled={false}
+            onPress={handleLogin}
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button
+            text="Log in"
+            disabled={!email || !password}
+            onPress={handleLogin}
+          />
+        </View>
+        <Text style={styles.linkText}>
+          Need an account?{' '}
+          <Text style={styles.link} onPress={handleSignUp}>
+            Sign up
+          </Text>
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'left',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'left',
+    marginBottom: 30,
+    color: '#666',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 12,
+    fontSize: 16,
+  },
+  showButton: {
+    padding: 12,
+  },
+  showButtonText: {
+    fontWeight: '500',
+  },
+  orText: {
+    textAlign: 'center',
+    marginVertical: 16,
+    color: '#666',
+  },
+  linkText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#666',
+  },
+  link: {
+    color: '#007AFF',
+    textDecorationLine: 'underline',
+  },
+  buttonContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+});
