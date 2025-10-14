@@ -58,14 +58,6 @@ export default function LoginPage() {
             </Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.orText}>OR</Text>
-        <View style={styles.buttonContainer}>
-          <Button
-            text="Continue with NPO Portal"
-            disabled={false}
-            onPress={handleLogin}
-          />
-        </View>
         <View style={styles.buttonContainer}>
           <Button
             text="Log in"

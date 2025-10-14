@@ -97,7 +97,7 @@ export default function SignupPage() {
           onPress={handleSignUp}
         />
         <Text style={styles.linkText}>
-          Need an account?{' '}
+          Have an account?{' '}
           <Text style={styles.link} onPress={handleSignIn}>
             Sign in
           </Text>
