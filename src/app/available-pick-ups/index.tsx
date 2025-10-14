@@ -40,6 +40,7 @@ const fmtTimeRange = (startISO: string, endISO: string) => {
   return `${to12h(s)} - ${to12h(e)}`;
 };
 
+//makes calendar
 function CalendarStrip({
   days,
   todayISO,
@@ -165,8 +166,8 @@ export default function AvailablePickupsPage() {
             style={{
               fontSize: 18,
               fontWeight: '700',
-              marginTop: 40, // 👈 space below calendar
-              marginBottom: 12, // 👈 space before first card
+              marginTop: 40, 
+              marginBottom: 12, 
               paddingHorizontal: 4,
             }}
           >

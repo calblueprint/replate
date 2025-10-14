@@ -37,8 +37,11 @@ export default function RootLayout() {
         headerTitleStyle: {
           fontSize: 22,
           fontWeight: '700',
-        }, contentStyle:{backgroundColor:'#DCDCDC'}
+        },
+        contentStyle: { backgroundColor: '#DCDCDC' },
       }}
-    />
+    >
+      <Stack.Screen name="pickup-details" options={{ headerShown: false }} />
+    </Stack>
   );
 }

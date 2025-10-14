@@ -9,7 +9,7 @@ export default function PickupDetailsLayout() {
         headerRight: () => (
           <Pressable
             onPress={() =>
-              Alert.alert('Claim Pickup', 'Pretend we claimed it ✅')
+              Alert.alert('Claim Pickup', 'Pretend we claimed it 🤓🍻')
             }
             style={{ paddingHorizontal: 8, paddingVertical: 6 }}
           >
