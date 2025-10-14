@@ -166,8 +166,8 @@ export default function AvailablePickupsPage() {
             style={{
               fontSize: 18,
               fontWeight: '700',
-              marginTop: 40, 
-              marginBottom: 12, 
+              marginTop: 40,
+              marginBottom: 12,
               paddingHorizontal: 4,
             }}
           >

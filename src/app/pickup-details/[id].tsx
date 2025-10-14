@@ -1,11 +1,11 @@
-import React from "react";
-import { View, Text } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { MOCK_PICKUPS } from "../available-pick-ups"; // re-use your mock data
+import React from 'react';
+import { Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { MOCK_PICKUPS } from '../available-pick-ups'; // re-use your mock data
 
 function fmtTime(iso: string) {
   return new Date(iso)
-    .toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+    .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
     .toLowerCase();
 }
 
@@ -20,14 +20,14 @@ function Section({
     <View
       style={{
         borderWidth: 1,
-        borderColor: "#d1d5db",
+        borderColor: '#d1d5db',
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
-        backgroundColor: "#f7f7f7",
+        backgroundColor: '#f7f7f7',
       }}
     >
-      <Text style={{ fontWeight: "700", marginBottom: 6 }}>{title}</Text>
+      <Text style={{ fontWeight: '700', marginBottom: 6 }}>{title}</Text>
       {children}
     </View>
   );
@@ -35,7 +35,7 @@ function Section({
 
 export default function PickupDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const pickup = MOCK_PICKUPS.find((p) => String(p.id) === String(id));
+  const pickup = MOCK_PICKUPS.find(p => String(p.id) === String(id));
 
   if (!pickup) {
     return (
