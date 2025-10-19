@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { driverAPI, DriverSignupData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
 
 export default function SignupPage() {
@@ -20,15 +21,39 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
-  const handleSignUp = () => {
-    console.log('Driver signup info:', {
-      first_name,
-      last_name,
-      phone_number,
-      email,
-      password,
-    });
-    Alert.alert('Signup successful!');
+  const handleSignUp = async () => {
+    try {
+      console.log('Creating driver account...');
+
+      const signupData: DriverSignupData = {
+        email,
+        password,
+        password_confirmation: password,
+        first_name,
+        last_name,
+        phone: phone_number,
+        // You'll need to add these fields to your form or provide defaults
+        zone_id: 1, // TODO: Add zone selection to form
+        home_lat: 0, // TODO: Add location picker to form
+        home_lon: 0, // TODO: Add location picker to form
+        onfleet_worker_id: '', // TODO: Add OnFleet ID to form or set after signup
+        deputy_employee_id: 0, // TODO: Add Deputy employee ID to form or set after signup
+      };
+
+      const driver = await driverAPI.signup(signupData);
+      console.log('Driver created successfully:', driver);
+      Alert.alert('Success', 'Account created successfully!', [
+        { text: 'OK', onPress: () => navigation.navigate('Login' as never) },
+      ]);
+    } catch (error) {
+      console.error('Signup error:', error);
+      Alert.alert(
+        'Signup Failed',
+        error instanceof Error
+          ? error.message
+          : 'Failed to create account. Please try again.',
+      );
+    }
   };
 
   const handleSignIn = () => {

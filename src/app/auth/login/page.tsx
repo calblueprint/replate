@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { driverAPI, DriverLoginData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
 
 export default function LoginPage() {
@@ -17,9 +18,29 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    console.log('Logging in with:', { email, password });
-    Alert.alert('Login successful!');
+  const handleLogin = async () => {
+    try {
+      console.log('Logging in with:', { email, password });
+
+      const loginData: DriverLoginData = {
+        email,
+        password,
+      };
+
+      const driver = await driverAPI.login(loginData);
+      console.log('Login successful:', driver);
+      Alert.alert('Success', `Welcome back, ${driver.first_name}!`, [
+        { text: 'OK', onPress: () => navigation.navigate('Index' as never) },
+      ]);
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert(
+        'Login Failed',
+        error instanceof Error
+          ? error.message
+          : 'Invalid email or password. Please try again.',
+      );
+    }
   };
 
   const handleSignUp = () => {
