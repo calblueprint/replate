@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -8,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 
@@ -24,11 +24,19 @@ export default function DonationLayout() {
   const [weight, setWeight] = useState('');
 
   const handleComplete = () => {
-    Alert.alert('Complete', `Donation recorded for ${location}.`);
+    Toast.show({
+      type: `success`,
+      text1: `Complete`,
+      text2: `Donation recorded for ${location}.`,
+    });
   };
 
   const handleMissed = () => {
-    Alert.alert('Missed', `Marked ${location} as missed.`);
+    Toast.show({
+      type: `info`,
+      text1: `Missed`,
+      text2: `Marked ${location} as missed.`,
+    });
   };
 
   return (

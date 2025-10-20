@@ -1,5 +1,6 @@
 //import { Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 //import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Stack } from 'expo-router';
 
@@ -40,6 +41,7 @@ function StackLayout() {
           }}
         />
       </Stack>
+      <Toast />
     </SafeAreaProvider>
   );
 }
