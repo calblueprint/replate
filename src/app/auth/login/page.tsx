@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -8,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { driverAPI, DriverLoginData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
 
@@ -16,7 +17,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const navigation = useNavigation();
 
   const handleLogin = async () => {
     try {
@@ -30,7 +30,7 @@ export default function LoginPage() {
       const driver = await driverAPI.login(loginData);
       console.log('Login successful:', driver);
       Alert.alert('Success', `Welcome back, ${driver.first_name}!`, [
-        { text: 'OK', onPress: () => navigation.navigate('Index' as never) },
+        { text: 'OK', onPress: () => router.push('/') },
       ]);
     } catch (error) {
       console.error('Login error:', error);
@@ -44,12 +44,12 @@ export default function LoginPage() {
   };
 
   const handleSignUp = () => {
-    navigation.navigate('Signup' as never);
+    router.push('/auth/signup/page');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.logo}>Logo</Text>
         <Text style={styles.title}>Welcome</Text>
         <Text style={styles.subtitle}>Please input your details</Text>
@@ -92,7 +92,7 @@ export default function LoginPage() {
             Sign up
           </Text>
         </Text>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
