@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { driverAPI, DriverLoginData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
+import { authStyles } from '../../../styles/authStyles';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -43,18 +43,18 @@ export default function LoginPage() {
     }
   };
 
-  const handleSignUp = () => {
+  const navigateToSignUp = () => {
     router.push('/auth/signup/page');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.logo}>Logo</Text>
-        <Text style={styles.title}>Welcome</Text>
-        <Text style={styles.subtitle}>Please input your details</Text>
+    <SafeAreaView style={authStyles.container}>
+      <ScrollView contentContainerStyle={authStyles.content}>
+        <Text style={authStyles.logo}>Logo</Text>
+        <Text style={authStyles.title}>Welcome</Text>
+        <Text style={authStyles.subtitle}>Please input your details</Text>
         <TextInput
-          style={styles.input}
+          style={authStyles.input}
           placeholder="youremailaddress@address.com"
           value={email}
           onChangeText={setEmail}
@@ -62,33 +62,33 @@ export default function LoginPage() {
           autoCapitalize="none"
         />
 
-        <View style={styles.passwordContainer}>
+        <View style={authStyles.passwordContainer}>
           <TextInput
-            style={styles.passwordInput}
+            style={authStyles.passwordInput}
             placeholder="Enter password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
           />
           <TouchableOpacity
-            style={styles.showButton}
+            style={authStyles.showButton}
             onPress={() => setShowPassword(!showPassword)}
           >
-            <Text style={styles.showButtonText}>
+            <Text style={authStyles.showButtonText}>
               {showPassword ? 'Hide' : 'Show'}
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.buttonContainer}>
+        <View style={authStyles.buttonContainer}>
           <Button
             text="Log in"
             disabled={!email || !password}
             onPress={handleLogin}
           />
         </View>
-        <Text style={styles.linkText}>
+        <Text style={authStyles.linkText}>
           Need an account?{' '}
-          <Text style={styles.link} onPress={handleSignUp}>
+          <Text style={authStyles.link} onPress={navigateToSignUp}>
             Sign up
           </Text>
         </Text>
@@ -96,79 +96,3 @@ export default function LoginPage() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'left',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'left',
-    marginBottom: 30,
-    color: '#666',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 12,
-    fontSize: 16,
-  },
-  showButton: {
-    padding: 12,
-  },
-  showButtonText: {
-    fontWeight: '500',
-  },
-  orText: {
-    textAlign: 'center',
-    marginVertical: 16,
-    color: '#666',
-  },
-  linkText: {
-    textAlign: 'center',
-    marginTop: 20,
-    color: '#666',
-  },
-  link: {
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-  },
-  buttonContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-});

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { driverAPI, DriverSignupData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
+import { authStyles } from '../../../styles/authStyles';
 
 export default function SignupPage() {
   const [first_name, setFirstName] = useState('');
@@ -56,39 +56,39 @@ export default function SignupPage() {
     }
   };
 
-  const handleSignIn = () => {
+  const navigateToLogin = () => {
     router.push('/auth/login/page');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.logo}>Logo</Text>
-        <Text style={styles.title}>Let's get started</Text>
-        <Text style={styles.subtitle}>Please input your details</Text>
-        <View style={styles.inputContainer}>
+    <SafeAreaView style={authStyles.container}>
+      <ScrollView contentContainerStyle={authStyles.content}>
+        <Text style={authStyles.logo}>Logo</Text>
+        <Text style={authStyles.title}>Let's get started</Text>
+        <Text style={authStyles.subtitle}>Please input your details</Text>
+        <View style={authStyles.inputContainer}>
           <TextInput
-            style={styles.inputHalf}
+            style={authStyles.inputHalf}
             placeholder="First name"
             value={first_name}
             onChangeText={setFirstName}
           />
           <TextInput
-            style={styles.inputHalf}
+            style={authStyles.inputHalf}
             placeholder="Last name"
             value={last_name}
             onChangeText={setLastName}
           />
         </View>
         <TextInput
-          style={styles.input}
+          style={authStyles.input}
           placeholder="Your phone number"
           value={phone_number}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
         />
         <TextInput
-          style={styles.input}
+          style={authStyles.input}
           placeholder="Your email"
           value={email}
           onChangeText={setEmail}
@@ -96,19 +96,19 @@ export default function SignupPage() {
           autoCapitalize="none"
         />
 
-        <View style={styles.passwordContainer}>
+        <View style={authStyles.passwordContainer}>
           <TextInput
-            style={styles.passwordInput}
+            style={authStyles.passwordInput}
             placeholder="Your password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
           />
           <TouchableOpacity
-            style={styles.showButton}
+            style={authStyles.showButton}
             onPress={() => setShowPassword(!showPassword)}
           >
-            <Text style={styles.showButtonText}>
+            <Text style={authStyles.showButtonText}>
               {showPassword ? 'Hide' : 'Show'}
             </Text>
           </TouchableOpacity>
@@ -121,9 +121,9 @@ export default function SignupPage() {
           }
           onPress={handleSignUp}
         />
-        <Text style={styles.linkText}>
+        <Text style={authStyles.linkText}>
           Have an account?{' '}
-          <Text style={styles.link} onPress={handleSignIn}>
+          <Text style={authStyles.link} onPress={navigateToLogin}>
             Sign in
           </Text>
         </Text>
@@ -131,85 +131,3 @@ export default function SignupPage() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'left',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'left',
-    marginBottom: 30,
-    color: '#666',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 12,
-    fontSize: 16,
-  },
-  showButton: {
-    padding: 12,
-  },
-  showButtonText: {
-    fontWeight: '500',
-  },
-  inputHalf: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-    fontSize: 16,
-    flex: 1,
-    marginLeft: 3,
-    marginRight: 3,
-  },
-  linkText: {
-    textAlign: 'center',
-    marginTop: 20,
-    color: '#666',
-  },
-  link: {
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-});
