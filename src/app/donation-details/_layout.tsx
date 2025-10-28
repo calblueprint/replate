@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
+import PhotoUpload from '../../components/PhotoUpload';
 
 const MOCK_NPOS = [
   { id: 1, name: 'NPO 1' },
@@ -22,6 +24,7 @@ export default function DonationLayout() {
   const location = params.location || 'Unknown';
   const [selectedNPO, setSelectedNPO] = useState('');
   const [weight, setWeight] = useState('');
+  const [photo, setPhoto] = useState<string | null>(null);
 
   const handleComplete = () => {
     Toast.show({
@@ -39,6 +42,11 @@ export default function DonationLayout() {
     });
   };
 
+  const handlePhotoSelect = (uri: string | null) => {
+    setPhoto(uri);
+    console.log(photo);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
@@ -50,7 +58,7 @@ export default function DonationLayout() {
         }}
       />
 
-      <View style={styles.content}>
+      <ScrollView style={styles.content}>
         <Text style={styles.header}>{location} Pick-up</Text>
 
         <Text style={styles.label}>
@@ -78,7 +86,11 @@ export default function DonationLayout() {
             ))}
           </Picker>
         </View>
-      </View>
+        <View style={styles.photoSection}>
+          <Text style={styles.label}>Add Pick-up Image</Text>
+          <PhotoUpload onSelect={handlePhotoSelect} />
+        </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.outlineButton} onPress={handleMissed}>
@@ -99,7 +111,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 120,
+    //paddingBottom: 10,
   },
   header: {
     fontSize: 20,
@@ -126,14 +138,12 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: 20,
     backgroundColor: 'white',
-    marginBottom: 20,
     height: 52,
     justifyContent: 'center',
     //overflow: "hidden",
   },
   picker: {
     width: '100%',
-    height: '100%',
     color: 'black',
     fontSize: 16,
   },
@@ -169,5 +179,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: 'black',
+  },
+  photoSection: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+    alignItems: 'flex-start',
   },
 });
