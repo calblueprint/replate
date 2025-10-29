@@ -37,10 +37,6 @@ export default function SignupPage() {
         first_name,
         last_name,
         phone: phone_number,
-        // You'll need to add these fields to your form or provide defaults
-        zone_id: 1, // TODO: Add zone selection to form
-        home_lat: 0, // TODO: Add location picker to form
-        home_lon: 0, // TODO: Add location picker to form
       };
 
       await signup(signupData);
