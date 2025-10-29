@@ -43,10 +43,6 @@ export default function LoginPage() {
     }
   };
 
-  const navigateToSignUp = () => {
-    router.push('/auth/signup/page');
-  };
-
   return (
     <SafeAreaView style={authStyles.container}>
       <ScrollView contentContainerStyle={authStyles.content}>
@@ -88,7 +84,10 @@ export default function LoginPage() {
         </View>
         <Text style={authStyles.linkText}>
           Need an account?{' '}
-          <Text style={authStyles.link} onPress={navigateToSignUp}>
+          <Text
+            style={authStyles.link}
+            onPress={() => router.push('/auth/signup')}
+          >
             Sign up
           </Text>
         </Text>

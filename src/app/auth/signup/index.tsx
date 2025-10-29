@@ -36,14 +36,12 @@ export default function SignupPage() {
         zone_id: 1, // TODO: Add zone selection to form
         home_lat: 0, // TODO: Add location picker to form
         home_lon: 0, // TODO: Add location picker to form
-        onfleet_worker_id: '', // TODO: Add OnFleet ID to form or set after signup
-        deputy_employee_id: 0, // TODO: Add Deputy employee ID to form or set after signup
       };
 
       const driver = await driverAPI.signup(signupData);
       console.log('Driver created successfully:', driver);
       Alert.alert('Success', 'Account created successfully!', [
-        { text: 'OK', onPress: () => router.push('/auth/login/page') },
+        { text: 'OK', onPress: () => router.push('/auth/login') },
       ]);
     } catch (error) {
       console.error('Signup error:', error);
@@ -54,10 +52,6 @@ export default function SignupPage() {
           : 'Failed to create account. Please try again.',
       );
     }
-  };
-
-  const navigateToLogin = () => {
-    router.push('/auth/login/page');
   };
 
   return (
@@ -123,7 +117,10 @@ export default function SignupPage() {
         />
         <Text style={authStyles.linkText}>
           Have an account?{' '}
-          <Text style={authStyles.link} onPress={navigateToLogin}>
+          <Text
+            style={authStyles.link}
+            onPress={() => router.push('/auth/login')}
+          >
             Sign in
           </Text>
         </Text>

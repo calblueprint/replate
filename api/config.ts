@@ -1,6 +1,6 @@
 // API Configuration for Rails Backend
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.2.193.251:3000';
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
 export { BASE_URL };
 
@@ -21,8 +21,6 @@ export interface DriverSignupData {
   zone_id: number;
   home_lat: number;
   home_lon: number;
-  onfleet_worker_id: string;
-  deputy_employee_id: number;
 }
 
 export interface DriverLoginData {
