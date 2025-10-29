@@ -27,7 +27,7 @@
     },
     "plugins": ["expo-router", "expo-font"],
     "extra": {
-      "EXPO_PUBLIC_BACKEND_URL": "http://192.168.102.21:3000"
+      "EXPO_PUBLIC_BACKEND_URL": "http:10.40.164.190:3000"
     }
   }
 }
