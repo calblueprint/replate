@@ -1,6 +1,6 @@
 // API Configuration for Rails Backend
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'http:/10.2.193.239:3000';
 
 export { BASE_URL };
 
