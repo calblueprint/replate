@@ -12,7 +12,7 @@ const extra: AppExtra =
 export const BACKEND_URL =
   typeof extra.EXPO_PUBLIC_BACKEND_URL === 'string'
     ? extra.EXPO_PUBLIC_BACKEND_URL
-    : 'http://192.168.102.21:3000';
+    : '10.40.164.190:3000';
 
 export const MOCK_PICKUPS = [
   {
@@ -41,19 +41,6 @@ export const MOCK_PICKUPS = [
   },
 ];
 
-// datetime helpers
-const fmtTimeRange = (startISO?: string | null, endISO?: string | null) => {
-  if (!startISO || !endISO) return 'Time TBD';
-  const s = new Date(startISO);
-  const e = new Date(endISO);
-  if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Time TBD';
-  const to12h = (d: Date) =>
-    d
-      .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-      .toLowerCase();
-  return `${to12h(s)} - ${to12h(e)}`;
-};
-
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
@@ -63,11 +50,42 @@ function getErrorMessage(e: unknown): string {
     return 'Unknown error';
   }
 }
-const toISO = (dateStr?: string | null, timeStr?: string | null) => {
-  if (!dateStr || !timeStr) return null;
-  const hhmm = timeStr.length === 5 ? `${timeStr}:00` : timeStr; // "09:00" -> "09:00:00"
-  return `${dateStr}T${hhmm}`;
-};
+
+// This is a bunch of helpers to fix formatting from backend, will clean up
+function parseBackendUtc(ts?: string | null): Date | null {
+  if (!ts) return null;
+  const iso = ts.replace(' ', 'T').replace(' UTC', 'Z');
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtHour(d: Date): string {
+  const h = d.getHours(); // local hours
+  const hr12 = h % 12 || 12; // 0→12
+  return String(hr12) + ':00';
+}
+
+function ampm(d: Date): 'am' | 'pm' {
+  return d.getHours() < 12 ? 'am' : 'pm';
+}
+
+function fmtShortHourRange(
+  startStr?: string | null,
+  endStr?: string | null,
+  opts?: { showAmPm?: boolean },
+) {
+  const s = parseBackendUtc(startStr);
+  const e = parseBackendUtc(endStr);
+  if (!s || !e) return 'Time TBD';
+
+  const base = `${fmtHour(s)}–${fmtHour(e)}`;
+  if (opts?.showAmPm) {
+    return ampm(s) === ampm(e)
+      ? `${base} ${ampm(s)}`
+      : `${fmtHour(s)} ${ampm(s)}–${fmtHour(e)} ${ampm(e)}`;
+  }
+  return base;
+}
 
 type ApiTask = {
   id: number;
@@ -176,11 +194,10 @@ export default function AvailablePickupsPage() {
         const res = await fetch(`${BACKEND_URL}/api/tasks`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: ApiTask[] = await res.json();
-        // map backend -> UI shape
         const mapped = data.map(t => ({
           id: t.id,
-          slot_start_time: toISO(t.pickup_date, t.start_time),
-          slot_end_time: toISO(t.pickup_date, t.end_time),
+          slot_start_time: t.start_time,
+          slot_end_time: t.end_time,
           pickup_location: t.location_name ?? 'Unknown location',
         }));
         setRemote(mapped);
@@ -251,7 +268,9 @@ export default function AvailablePickupsPage() {
           })}
         >
           <Text style={{ fontWeight: '700', marginBottom: 6 }}>
-            {fmtTimeRange(item.slot_start_time, item.slot_end_time)}
+            {fmtShortHourRange(item.slot_start_time, item.slot_end_time, {
+              showAmPm: true,
+            })}
           </Text>
           <Text>{item.pickup_location}</Text>
         </Pressable>
