@@ -36,6 +36,19 @@ export const MOCK_PICKUPS = [
   },
 ];
 
+// datetime helpers
+const fmtTimeRange = (startISO?: string | null, endISO?: string | null) => {
+  if (!startISO || !endISO) return 'Time TBD';
+  const s = new Date(startISO);
+  const e = new Date(endISO);
+  if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Time TBD';
+  const to12h = (d: Date) =>
+    d
+      .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+      .toLowerCase();
+  return `${to12h(s)} - ${to12h(e)}`;
+};
+
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
