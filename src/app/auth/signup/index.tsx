@@ -9,9 +9,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { driverAPI, DriverSignupData } from '../../../../api/config';
+import { DriverSignupData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
 import { authStyles } from '../../../styles/authStyles';
+import { useAuth } from '../../../utils/AuthContext';
 
 export default function SignupPage() {
   const [first_name, setFirstName] = useState('');
@@ -20,9 +21,13 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { signup } = useAuth();
 
   const handleSignUp = async () => {
     try {
+      setIsLoading(true);
       console.log('Creating driver account...');
 
       const signupData: DriverSignupData = {
@@ -38,10 +43,10 @@ export default function SignupPage() {
         home_lon: 0, // TODO: Add location picker to form
       };
 
-      const driver = await driverAPI.signup(signupData);
-      console.log('Driver created successfully:', driver);
+      await signup(signupData);
+      console.log('Driver created successfully');
       Alert.alert('Success', 'Account created successfully!', [
-        { text: 'OK', onPress: () => router.push('/auth/login') },
+        { text: 'OK', onPress: () => router.push('/dashboard') },
       ]);
     } catch (error) {
       console.error('Signup error:', error);
@@ -51,6 +56,8 @@ export default function SignupPage() {
           ? error.message
           : 'Failed to create account. Please try again.',
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -109,9 +116,14 @@ export default function SignupPage() {
         </View>
 
         <Button
-          text="Continue"
+          text={isLoading ? 'Creating Account...' : 'Continue'}
           disabled={
-            !email || !password || !first_name || !last_name || !phone_number
+            !email ||
+            !password ||
+            !first_name ||
+            !last_name ||
+            !phone_number ||
+            isLoading
           }
           onPress={handleSignUp}
         />
