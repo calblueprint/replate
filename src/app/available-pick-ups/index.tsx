@@ -1,6 +1,18 @@
 import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
+
+type AppExtra = { EXPO_PUBLIC_BACKEND_URL?: string };
+
+const rawExtra: unknown = Constants.expoConfig?.extra;
+const extra: AppExtra =
+  rawExtra && typeof rawExtra === 'object' ? (rawExtra as AppExtra) : {};
+
+export const BACKEND_URL =
+  typeof extra.EXPO_PUBLIC_BACKEND_URL === 'string'
+    ? extra.EXPO_PUBLIC_BACKEND_URL
+    : 'http://192.168.102.21:3000';
 
 export const MOCK_PICKUPS = [
   {
@@ -30,14 +42,46 @@ export const MOCK_PICKUPS = [
 ];
 
 // datetime helpers
-const fmtTimeRange = (startISO: string, endISO: string) => {
+const fmtTimeRange = (startISO?: string | null, endISO?: string | null) => {
+  if (!startISO || !endISO) return 'Time TBD';
   const s = new Date(startISO);
   const e = new Date(endISO);
+  if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Time TBD';
   const to12h = (d: Date) =>
     d
       .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
       .toLowerCase();
   return `${to12h(s)} - ${to12h(e)}`;
+};
+
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === 'string') return e;
+  try {
+    return JSON.stringify(e);
+  } catch {
+    return 'Unknown error';
+  }
+}
+const toISO = (dateStr?: string | null, timeStr?: string | null) => {
+  if (!dateStr || !timeStr) return null;
+  const hhmm = timeStr.length === 5 ? `${timeStr}:00` : timeStr; // "09:00" -> "09:00:00"
+  return `${dateStr}T${hhmm}`;
+};
+
+type ApiTask = {
+  id: number;
+  pickup_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  location_name: string | null;
+};
+
+type UiPickup = {
+  id: number;
+  slot_start_time: string | null;
+  slot_end_time: string | null;
+  pickup_location: string;
 };
 
 //makes calendar
@@ -127,6 +171,28 @@ function CalendarStrip({
 export default function AvailablePickupsPage() {
   const todayISO = new Date().toISOString().slice(0, 10);
   const [selectedISO, setSelectedISO] = React.useState(todayISO);
+  const [remote, setRemote] = React.useState<UiPickup[] | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/tasks`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: ApiTask[] = await res.json();
+        // map backend -> UI shape
+        const mapped = data.map(t => ({
+          id: t.id,
+          slot_start_time: toISO(t.pickup_date, t.start_time),
+          slot_end_time: toISO(t.pickup_date, t.end_time),
+          pickup_location: t.location_name ?? 'Unknown location',
+        }));
+        setRemote(mapped);
+      } catch (e: unknown) {
+        setError(getErrorMessage(e));
+      }
+    })();
+  }, []);
   const days = React.useMemo(() => {
     const out: string[] = [];
     const start = new Date();
@@ -139,10 +205,10 @@ export default function AvailablePickupsPage() {
     return out;
   }, []);
 
+  const source = remote ?? MOCK_PICKUPS; // fallback to mocks if fetch not ready
   const filtered = React.useMemo(
-    () =>
-      MOCK_PICKUPS.filter(p => p.slot_start_time.slice(0, 10) === selectedISO),
-    [selectedISO],
+    () => source.filter(p => p.slot_start_time?.slice(0, 10) === selectedISO),
+    [source, selectedISO],
   );
 
   return (
@@ -156,6 +222,20 @@ export default function AvailablePickupsPage() {
       }}
       ListHeaderComponent={
         <View>
+          {error ? (
+            <View
+              style={{
+                padding: 16,
+                backgroundColor: '#fee2e2',
+                borderRadius: 8,
+                marginTop: 16,
+              }}
+            >
+              <Text style={{ color: '#991b1b' }}>
+                Failed to load tasks: {error}
+              </Text>
+            </View>
+          ) : null}
           <CalendarStrip
             days={days}
             todayISO={todayISO}
