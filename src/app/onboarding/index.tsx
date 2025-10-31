@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, Button, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { Button } from 'react-native-paper';
 
 export default function OnboardingFlow() {
   const MOCK_NPOS = [
@@ -33,12 +32,10 @@ export default function OnboardingFlow() {
       />
 
       <Button
-        mode="contained"
+        title="Finish"
         disabled={selectedNPOId === null}
         onPress={() => Alert.alert('Your NPO selection has been saved.')}
-      >
-        Finish
-      </Button>
+      />
     </View>
   );
 }
