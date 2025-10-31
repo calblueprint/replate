@@ -17,10 +17,7 @@ function IndexScreen() {
 function StackLayout() {
   return (
     <SafeAreaProvider>
-      <Stack.Navigator
-        screenOptions={{ headerShown: false }}
-        initialRouteName="Onboarding"
-      >
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Index" component={IndexScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingFlow} />
       </Stack.Navigator>
