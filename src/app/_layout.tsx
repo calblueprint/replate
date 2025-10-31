@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import OnboardingFlow from './onboarding/page';
+import OnboardingFlow from './onboarding';
 
 const Stack = createNativeStackNavigator();
 
