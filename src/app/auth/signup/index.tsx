@@ -15,7 +15,6 @@ import { router } from 'expo-router';
 import { DriverSignupData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
 import { authStyles } from '../../../styles/authStyles';
-import { useAuth } from '../../../utils/AuthContext';
 
 export default function SignupPage() {
   const [first_name, setFirstName] = useState('');
@@ -26,7 +25,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const firstNameBorderAnim = useRef(new Animated.Value(0)).current;
   const lastNameBorderAnim = useRef(new Animated.Value(0)).current;
@@ -34,8 +32,6 @@ export default function SignupPage() {
   const phoneBorderAnim = useRef(new Animated.Value(0)).current;
   const passwordBorderAnim = useRef(new Animated.Value(0)).current;
   const confirmPasswordBorderAnim = useRef(new Animated.Value(0)).current;
-
-  const { signup } = useAuth();
 
   useEffect(() => {
     Animated.timing(firstNameBorderAnim, {
@@ -115,7 +111,7 @@ export default function SignupPage() {
     outputRange: ['#E5E5E5', '#000000'],
   });
 
-  const handleSignUp = async () => {
+  const handleSignUp = () => {
     if (password !== confirmPassword) {
       Toast.show({
         type: 'error',
@@ -127,46 +123,21 @@ export default function SignupPage() {
       return;
     }
 
-    try {
-      setIsLoading(true);
-      console.log('Creating driver account...');
+    const signupData: DriverSignupData = {
+      email,
+      password,
+      password_confirmation: password,
+      first_name,
+      last_name,
+      phone: phone_number,
+    };
 
-      const signupData: DriverSignupData = {
-        email,
-        password,
-        password_confirmation: password,
-        first_name,
-        last_name,
-        phone: phone_number,
-      };
-
-      await signup(signupData);
-      console.log('Driver created successfully');
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Account created successfully!',
-        position: 'top',
-        visibilityTime: 2000,
-      });
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 500);
-    } catch (error) {
-      console.error('Signup error:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Signup Failed',
-        text2:
-          error instanceof Error
-            ? error.message
-            : 'Failed to create account. Please try again.',
-        position: 'top',
-        visibilityTime: 3000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    router.push({
+      pathname: '/auth/signup/npo-selection',
+      params: {
+        signupData: JSON.stringify(signupData),
+      },
+    });
   };
 
   return (
@@ -319,15 +290,14 @@ export default function SignupPage() {
 
             <View style={authStyles.buttonContainer}>
               <Button
-                text={isLoading ? 'Creating Account...' : 'Continue'}
+                text="Continue"
                 disabled={
                   !email ||
                   !password ||
                   !confirmPassword ||
                   !first_name ||
                   !last_name ||
-                  !phone_number ||
-                  isLoading
+                  !phone_number
                 }
                 onPress={handleSignUp}
               />

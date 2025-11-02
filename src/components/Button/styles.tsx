@@ -3,11 +3,11 @@ import colors from '../../styles/colors';
 
 export default StyleSheet.create({
   disabledStyle: {
-    borderRadius: 6,
-    backgroundColor: '#9CA3AF',
+    borderRadius: 10,
+    backgroundColor: '#b5b5b5',
   },
   buttonStyle: {
-    borderRadius: 6,
+    borderRadius: 10,
     backgroundColor: '#1E40AF',
   },
   titleStyle: {
