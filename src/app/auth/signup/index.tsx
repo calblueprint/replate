@@ -150,7 +150,7 @@ export default function SignupPage() {
         visibilityTime: 2000,
       });
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/(tabs)/dashboard');
       }, 500);
     } catch (error) {
       console.error('Signup error:', error);

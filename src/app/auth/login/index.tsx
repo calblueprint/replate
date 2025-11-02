@@ -75,7 +75,7 @@ export default function LoginPage() {
         visibilityTime: 2000,
       });
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/(tabs)/dashboard');
       }, 500);
     } catch (error) {
       console.error('Login error:', error);

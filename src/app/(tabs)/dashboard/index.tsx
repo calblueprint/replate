@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useAuth } from '../../utils/AuthContext';
+import { useAuth } from '../../../utils/AuthContext';
 
 export default function DashboardPage() {
   const { driver, logout } = useAuth();
@@ -30,11 +30,15 @@ export default function DashboardPage() {
           style={{
             backgroundColor: '#ff4444',
             padding: 15,
-            borderRadius: 5,
+            borderRadius: 10,
             alignItems: 'center',
           }}
         >
-          <Text style={{ color: 'white', fontSize: 16 }}>Logout</Text>
+          <Text
+            style={{ color: 'white', fontSize: 16, fontFamily: 'Lato_700Bold' }}
+          >
+            Logout
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
