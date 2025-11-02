@@ -117,8 +117,8 @@ export default function AvailablePickupsPage() {
   const days = React.useMemo(() => {
     const out: string[] = [];
     const start = new Date();
-    start.setDate(start.getDate() - 1);
-    for (let i = 0; i < 5; i++) {
+    start.setDate(start.getDate());
+    for (let i = 0; i < 2; i++) {
       const d = new Date(start);
       d.setDate(start.getDate() + i);
       out.push(d.toISOString().slice(0, 10));
