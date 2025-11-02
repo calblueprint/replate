@@ -14,7 +14,7 @@ export default function PickupDetailsLayout() {
             }
             style={{ paddingHorizontal: 8, paddingVertical: 6 }}
           >
-            <Text style={(styles.claimPickupText)}>Claim Pickup</Text>
+            <Text style={styles.claimPickupText}>Claim Pickup</Text>
           </Pressable>
         ),
       }}

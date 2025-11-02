@@ -71,35 +71,35 @@ function CalendarStrip({
             ]}
           >
             <Text
-              style={
-                [styles.dateText,
-                isSelected ? styles.selectedText : styles.unselectedText]
-              }
+              style={[
+                styles.dateText,
+                isSelected ? styles.selectedText : styles.unselectedText,
+              ]}
             >
               {month}
             </Text>
             <Text
-              style={
-                [styles.headerText,
-                isSelected ? styles.selectedText : styles.unselectedText]
-              }
+              style={[
+                styles.headerText,
+                isSelected ? styles.selectedText : styles.unselectedText,
+              ]}
             >
               {day}
             </Text>
             <Text
-              style={
-                [styles.dateText,
-                isSelected ? styles.selectedText : styles.unselectedText]
-              }
+              style={[
+                styles.dateText,
+                isSelected ? styles.selectedText : styles.unselectedText,
+              ]}
             >
               {dow}
             </Text>
             {isToday && (
               <Text
-                style={
-                  [styles.todayText,
-                  isSelected ? styles.unselectedText : styles.selectedText]
-                }
+                style={[
+                  styles.todayText,
+                  isSelected ? styles.unselectedText : styles.selectedText,
+                ]}
               >
                 Today
               </Text>
