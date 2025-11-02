@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -9,7 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
@@ -34,6 +38,9 @@ export default function LoginPage() {
   // Error states
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const insets = useSafeAreaInsets();
 
   const emailBorderAnim = useRef(new Animated.Value(0)).current;
   const passwordBorderAnim = useRef(new Animated.Value(0)).current;
@@ -191,75 +198,87 @@ export default function LoginPage() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
     >
       <SafeAreaView style={authStyles.container}>
         <ScrollView
-          contentContainerStyle={authStyles.content}
+          ref={scrollViewRef}
+          contentContainerStyle={[
+            authStyles.content,
+            { paddingBottom: insets.bottom + 250 }, // Extra padding at bottom for keyboard
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          keyboardDismissMode="interactive"
         >
           <View style={authStyles.formCard}>
             <Text style={authStyles.title}>Welcome back</Text>
             <Text style={authStyles.subtitle}>Please input your details</Text>
 
-            <Text style={authStyles.inputLabel}>EMAIL</Text>
-            <Animated.View
-              style={[
-                authStyles.inputWrapper,
-                { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
-              ]}
-            >
-              <TextInput
-                style={authStyles.inputInner}
-                placeholder="Email@gmail.com"
-                value={email}
-                onChangeText={handleEmailChange}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="off"
-                textContentType="none"
-                autoCorrect={false}
-              />
-            </Animated.View>
-            {emailError && (
-              <Text style={authStyles.errorText}>{emailError}</Text>
-            )}
-
-            <Text style={authStyles.inputLabel}>PASSWORD</Text>
-            <Animated.View
-              style={[
-                authStyles.passwordContainer,
-                {
-                  borderColor: passwordError
-                    ? ERROR_COLOR
-                    : passwordBorderColor,
-                },
-              ]}
-            >
-              <TextInput
-                style={authStyles.passwordInput}
-                placeholder="Enter password"
-                value={password}
-                onChangeText={handlePasswordChange}
-                secureTextEntry={!showPassword}
-                autoComplete="off"
-                textContentType="none"
-                autoCorrect={false}
-                passwordRules=""
-              />
-              <TouchableOpacity
-                style={authStyles.showButton}
-                onPress={() => setShowPassword(!showPassword)}
+            <View>
+              <Text style={authStyles.inputLabel}>EMAIL</Text>
+              <Animated.View
+                style={[
+                  authStyles.inputWrapper,
+                  { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
+                ]}
               >
-                <Text style={authStyles.showButtonText}>Show</Text>
-              </TouchableOpacity>
-            </Animated.View>
-            {passwordError && (
-              <Text style={authStyles.errorText}>{passwordError}</Text>
-            )}
+                <TextInput
+                  style={authStyles.inputInner}
+                  placeholder="Email@gmail.com"
+                  value={email}
+                  onChangeText={handleEmailChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  textContentType="none"
+                  autoCorrect={false}
+                />
+              </Animated.View>
+              {emailError && (
+                <Text style={authStyles.errorText}>{emailError}</Text>
+              )}
+            </View>
+
+            <View>
+              <Text style={authStyles.inputLabel}>PASSWORD</Text>
+              <Animated.View
+                style={[
+                  authStyles.passwordContainer,
+                  {
+                    borderColor: passwordError
+                      ? ERROR_COLOR
+                      : passwordBorderColor,
+                  },
+                ]}
+              >
+                <TextInput
+                  style={authStyles.passwordInput}
+                  placeholder="Enter password"
+                  value={password}
+                  onChangeText={handlePasswordChange}
+                  secureTextEntry={!showPassword}
+                  autoComplete="off"
+                  textContentType="oneTimeCode"
+                  autoCorrect={false}
+                  passwordRules=""
+                  blurOnSubmit={false}
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                />
+                <TouchableOpacity
+                  style={authStyles.showButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Text style={authStyles.showButtonText}>Show</Text>
+                </TouchableOpacity>
+              </Animated.View>
+              {passwordError && (
+                <Text style={authStyles.errorText}>{passwordError}</Text>
+              )}
+            </View>
 
             <View style={authStyles.checkboxRow}>
               <TouchableOpacity
