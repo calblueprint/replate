@@ -60,7 +60,7 @@ export const driverAPI = {
             status: response.status,
           };
           throw errorObj;
-        } catch (parseError) {
+        } catch {
           // If JSON parsing fails, throw network error
           throw {
             message:
@@ -102,7 +102,7 @@ export const driverAPI = {
             errors: [],
             status: response.status,
           };
-        } catch (parseError) {
+        } catch {
           throw {
             message:
               'Network error. Please check your connection and try again.',

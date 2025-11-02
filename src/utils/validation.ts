@@ -91,7 +91,7 @@ export const validatePhone = (phone: string): string | null => {
   }
 
   // Remove common formatting characters for validation
-  const digitsOnly = phone.replace(/[\s\-\(\)]/g, '');
+  const digitsOnly = phone.replace(/[\s\-()]/g, '');
   if (digitsOnly.length < 10) {
     return 'Please enter a valid phone number';
   }

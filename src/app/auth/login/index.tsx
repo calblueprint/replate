@@ -18,6 +18,12 @@ import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
 import { validateEmail, validatePassword } from '../../../utils/validation';
 
+interface ApiErrorResponse {
+  message?: string;
+  errors?: string[];
+  status?: number;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -97,14 +103,22 @@ export default function LoginPage() {
       setTimeout(() => {
         router.push('/(tabs)/dashboard');
       }, 500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle backend errors
-      const errorMessage =
-        error?.message || (error instanceof Error ? error.message : '');
-      const status = error?.status;
+      const apiError = error as ApiErrorResponse | Error;
+      const errorMessage: string =
+        'message' in apiError && apiError.message
+          ? apiError.message
+          : apiError instanceof Error
+            ? apiError.message
+            : '';
+      const status = 'status' in apiError ? apiError.status : undefined;
 
       // Handle network errors
-      if (status === 0 || errorMessage.toLowerCase().includes('network')) {
+      if (
+        status === 0 ||
+        (errorMessage && errorMessage.toLowerCase().includes('network'))
+      ) {
         Toast.show({
           type: 'error',
           text1: 'Connection Error',
@@ -128,22 +142,33 @@ export default function LoginPage() {
       }
 
       // Check for invalid credentials
-      const errLower = errorMessage.toLowerCase();
-      if (
-        errLower.includes('invalid') ||
-        errLower.includes('credentials') ||
-        errLower.includes('password') ||
-        errLower.includes('incorrect')
-      ) {
-        setEmailError('Invalid email or password. Please try again.');
-        setPasswordError('Invalid email or password. Please try again.');
-      } else if (errLower.includes('email')) {
-        setEmailError(errorMessage);
+      if (errorMessage) {
+        const errLower = errorMessage.toLowerCase();
+        if (
+          errLower.includes('invalid') ||
+          errLower.includes('credentials') ||
+          errLower.includes('password') ||
+          errLower.includes('incorrect')
+        ) {
+          setEmailError('Invalid email or password. Please try again.');
+          setPasswordError('Invalid email or password. Please try again.');
+        } else if (errLower.includes('email')) {
+          setEmailError(errorMessage);
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: 'Login Failed',
+            text2:
+              errorMessage || 'Invalid email or password. Please try again.',
+            position: 'top',
+            visibilityTime: 3000,
+          });
+        }
       } else {
         Toast.show({
           type: 'error',
           text1: 'Login Failed',
-          text2: errorMessage || 'Invalid email or password. Please try again.',
+          text2: 'Invalid email or password. Please try again.',
           position: 'top',
           visibilityTime: 3000,
         });

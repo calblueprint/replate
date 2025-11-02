@@ -24,6 +24,12 @@ import {
   validatePhone,
 } from '../../../utils/validation';
 
+interface ApiErrorResponse {
+  message?: string;
+  errors?: string[];
+  status?: number;
+}
+
 export default function SignupPage() {
   const [first_name, setFirstName] = useState('');
   const [last_name, setLastName] = useState('');
@@ -192,15 +198,26 @@ export default function SignupPage() {
       setTimeout(() => {
         router.push('/(tabs)/dashboard');
       }, 500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle backend errors
-      const errorMessage =
-        error?.message || (error instanceof Error ? error.message : '');
-      const errorsArray = error?.errors || [];
-      const status = error?.status;
+      const apiError = error as ApiErrorResponse | Error;
+      const errorMessage: string =
+        'message' in apiError && apiError.message
+          ? apiError.message
+          : apiError instanceof Error
+            ? apiError.message
+            : '';
+      const errorsArray: string[] =
+        'errors' in apiError && Array.isArray(apiError.errors)
+          ? apiError.errors.filter((e): e is string => typeof e === 'string')
+          : [];
+      const status = 'status' in apiError ? apiError.status : undefined;
 
       // Handle network errors
-      if (status === 0 || errorMessage.toLowerCase().includes('network')) {
+      if (
+        status === 0 ||
+        (errorMessage && errorMessage.toLowerCase().includes('network'))
+      ) {
         Toast.show({
           type: 'error',
           text1: 'Connection Error',
@@ -225,9 +242,15 @@ export default function SignupPage() {
 
       // Parse errors and map to specific fields
       let hasFieldErrors = false;
-      const allErrors = errorsArray.length > 0 ? errorsArray : [errorMessage];
+      const allErrors =
+        errorsArray.length > 0
+          ? errorsArray
+          : errorMessage
+            ? [errorMessage]
+            : [];
 
       for (const err of allErrors) {
+        if (!err) continue;
         const errLower = err.toLowerCase();
 
         // Email errors
