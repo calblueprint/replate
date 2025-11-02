@@ -1,13 +1,9 @@
 import React from 'react';
 import { Text, View } from 'react-native';
+import { fmtTime } from '@/utils/dateHelpers';
 import { useLocalSearchParams } from 'expo-router';
 import { MOCK_PICKUPS } from '../available-pick-ups'; // re-use your mock data
-
-function fmtTime(iso: string) {
-  return new Date(iso)
-    .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-    .toLowerCase();
-}
+import { styles } from '../available-pick-ups/styles';
 
 function Section({
   title,
@@ -18,14 +14,9 @@ function Section({
 }) {
   return (
     <View
-      style={{
-        borderWidth: 1,
-        borderColor: '#d1d5db',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        backgroundColor: '#f7f7f7',
-      }}
+      style={(
+        styles.detailsSections
+  )}
     >
       <Text style={{ fontWeight: '700', marginBottom: 6 }}>{title}</Text>
       {children}
@@ -39,14 +30,14 @@ export default function PickupDetails() {
 
   if (!pickup) {
     return (
-      <View style={{ flex: 1, padding: 16 }}>
+      <View style={(styles.view)}>
         <Text>Pickup not found.</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
+    <View style={(styles.view)}>
       <Section title="Pickup Location">
         <Text>{pickup.pickup_location}</Text>
       </Section>

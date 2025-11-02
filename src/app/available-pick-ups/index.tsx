@@ -1,6 +1,8 @@
 import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { fmtTimeRange } from '@/utils/dateHelpers';
+import { styles } from './styles';
 
 export const MOCK_PICKUPS = [
   {
@@ -11,8 +13,8 @@ export const MOCK_PICKUPS = [
   },
   {
     id: 2,
-    slot_start_time: '2025-10-13T13:00:00',
-    slot_end_time: '2025-10-13T15:00:00',
+    slot_start_time: '2025-11-02T13:00:00',
+    slot_end_time: '2025-11-02T15:00:00',
     pickup_location: 'Rockridge Cafe',
   },
   {
@@ -28,17 +30,6 @@ export const MOCK_PICKUPS = [
     pickup_location: 'Kingman Hall',
   },
 ];
-
-// datetime helpers
-const fmtTimeRange = (startISO: string, endISO: string) => {
-  const s = new Date(startISO);
-  const e = new Date(endISO);
-  const to12h = (d: Date) =>
-    d
-      .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-      .toLowerCase();
-  return `${to12h(s)} - ${to12h(e)}`;
-};
 
 //makes calendar
 function CalendarStrip({
@@ -58,7 +49,7 @@ function CalendarStrip({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 6 }}
+      contentContainerStyle={styles.calendarStripContent}
     >
       {days.map(iso => {
         const d = dateFromISO(iso);
@@ -73,46 +64,42 @@ function CalendarStrip({
           <Pressable
             key={iso}
             onPress={() => onSelect(iso)}
-            style={({ pressed }) => ({
-              width: 56,
-              height: 72,
-              borderRadius: 12,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderWidth: 1,
-              borderColor: isSelected ? '#000' : '#d1d5db',
-              backgroundColor: isSelected ? '#000' : '#f3f4f6',
-              marginRight: 8, // spacing between chips
-              opacity: pressed ? 0.7 : 1,
-            })}
+            style={({ pressed }) => [
+              styles.dateCard,
+              isSelected ? styles.selectedCard : styles.unselectedCard,
+              pressed && styles.pressedCard,
+            ]}
           >
             <Text
-              style={{ fontSize: 10, color: isSelected ? 'white' : 'black' }}
+              style={
+                [styles.dateText,
+                isSelected ? styles.selectedText : styles.unselectedText]
+              }
             >
               {month}
             </Text>
             <Text
-              style={{
-                fontSize: 16,
-                fontWeight: '700',
-                color: isSelected ? 'white' : 'black',
-              }}
+              style={
+                [styles.headerText,
+                isSelected ? styles.selectedText : styles.unselectedText]
+              }
             >
               {day}
             </Text>
             <Text
-              style={{ fontSize: 10, color: isSelected ? 'white' : 'black' }}
+              style={
+                [styles.dateText,
+                isSelected ? styles.selectedText : styles.unselectedText]
+              }
             >
               {dow}
             </Text>
             {isToday && (
               <Text
-                style={{
-                  marginTop: 2,
-                  fontSize: 9,
-                  fontWeight: '700',
-                  color: isSelected ? 'white' : 'black',
-                }}
+                style={
+                  [styles.todayText,
+                  isSelected ? styles.unselectedText : styles.selectedText]
+                }
               >
                 Today
               </Text>
@@ -149,11 +136,7 @@ export default function AvailablePickupsPage() {
     <FlatList
       data={filtered}
       keyExtractor={item => String(item.id)}
-      contentContainerStyle={{
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-        paddingTop: 8,
-      }}
+      contentContainerStyle={styles.contentContainer}
       ListHeaderComponent={
         <View>
           <CalendarStrip
@@ -162,17 +145,7 @@ export default function AvailablePickupsPage() {
             selectedISO={selectedISO}
             onSelect={setSelectedISO}
           />
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: '700',
-              marginTop: 40,
-              marginBottom: 12,
-              paddingHorizontal: 4,
-            }}
-          >
-            Available Pickups
-          </Text>
+          <Text style={styles.AvailablePickupstext}>Available Pickups</Text>
         </View>
       }
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}

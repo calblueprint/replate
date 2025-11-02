@@ -1,5 +1,6 @@
 import { Alert, Pressable, Text } from 'react-native';
 import { Stack } from 'expo-router';
+import { styles } from '../available-pick-ups/styles';
 
 export default function PickupDetailsLayout() {
   return (
@@ -13,7 +14,7 @@ export default function PickupDetailsLayout() {
             }
             style={{ paddingHorizontal: 8, paddingVertical: 6 }}
           >
-            <Text style={{ fontWeight: '600' }}>Claim Pickup</Text>
+            <Text style={(styles.claimPickupText)}>Claim Pickup</Text>
           </Pressable>
         ),
       }}
