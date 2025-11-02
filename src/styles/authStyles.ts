@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 
 const REGULAR = 'Lato_400Regular';
 const BOLD = 'Lato_700Bold';
+export const ERROR_COLOR = '#FF4444';
 
 export const authStyles = StyleSheet.create({
   container: {
@@ -158,5 +159,13 @@ export const authStyles = StyleSheet.create({
     marginVertical: 16,
     color: '#666',
     fontFamily: REGULAR,
+  },
+  errorText: {
+    fontSize: 11,
+    fontFamily: REGULAR,
+    color: ERROR_COLOR,
+    marginTop: -20,
+    marginBottom: 8,
+    marginLeft: 2,
   },
 });

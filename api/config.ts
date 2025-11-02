@@ -33,35 +33,97 @@ export interface DriverResponse {
   phone?: string;
 }
 
+// Error types for better error handling
+export interface ApiError {
+  errors?: string[];
+  error?: string;
+  message?: string;
+}
+
 // API functions
 export const driverAPI = {
   signup: async (data: DriverSignupData): Promise<DriverResponse> => {
-    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ driver: data }),
-    });
+    try {
+      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driver: data }),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.errors?.join(', ') || 'Signup failed');
+      if (!response.ok) {
+        try {
+          const error: ApiError = await response.json();
+          // Return error object with errors array for better parsing
+          const errorObj = {
+            message: error.errors?.join(', ') || error.error || 'Signup failed',
+            errors: error.errors || [],
+            status: response.status,
+          };
+          throw errorObj;
+        } catch (parseError) {
+          // If JSON parsing fails, throw network error
+          throw {
+            message:
+              'Network error. Please check your connection and try again.',
+            errors: [],
+            status: response.status,
+          };
+        }
+      }
+
+      return response.json();
+    } catch (error) {
+      // Handle network errors (fetch failures)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw {
+          message: 'Network error. Please check your connection and try again.',
+          errors: [],
+          status: 0,
+        };
+      }
+      // Re-throw API errors
+      throw error;
     }
-
-    return response.json();
   },
 
   login: async (data: DriverLoginData): Promise<DriverResponse> => {
-    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.LOGIN}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.LOGIN}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
+      if (!response.ok) {
+        try {
+          const error: ApiError = await response.json();
+          throw {
+            message: error.error || error.message || 'Login failed',
+            errors: [],
+            status: response.status,
+          };
+        } catch (parseError) {
+          throw {
+            message:
+              'Network error. Please check your connection and try again.',
+            errors: [],
+            status: response.status,
+          };
+        }
+      }
+
+      return response.json();
+    } catch (error) {
+      // Handle network errors (fetch failures)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw {
+          message: 'Network error. Please check your connection and try again.',
+          errors: [],
+          status: 0,
+        };
+      }
+      // Re-throw API errors
+      throw error;
     }
-
-    return response.json();
   },
 };

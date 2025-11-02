@@ -14,8 +14,9 @@ import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
-import { authStyles } from '../../../styles/authStyles';
+import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
+import { validateEmail, validatePassword } from '../../../utils/validation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,6 +24,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [staySignedIn, setStaySignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Error states
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const emailBorderAnim = useRef(new Animated.Value(0)).current;
   const passwordBorderAnim = useRef(new Animated.Value(0)).current;
@@ -56,9 +61,25 @@ export default function LoginPage() {
   });
 
   const handleLogin = async () => {
+    // Clear previous errors
+    setEmailError(null);
+    setPasswordError(null);
+
+    // Run validations
+    const emailErr = validateEmail(email);
+    const passwordErr = validatePassword(password);
+
+    // Set errors
+    setEmailError(emailErr);
+    setPasswordError(passwordErr);
+
+    // If any errors exist, don't proceed
+    if (emailErr || passwordErr) {
+      return;
+    }
+
     try {
       setIsLoading(true);
-      console.log('Logging in with:', { email, password });
 
       const loginData: DriverLoginData = {
         email,
@@ -66,7 +87,6 @@ export default function LoginPage() {
       };
 
       await login(loginData, staySignedIn);
-      console.log('Login successful');
       Toast.show({
         type: 'success',
         text1: 'Welcome back!',
@@ -77,21 +97,71 @@ export default function LoginPage() {
       setTimeout(() => {
         router.push('/(tabs)/dashboard');
       }, 500);
-    } catch (error) {
-      console.error('Login error:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Login Failed',
-        text2:
-          error instanceof Error
-            ? error.message
-            : 'Invalid email or password. Please try again.',
-        position: 'top',
-        visibilityTime: 3000,
-      });
+    } catch (error: any) {
+      // Handle backend errors
+      const errorMessage =
+        error?.message || (error instanceof Error ? error.message : '');
+      const status = error?.status;
+
+      // Handle network errors
+      if (status === 0 || errorMessage.toLowerCase().includes('network')) {
+        Toast.show({
+          type: 'error',
+          text1: 'Connection Error',
+          text2: 'Please check your internet connection and try again.',
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
+      }
+
+      // Handle server errors
+      if (status && status >= 500) {
+        Toast.show({
+          type: 'error',
+          text1: 'Server Error',
+          text2: 'Server is temporarily unavailable. Please try again later.',
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
+      }
+
+      // Check for invalid credentials
+      const errLower = errorMessage.toLowerCase();
+      if (
+        errLower.includes('invalid') ||
+        errLower.includes('credentials') ||
+        errLower.includes('password') ||
+        errLower.includes('incorrect')
+      ) {
+        setEmailError('Invalid email or password. Please try again.');
+        setPasswordError('Invalid email or password. Please try again.');
+      } else if (errLower.includes('email')) {
+        setEmailError(errorMessage);
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Login Failed',
+          text2: errorMessage || 'Invalid email or password. Please try again.',
+          position: 'top',
+          visibilityTime: 3000,
+        });
+      }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Clear errors when user starts typing
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    if (emailError) setEmailError(null);
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    if (passwordError) setPasswordError(null);
   };
 
   return (
@@ -114,14 +184,14 @@ export default function LoginPage() {
             <Animated.View
               style={[
                 authStyles.inputWrapper,
-                { borderColor: emailBorderColor },
+                { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
               ]}
             >
               <TextInput
                 style={authStyles.inputInner}
                 placeholder="Email@gmail.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={handleEmailChange}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="off"
@@ -129,19 +199,26 @@ export default function LoginPage() {
                 autoCorrect={false}
               />
             </Animated.View>
+            {emailError && (
+              <Text style={authStyles.errorText}>{emailError}</Text>
+            )}
 
             <Text style={authStyles.inputLabel}>PASSWORD</Text>
             <Animated.View
               style={[
                 authStyles.passwordContainer,
-                { borderColor: passwordBorderColor },
+                {
+                  borderColor: passwordError
+                    ? ERROR_COLOR
+                    : passwordBorderColor,
+                },
               ]}
             >
               <TextInput
                 style={authStyles.passwordInput}
                 placeholder="Enter password"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
                 autoComplete="off"
                 textContentType="none"
@@ -155,6 +232,9 @@ export default function LoginPage() {
                 <Text style={authStyles.showButtonText}>Show</Text>
               </TouchableOpacity>
             </Animated.View>
+            {passwordError && (
+              <Text style={authStyles.errorText}>{passwordError}</Text>
+            )}
 
             <View style={authStyles.checkboxRow}>
               <TouchableOpacity
