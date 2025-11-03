@@ -1,6 +1,6 @@
 // API Configuration for Rails Backend
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.4.16.38:3000';
 
 export { BASE_URL };
 
@@ -8,6 +8,7 @@ export { BASE_URL };
 export const API_ENDPOINTS = {
   LOGIN: '/api/login',
   DRIVERS: '/api/drivers',
+  PARTNERS: '/api/partners',
 } as const;
 
 // Types for driver auth
@@ -39,6 +40,7 @@ export interface DriverResponse {
 // API functions
 export const driverAPI = {
   signup: async (data: DriverSignupData): Promise<DriverResponse> => {
+    console.log(JSON.parse(JSON.stringify(data)));
     const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -67,4 +69,16 @@ export const driverAPI = {
 
     return response.json();
   },
+};
+
+export const getPartners = async () => {
+  const response = await fetch(`${BASE_URL}${API_ENDPOINTS.PARTNERS}`);
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to fetch partners: ${text}`);
+  }
+
+  const json = await response.json();
+  return json;
 };

@@ -1,21 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Button, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { getPartners } from '~/api/config';
 
 export default function OnboardingFlow() {
-  const MOCK_NPOS = [
-    { id: 1, name: 'Replate' },
-    { id: 2, name: 'Adopt an Inmate' },
-    { id: 3, name: 'Amigos De Los Rios' },
-    { id: 4, name: 'Rose Academies' },
-    { id: 5, name: 'EcoVet' },
-  ];
-
+  const [partners, setPartners] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedNPOId, setSelectedNPOId] = useState(null);
-  const [items, setItems] = useState(
-    MOCK_NPOS.map(npo => ({ label: npo.name, value: npo.id })),
-  );
+  const [items, setItems] = useState([{}]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const partnersList = await getPartners();
+        setPartners(partnersList);
+      } catch (err) {
+        console.error('Error fetching partners:', err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    setItems(partners.map(npo => ({ label: npo[1], value: npo[0] })));
+  }, [partners]);
 
   return (
     <View style={{ marginTop: 50 }}>
