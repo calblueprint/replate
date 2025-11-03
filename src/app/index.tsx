@@ -1,5 +1,5 @@
 import { Redirect } from 'expo-router';
 
-export default function Index() {
-  return <Redirect href="/available-pick-ups" />;
+export default function App() {
+  return <Redirect href="/auth/login/page" />;
 }
