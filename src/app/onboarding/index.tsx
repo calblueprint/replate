@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, Text, View } from 'react-native';
+import { Button, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { getPartners } from '~/api/config';
+import { getPartners, updateDriverPartner } from '~/api/config';
 
 export default function OnboardingFlow() {
   const [partners, setPartners] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedNPOId, setSelectedNPOId] = useState(null);
+  const [selectedNPOId, setSelectedNPOId] = useState(0);
   const [items, setItems] = useState([{}]);
 
   useEffect(() => {
@@ -24,6 +24,10 @@ export default function OnboardingFlow() {
     setItems(partners.map(npo => ({ label: npo[1], value: npo[0] })));
   }, [partners]);
 
+  const handleUpdatePress = () => async () => {
+    await updateDriverPartner(selectedNPOId);
+  };
+
   return (
     <View style={{ marginTop: 50 }}>
       <Text>Which NPO are you partnered with?</Text>
@@ -40,8 +44,8 @@ export default function OnboardingFlow() {
 
       <Button
         title="Finish"
-        disabled={selectedNPOId === null}
-        onPress={() => Alert.alert('Your NPO selection has been saved.')}
+        disabled={selectedNPOId === 0}
+        onPress={handleUpdatePress()}
       />
     </View>
   );
