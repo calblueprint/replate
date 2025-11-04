@@ -1,8 +1,6 @@
 // Allowed email domains whitelist
 const ALLOWED_EMAIL_DOMAINS = [
   'gmail.com',
-  'berkeley.edu',
-  'calblueprint.org',
   'yahoo.com',
   'outlook.com',
   'hotmail.com',
@@ -37,7 +35,7 @@ export const validateEmail = (email: string): string | null => {
     ) || false;
 
   if (!isAllowed) {
-    return 'Email domain not allowed. Please use a valid email domain (e.g., gmail.com, berkeley.edu)';
+    return 'Email domain not allowed. Please use a valid email domain (e.g., gmail.com)';
   }
 
   return null;

@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -197,122 +195,117 @@ export default function LoginPage() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
-    >
-      <SafeAreaView style={authStyles.container}>
-        <ScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={[
-            authStyles.content,
-            { paddingBottom: insets.bottom + 250 }, // Extra padding at bottom for keyboard
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-          keyboardDismissMode="interactive"
-        >
-          <View style={authStyles.formCard}>
-            <Text style={authStyles.title}>Welcome back</Text>
-            <Text style={authStyles.subtitle}>Please input your details</Text>
+    <SafeAreaView style={authStyles.container}>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={[
+          authStyles.content,
+          { paddingBottom: insets.bottom + 250 }, // Extra padding at bottom for keyboard
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardDismissMode="interactive"
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <View style={authStyles.formCard}>
+          <Text style={authStyles.title}>Welcome back</Text>
+          <Text style={authStyles.subtitle}>Please input your details</Text>
 
-            <View>
-              <Text style={authStyles.inputLabel}>EMAIL</Text>
-              <Animated.View
-                style={[
-                  authStyles.inputWrapper,
-                  { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
-                ]}
-              >
-                <TextInput
-                  style={authStyles.inputInner}
-                  placeholder="Email@gmail.com"
-                  value={email}
-                  onChangeText={handleEmailChange}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  textContentType="none"
-                  autoCorrect={false}
-                />
-              </Animated.View>
-              {emailError && (
-                <Text style={authStyles.errorText}>{emailError}</Text>
-              )}
-            </View>
-
-            <View>
-              <Text style={authStyles.inputLabel}>PASSWORD</Text>
-              <Animated.View
-                style={[
-                  authStyles.passwordContainer,
-                  {
-                    borderColor: passwordError
-                      ? ERROR_COLOR
-                      : passwordBorderColor,
-                  },
-                ]}
-              >
-                <TextInput
-                  style={authStyles.passwordInput}
-                  placeholder="Enter password"
-                  value={password}
-                  onChangeText={handlePasswordChange}
-                  secureTextEntry={!showPassword}
-                  autoComplete="off"
-                  textContentType="oneTimeCode"
-                  autoCorrect={false}
-                  passwordRules=""
-                  blurOnSubmit={false}
-                  onSubmitEditing={() => Keyboard.dismiss()}
-                />
-                <TouchableOpacity
-                  style={authStyles.showButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Text style={authStyles.showButtonText}>Show</Text>
-                </TouchableOpacity>
-              </Animated.View>
-              {passwordError && (
-                <Text style={authStyles.errorText}>{passwordError}</Text>
-              )}
-            </View>
-
-            <View style={authStyles.checkboxRow}>
-              <TouchableOpacity
-                onPress={() => setStaySignedIn(!staySignedIn)}
-                style={[
-                  authStyles.checkboxBox,
-                  { backgroundColor: staySignedIn ? '#000' : 'transparent' },
-                ]}
-              >
-                {staySignedIn && <Text style={authStyles.checkboxMark}>✓</Text>}
-              </TouchableOpacity>
-              <Text style={authStyles.checkboxLabel}>Stay signed in</Text>
-            </View>
-
-            <View style={authStyles.buttonContainer}>
-              <Button
-                text={isLoading ? 'Logging in...' : 'Log in'}
-                disabled={!email || !password || isLoading}
-                onPress={handleLogin}
+          <View>
+            <Text style={authStyles.inputLabel}>EMAIL</Text>
+            <Animated.View
+              style={[
+                authStyles.inputWrapper,
+                { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
+              ]}
+            >
+              <TextInput
+                style={authStyles.inputInner}
+                placeholder="Email@gmail.com"
+                value={email}
+                onChangeText={handleEmailChange}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="off"
+                textContentType="none"
+                autoCorrect={false}
               />
-            </View>
-
-            <Text style={authStyles.linkText}>
-              Need an account?{' '}
-              <Text
-                style={authStyles.link}
-                onPress={() => router.push('/auth/signup')}
-              >
-                Sign up
-              </Text>
-            </Text>
+            </Animated.View>
+            {emailError && (
+              <Text style={authStyles.errorText}>{emailError}</Text>
+            )}
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+
+          <View>
+            <Text style={authStyles.inputLabel}>PASSWORD</Text>
+            <Animated.View
+              style={[
+                authStyles.passwordContainer,
+                {
+                  borderColor: passwordError
+                    ? ERROR_COLOR
+                    : passwordBorderColor,
+                },
+              ]}
+            >
+              <TextInput
+                style={authStyles.passwordInput}
+                placeholder="Enter password"
+                value={password}
+                onChangeText={handlePasswordChange}
+                secureTextEntry={!showPassword}
+                autoComplete="off"
+                textContentType="oneTimeCode"
+                autoCorrect={false}
+                passwordRules=""
+                blurOnSubmit={false}
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+              <TouchableOpacity
+                style={authStyles.showButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Text style={authStyles.showButtonText}>Show</Text>
+              </TouchableOpacity>
+            </Animated.View>
+            {passwordError && (
+              <Text style={authStyles.errorText}>{passwordError}</Text>
+            )}
+          </View>
+
+          <View style={authStyles.checkboxRow}>
+            <TouchableOpacity
+              onPress={() => setStaySignedIn(!staySignedIn)}
+              style={[
+                authStyles.checkboxBox,
+                { backgroundColor: staySignedIn ? '#000' : 'transparent' },
+              ]}
+            >
+              {staySignedIn && <Text style={authStyles.checkboxMark}>✓</Text>}
+            </TouchableOpacity>
+            <Text style={authStyles.checkboxLabel}>Stay signed in</Text>
+          </View>
+
+          <View style={authStyles.buttonContainer}>
+            <Button
+              text={isLoading ? 'Logging in...' : 'Log in'}
+              disabled={!email || !password || isLoading}
+              onPress={handleLogin}
+            />
+          </View>
+
+          <Text style={authStyles.linkText}>
+            Need an account?{' '}
+            <Text
+              style={authStyles.link}
+              onPress={() => router.push('/auth/signup')}
+            >
+              Sign up
+            </Text>
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

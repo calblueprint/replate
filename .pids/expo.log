@@ -1,0 +1,17 @@
+
+> mobile-app-template@1.0.0 start /Users/stephenhung/Documents/GitHub/replate
+> expo start
+
+env: load .env
+env: export EXPO_PUBLIC_API_BASE_URL
+Starting project at /Users/stephenhung/Documents/GitHub/replate
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+The following packages should be updated for best compatibility with the installed expo version:
+  expo@54.0.13 - expected version: 54.0.22
+  expo-constants@18.0.9 - expected version: ~18.0.10
+  expo-router@6.0.12 - expected version: ~6.0.14
+  react-native@0.81.4 - expected version: 0.81.5
+Your project may not work correctly until you install the expected versions of the packages.
+Waiting on http://localhost:8081
+Logs for your project will appear below.

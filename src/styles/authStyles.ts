@@ -11,8 +11,8 @@ export const authStyles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 24,
-    paddingTop: 60,
+    padding: 20,
+    paddingTop: 40,
     justifyContent: 'flex-start',
   },
   formCard: {
@@ -29,7 +29,7 @@ export const authStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: REGULAR,
     textAlign: 'left',
-    marginBottom: 40,
+    marginBottom: 24,
     color: '#666',
   },
   inputLabel: {
@@ -52,7 +52,7 @@ export const authStyles = StyleSheet.create({
   inputWrapper: {
     borderWidth: 1,
     borderRadius: 6,
-    marginBottom: 24,
+    marginBottom: 16,
     backgroundColor: '#fff',
   },
   inputInner: {
@@ -65,13 +65,13 @@ export const authStyles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderRadius: 6,
-    marginBottom: 24,
+    marginBottom: 16,
     backgroundColor: '#fff',
   },
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   checkboxBox: {
     width: 18,
@@ -110,7 +110,7 @@ export const authStyles = StyleSheet.create({
   nameRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   nameFieldContainer: {
     flex: 1,
@@ -151,8 +151,8 @@ export const authStyles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonContainer: {
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: 12,
+    marginBottom: 16,
   },
   orText: {
     textAlign: 'center',
@@ -164,8 +164,24 @@ export const authStyles = StyleSheet.create({
     fontSize: 11,
     fontFamily: REGULAR,
     color: ERROR_COLOR,
-    marginTop: -20,
-    marginBottom: 8,
+    marginTop: -16,
+    marginBottom: 6,
     marginLeft: 2,
+  },
+  passwordRequirements: {
+    marginTop: -6,
+    marginBottom: 2,
+  },
+  requirementText: {
+    fontSize: 11,
+    fontFamily: REGULAR,
+    marginBottom: 3,
+    marginLeft: 2,
+  },
+  requirementMet: {
+    color: '#4CAF50',
+  },
+  requirementUnmet: {
+    color: ERROR_COLOR,
   },
 });

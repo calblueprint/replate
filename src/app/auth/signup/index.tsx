@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -23,7 +21,6 @@ import { useAuth } from '../../../utils/AuthContext';
 import {
   validateEmail,
   validateName,
-  validatePassword,
   validatePasswordMatch,
   validatePhone,
 } from '../../../utils/validation';
@@ -154,12 +151,13 @@ export default function SignupPage() {
     setPasswordError(null);
     setConfirmPasswordError(null);
 
-    // Run all validations
+    // Run all validations (skip password complexity since button is disabled until valid)
     const firstNameErr = validateName(first_name, 'First name');
     const lastNameErr = validateName(last_name, 'Last name');
     const phoneErr = validatePhone(phone_number);
     const emailErr = validateEmail(email);
-    const passwordErr = validatePassword(password);
+    // Only check if password is required, not complexity (handled by button disable)
+    const passwordErr = !password ? 'Password is required' : null;
     const confirmPasswordErr = validatePasswordMatch(password, confirmPassword);
 
     // Set errors
@@ -273,21 +271,20 @@ export default function SignupPage() {
             setEmailError(err);
           }
         }
-        // Password errors
-        else if (errLower.includes('password')) {
+        // Password errors - only show non-complexity errors (complexity handled by requirements list)
+        else if (
+          errLower.includes('password') &&
+          !errLower.includes('too short') &&
+          !errLower.includes('minimum') &&
+          !errLower.includes('complexity') &&
+          !errLower.includes('weak') &&
+          !errLower.includes('uppercase') &&
+          !errLower.includes('lowercase') &&
+          !errLower.includes('number') &&
+          !errLower.includes('special')
+        ) {
           hasFieldErrors = true;
-          if (errLower.includes('too short') || errLower.includes('minimum')) {
-            setPasswordError('Password must be at least 8 characters long.');
-          } else if (
-            errLower.includes('complexity') ||
-            errLower.includes('weak')
-          ) {
-            setPasswordError(
-              'Password is too weak. Please use a stronger password.',
-            );
-          } else {
-            setPasswordError(err);
-          }
+          setPasswordError(err);
         }
         // Phone errors
         else if (errLower.includes('phone')) {
@@ -363,241 +360,280 @@ export default function SignupPage() {
     if (confirmPasswordError) setConfirmPasswordError(null);
   };
 
+  // Check if all password requirements are met
+  const isPasswordValid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
-    >
-      <SafeAreaView style={authStyles.container}>
-        <ScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={[
-            authStyles.content,
-            { paddingBottom: insets.bottom + 250 }, // Extra padding at bottom for keyboard
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-          keyboardDismissMode="interactive"
-        >
-          <View style={authStyles.formCard}>
-            <Text style={authStyles.title}>Let's get started</Text>
-            <Text style={authStyles.subtitle}>Please input your details</Text>
+    <SafeAreaView style={authStyles.container}>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={[
+          authStyles.content,
+          { paddingBottom: insets.bottom + 250 }, // Extra padding at bottom for keyboard
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardDismissMode="interactive"
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <View style={authStyles.formCard}>
+          <Text style={authStyles.title}>Let's get started</Text>
+          <Text style={authStyles.subtitle}>Please input your details</Text>
 
-            <View style={authStyles.nameRow}>
-              <View style={authStyles.nameFieldContainer}>
-                <Text style={authStyles.inputLabel}>NAME</Text>
-                <Animated.View
-                  style={[
-                    authStyles.inputHalfWrapper,
-                    {
-                      borderColor: firstNameError
-                        ? ERROR_COLOR
-                        : firstNameBorderColor,
-                    },
-                  ]}
-                >
-                  <TextInput
-                    style={authStyles.inputHalfInner}
-                    placeholder="First name"
-                    value={first_name}
-                    onChangeText={handleFirstNameChange}
-                    autoComplete="off"
-                    textContentType="none"
-                    autoCorrect={false}
-                  />
-                </Animated.View>
-                {firstNameError && (
-                  <Text style={authStyles.errorText}>{firstNameError}</Text>
-                )}
-              </View>
-              <View style={authStyles.nameFieldContainer}>
-                <Text style={authStyles.inputLabel}>LAST</Text>
-                <Animated.View
-                  style={[
-                    authStyles.inputHalfWrapper,
-                    {
-                      borderColor: lastNameError
-                        ? ERROR_COLOR
-                        : lastNameBorderColor,
-                    },
-                  ]}
-                >
-                  <TextInput
-                    style={authStyles.inputHalfInner}
-                    placeholder="Last name"
-                    value={last_name}
-                    onChangeText={handleLastNameChange}
-                    autoComplete="off"
-                    textContentType="none"
-                    autoCorrect={false}
-                  />
-                </Animated.View>
-                {lastNameError && (
-                  <Text style={authStyles.errorText}>{lastNameError}</Text>
-                )}
-              </View>
-            </View>
-
-            <View>
-              <Text style={authStyles.inputLabel}>EMAIL</Text>
+          <View style={authStyles.nameRow}>
+            <View style={authStyles.nameFieldContainer}>
+              <Text style={authStyles.inputLabel}>NAME</Text>
               <Animated.View
                 style={[
-                  authStyles.inputWrapper,
-                  { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
+                  authStyles.inputHalfWrapper,
+                  {
+                    borderColor: firstNameError
+                      ? ERROR_COLOR
+                      : firstNameBorderColor,
+                  },
                 ]}
               >
                 <TextInput
-                  style={authStyles.inputInner}
-                  placeholder="Email@gmail.com"
-                  value={email}
-                  onChangeText={handleEmailChange}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
+                  style={authStyles.inputHalfInner}
+                  placeholder="First name"
+                  value={first_name}
+                  onChangeText={handleFirstNameChange}
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
                 />
               </Animated.View>
-              {emailError && (
-                <Text style={authStyles.errorText}>{emailError}</Text>
+              {firstNameError && (
+                <Text style={authStyles.errorText}>{firstNameError}</Text>
               )}
             </View>
-
-            <View>
-              <Text style={authStyles.inputLabel}>PHONE</Text>
+            <View style={authStyles.nameFieldContainer}>
+              <Text style={authStyles.inputLabel}>LAST</Text>
               <Animated.View
                 style={[
-                  authStyles.inputWrapper,
-                  { borderColor: phoneError ? ERROR_COLOR : phoneBorderColor },
+                  authStyles.inputHalfWrapper,
+                  {
+                    borderColor: lastNameError
+                      ? ERROR_COLOR
+                      : lastNameBorderColor,
+                  },
                 ]}
               >
                 <TextInput
-                  style={authStyles.inputInner}
-                  placeholder="(123) 456-7890"
-                  value={phone_number}
-                  onChangeText={handlePhoneChange}
-                  keyboardType="phone-pad"
+                  style={authStyles.inputHalfInner}
+                  placeholder="Last name"
+                  value={last_name}
+                  onChangeText={handleLastNameChange}
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
                 />
               </Animated.View>
-              {phoneError && (
-                <Text style={authStyles.errorText}>{phoneError}</Text>
+              {lastNameError && (
+                <Text style={authStyles.errorText}>{lastNameError}</Text>
               )}
             </View>
-
-            <View>
-              <Text style={authStyles.inputLabel}>PASSWORD</Text>
-              <Animated.View
-                style={[
-                  authStyles.passwordContainer,
-                  {
-                    borderColor: passwordError
-                      ? ERROR_COLOR
-                      : passwordBorderColor,
-                  },
-                ]}
-              >
-                <TextInput
-                  style={authStyles.passwordInput}
-                  placeholder="Enter password"
-                  value={password}
-                  onChangeText={handlePasswordChange}
-                  secureTextEntry={!showPassword}
-                  autoComplete="off"
-                  textContentType="oneTimeCode"
-                  autoCorrect={false}
-                  passwordRules=""
-                  blurOnSubmit={false}
-                  onSubmitEditing={() => Keyboard.dismiss()}
-                />
-                <TouchableOpacity
-                  style={authStyles.showButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Text style={authStyles.showButtonText}>Show</Text>
-                </TouchableOpacity>
-              </Animated.View>
-              {passwordError && (
-                <Text style={authStyles.errorText}>{passwordError}</Text>
-              )}
-            </View>
-
-            {/* Hidden dummy TextInput to prevent iOS strong password suggestion */}
-            <TextInput
-              style={{ height: 0.1, opacity: 0, position: 'absolute' }}
-              autoComplete="off"
-              textContentType="none"
-            />
-
-            <View>
-              <Text style={authStyles.inputLabel}>CONFIRM PASSWORD</Text>
-              <Animated.View
-                style={[
-                  authStyles.passwordContainer,
-                  {
-                    borderColor: confirmPasswordError
-                      ? ERROR_COLOR
-                      : confirmPasswordBorderColor,
-                  },
-                ]}
-              >
-                <TextInput
-                  style={authStyles.passwordInput}
-                  placeholder="Re-enter password"
-                  value={confirmPassword}
-                  onChangeText={handleConfirmPasswordChange}
-                  secureTextEntry={!showConfirmPassword}
-                  autoComplete="off"
-                  textContentType="oneTimeCode"
-                  autoCorrect={false}
-                  passwordRules=""
-                  blurOnSubmit={false}
-                  onSubmitEditing={() => Keyboard.dismiss()}
-                />
-                <TouchableOpacity
-                  style={authStyles.showButton}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  <Text style={authStyles.showButtonText}>Show</Text>
-                </TouchableOpacity>
-              </Animated.View>
-              {confirmPasswordError && (
-                <Text style={authStyles.errorText}>{confirmPasswordError}</Text>
-              )}
-            </View>
-
-            <View style={authStyles.buttonContainer}>
-              <Button
-                text={isLoading ? 'Creating Account...' : 'Continue'}
-                disabled={
-                  !email ||
-                  !password ||
-                  !confirmPassword ||
-                  !first_name ||
-                  !last_name ||
-                  !phone_number ||
-                  isLoading
-                }
-                onPress={handleSignUp}
-              />
-            </View>
-
-            <Text style={authStyles.linkText}>
-              Already have an account?{' '}
-              <Text
-                style={authStyles.link}
-                onPress={() => router.push('/auth/login')}
-              >
-                Sign in
-              </Text>
-            </Text>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+
+          <View>
+            <Text style={authStyles.inputLabel}>EMAIL</Text>
+            <Animated.View
+              style={[
+                authStyles.inputWrapper,
+                { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
+              ]}
+            >
+              <TextInput
+                style={authStyles.inputInner}
+                placeholder="Email@gmail.com"
+                value={email}
+                onChangeText={handleEmailChange}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="off"
+                textContentType="none"
+                autoCorrect={false}
+              />
+            </Animated.View>
+            {emailError && (
+              <Text style={authStyles.errorText}>{emailError}</Text>
+            )}
+          </View>
+
+          <View>
+            <Text style={authStyles.inputLabel}>PHONE</Text>
+            <Animated.View
+              style={[
+                authStyles.inputWrapper,
+                { borderColor: phoneError ? ERROR_COLOR : phoneBorderColor },
+              ]}
+            >
+              <TextInput
+                style={authStyles.inputInner}
+                placeholder="(123) 456-7890"
+                value={phone_number}
+                onChangeText={handlePhoneChange}
+                keyboardType="phone-pad"
+                autoComplete="off"
+                textContentType="none"
+                autoCorrect={false}
+              />
+            </Animated.View>
+            {phoneError && (
+              <Text style={authStyles.errorText}>{phoneError}</Text>
+            )}
+          </View>
+
+          <View>
+            <Text style={authStyles.inputLabel}>PASSWORD</Text>
+            <Animated.View
+              style={[
+                authStyles.passwordContainer,
+                {
+                  borderColor: passwordError
+                    ? ERROR_COLOR
+                    : passwordBorderColor,
+                },
+              ]}
+            >
+              <TextInput
+                style={authStyles.passwordInput}
+                placeholder="Enter password"
+                value={password}
+                onChangeText={handlePasswordChange}
+                secureTextEntry={!showPassword}
+                autoComplete="off"
+                textContentType="oneTimeCode"
+                autoCorrect={false}
+                passwordRules=""
+                blurOnSubmit={false}
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+              <TouchableOpacity
+                style={authStyles.showButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Text style={authStyles.showButtonText}>Show</Text>
+              </TouchableOpacity>
+            </Animated.View>
+            <View style={authStyles.passwordRequirements}>
+              {[
+                {
+                  text: 'At least 8 characters',
+                  met: password.length >= 8,
+                },
+                {
+                  text: 'One uppercase letter',
+                  met: /[A-Z]/.test(password),
+                },
+                {
+                  text: 'One lowercase letter',
+                  met: /[a-z]/.test(password),
+                },
+                {
+                  text: 'One number',
+                  met: /[0-9]/.test(password),
+                },
+                {
+                  text: 'One special character',
+                  met: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+                },
+              ]
+                .sort((a, b) => (b.met ? 1 : 0) - (a.met ? 1 : 0))
+                .map((requirement, index) => (
+                  <Text
+                    key={index}
+                    style={[
+                      authStyles.requirementText,
+                      requirement.met
+                        ? authStyles.requirementMet
+                        : authStyles.requirementUnmet,
+                    ]}
+                  >
+                    • {requirement.text}
+                  </Text>
+                ))}
+            </View>
+          </View>
+
+          {/* Hidden dummy TextInput to prevent iOS strong password suggestion */}
+          <TextInput
+            style={{ height: 0.1, opacity: 0, position: 'absolute' }}
+            autoComplete="off"
+            textContentType="none"
+          />
+
+          <View>
+            <Text style={authStyles.inputLabel}>CONFIRM PASSWORD</Text>
+            <Animated.View
+              style={[
+                authStyles.passwordContainer,
+                {
+                  borderColor: confirmPasswordError
+                    ? ERROR_COLOR
+                    : confirmPasswordBorderColor,
+                },
+              ]}
+            >
+              <TextInput
+                style={authStyles.passwordInput}
+                placeholder="Re-enter password"
+                value={confirmPassword}
+                onChangeText={handleConfirmPasswordChange}
+                secureTextEntry={!showConfirmPassword}
+                autoComplete="off"
+                textContentType="oneTimeCode"
+                autoCorrect={false}
+                passwordRules=""
+                blurOnSubmit={false}
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+              <TouchableOpacity
+                style={authStyles.showButton}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Text style={authStyles.showButtonText}>Show</Text>
+              </TouchableOpacity>
+            </Animated.View>
+            {confirmPasswordError && (
+              <Text style={authStyles.errorText}>{confirmPasswordError}</Text>
+            )}
+          </View>
+
+          <View style={authStyles.buttonContainer}>
+            <Button
+              text={isLoading ? 'Creating Account...' : 'Continue'}
+              disabled={
+                !email ||
+                !password ||
+                !confirmPassword ||
+                !first_name ||
+                !last_name ||
+                !phone_number ||
+                !isPasswordValid ||
+                isLoading
+              }
+              onPress={handleSignUp}
+            />
+          </View>
+
+          <Text style={authStyles.linkText}>
+            Already have an account?{' '}
+            <Text
+              style={authStyles.link}
+              onPress={() => router.push('/auth/login')}
+            >
+              Sign in
+            </Text>
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -6,7 +6,7 @@ export { BASE_URL };
 
 // API endpoints
 export const API_ENDPOINTS = {
-  LOGIN: '/api/login',
+  LOGIN: '/api/drivers/login',
   DRIVERS: '/api/drivers',
 } as const;
 
@@ -51,6 +51,8 @@ export const driverAPI = {
       });
 
       if (!response.ok) {
+        // Clone the response so we can read it multiple times if needed
+        const responseClone = response.clone();
         try {
           const error: ApiError = await response.json();
           // Return error object with errors array for better parsing
@@ -60,14 +62,44 @@ export const driverAPI = {
             status: response.status,
           };
           throw errorObj;
-        } catch {
-          // If JSON parsing fails, throw network error
-          throw {
-            message:
-              'Network error. Please check your connection and try again.',
-            errors: [],
-            status: response.status,
-          };
+        } catch (parseError) {
+          // If parseError is already our error object (has status and message), re-throw it
+          if (
+            typeof parseError === 'object' &&
+            parseError !== null &&
+            'status' in parseError &&
+            'message' in parseError
+          ) {
+            throw parseError;
+          }
+          // Otherwise, JSON parsing failed - try to read as text
+          try {
+            const text = await responseClone.text();
+            // Try to parse as JSON one more time
+            try {
+              const parsed = JSON.parse(text);
+              throw {
+                message:
+                  parsed.errors?.join(', ') || parsed.error || 'Signup failed',
+                errors: parsed.errors || [],
+                status: response.status,
+              };
+            } catch {
+              // Not valid JSON, use text as message
+              throw {
+                message: text || `Server error (${response.status})`,
+                errors: [],
+                status: response.status,
+              };
+            }
+          } catch {
+            // Couldn't read response, use status code
+            throw {
+              message: `Server error (${response.status}). Please try again.`,
+              errors: [],
+              status: response.status,
+            };
+          }
         }
       }
 
