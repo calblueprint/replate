@@ -3,14 +3,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
+import RequiredInput from '@/components/RequiredInput';
 import PhotoUpload from '../../components/PhotoUpload';
 
 const MOCK_NPOS = [
@@ -61,31 +60,24 @@ export default function DonationLayout() {
       <ScrollView style={styles.content}>
         <Text style={styles.header}>{location} Pick-up</Text>
 
-        <Text style={styles.label}>
-          Enter Weight(lbs) & Description{' '}
-          <Text style={{ color: 'red' }}>*</Text>
-        </Text>
-        <TextInput
-          style={styles.input}
+        <RequiredInput
+          label="Enter Weight(lbs) & Description"
           placeholder="e.g. 10.3 lbs"
           value={weight}
           onChangeText={setWeight}
+          required
         />
 
-        <Text style={styles.label}>Recipient</Text>
-        <View>
-          <Picker
-            selectedValue={selectedNPO}
-            onValueChange={value => setSelectedNPO(value)}
-            style={styles.picker}
-            itemStyle={styles.pickerItem}
-          >
-            <Picker.Item label="Select NPO Recipient" value="" />
-            {MOCK_NPOS.map(npo => (
-              <Picker.Item key={npo.id} label={npo.name} value={npo.name} />
-            ))}
-          </Picker>
-        </View>
+        <RequiredInput
+          label="Recipient"
+          placeholder="Select NPO Recipient"
+          value={selectedNPO}
+          onChangeText={setSelectedNPO}
+          required
+          isPicker
+          options={MOCK_NPOS.map(npo => ({ label: npo.name, value: npo.name }))}
+        />
+
         <View style={styles.photoSection}>
           <Text style={styles.label}>Add Pick-up Image</Text>
           <PhotoUpload onSelect={handlePhotoSelect} />
@@ -97,8 +89,22 @@ export default function DonationLayout() {
           <Text style={styles.outlineButtonText}>Mark as Missed</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.outlineButton} onPress={handleComplete}>
-          <Text style={styles.outlineButtonText}>Complete</Text>
+        <TouchableOpacity
+          style={[
+            styles.outlineButton,
+            (!weight || !selectedNPO) && styles.disabledButton,
+          ]}
+          onPress={handleComplete}
+          disabled={!weight || !selectedNPO}
+        >
+          <Text
+            style={[
+              styles.outlineButtonText,
+              (!weight || !selectedNPO) && styles.disabledButtonText,
+            ]}
+          >
+            Complete
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -111,7 +117,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 10,
-    //paddingBottom: 10,
   },
   header: {
     fontSize: 20,
@@ -125,32 +130,10 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#6E6E6E',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 12,
-    padding: 12,
-    backgroundColor: 'white',
-    marginBottom: 15,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 20,
-    backgroundColor: 'white',
-    height: 52,
-    justifyContent: 'center',
-    //overflow: "hidden",
-  },
   picker: {
     width: '100%',
     color: 'black',
     fontSize: 16,
-  },
-  pickerItem: {
-    fontSize: 16,
-    color: 'black',
-    fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',
@@ -184,5 +167,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: 20,
     alignItems: 'flex-start',
+  },
+  disabledButton: {
+    borderColor: '#BDBDBD',
+    backgroundColor: '#F0F0F0',
+  },
+  disabledButtonText: {
+    color: '#A0A0A0',
   },
 });
