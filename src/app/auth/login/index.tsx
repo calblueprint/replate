@@ -16,12 +16,11 @@ import {
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
+// Assets
+import LOGIN_LOGO from '../../../../assets/login-logo.png';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
 import { validateEmail } from '../../../utils/validation';
-
-// Assets
-const LOGIN_LOGO = require('../../../../assets/login-logo.png');
 
 interface ApiErrorResponse {
   message?: string;

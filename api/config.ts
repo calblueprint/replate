@@ -44,13 +44,13 @@ export interface ApiError {
 export const driverAPI = {
   signup: async (data: DriverSignupData): Promise<DriverResponse> => {
     try {
-    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ driver: data }),
-    });
+      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driver: data }),
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
         // Clone the response so we can read it multiple times if needed
         const responseClone = response.clone();
         try {
@@ -101,9 +101,9 @@ export const driverAPI = {
             };
           }
         }
-    }
+      }
 
-    return response.json();
+      return response.json();
     } catch (error) {
       // Handle network errors (fetch failures)
       if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -120,13 +120,13 @@ export const driverAPI = {
 
   login: async (data: DriverLoginData): Promise<DriverResponse> => {
     try {
-    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.LOGIN}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.LOGIN}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
         // Clone the response so we can read it multiple times if needed
         const responseClone = response.clone();
         try {
@@ -168,9 +168,9 @@ export const driverAPI = {
             };
           }
         }
-    }
+      }
 
-    return response.json();
+      return response.json();
     } catch (error) {
       // Handle network errors (fetch failures)
       if (error instanceof TypeError && error.message.includes('fetch')) {

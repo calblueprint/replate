@@ -1,18 +1,11 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { typography } from '../styles/typography';
-import colors from '../styles/colors';
-
 // Landing page image
-const LANDING_IMAGE = require('../../assets/landing-image.png');
+import LANDING_IMAGE from '../../assets/landing-image.png';
+import colors from '../styles/colors';
+import { typography } from '../styles/typography';
 
 export default function LandingPage() {
   const insets = useSafeAreaInsets();
@@ -153,4 +146,3 @@ const styles = StyleSheet.create({
     lineHeight: 30,
   },
 });
-
