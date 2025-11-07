@@ -2,7 +2,7 @@ import { Alert } from 'react-native';
 
 // API Configuration for Rails Backend
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.102.216:3000';
 
 export { BASE_URL };
 
