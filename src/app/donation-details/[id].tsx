@@ -13,7 +13,6 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import PhotoUpload from '../../components/PhotoUpload';
 
-
 const MOCK_NPOS = [
   { id: 1, name: 'NPO 1' },
   { id: 2, name: 'NPO 2' },
@@ -26,7 +25,6 @@ export default function DonationLayout() {
   const [selectedNPO, setSelectedNPO] = useState('');
   const [weight, setWeight] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
-
 
   const handleComplete = () => {
     Toast.show({
