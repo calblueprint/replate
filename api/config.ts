@@ -44,13 +44,13 @@ export interface ApiError {
 export const driverAPI = {
   signup: async (data: DriverSignupData): Promise<DriverResponse> => {
     try {
-      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driver: data }),
-      });
+    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ driver: data }),
+    });
 
-      if (!response.ok) {
+    if (!response.ok) {
         // Clone the response so we can read it multiple times if needed
         const responseClone = response.clone();
         try {
@@ -101,9 +101,9 @@ export const driverAPI = {
             };
           }
         }
-      }
+    }
 
-      return response.json();
+    return response.json();
     } catch (error) {
       // Handle network errors (fetch failures)
       if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -120,31 +120,57 @@ export const driverAPI = {
 
   login: async (data: DriverLoginData): Promise<DriverResponse> => {
     try {
-      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.LOGIN}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.LOGIN}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) {
+    if (!response.ok) {
+        // Clone the response so we can read it multiple times if needed
+        const responseClone = response.clone();
         try {
           const error: ApiError = await response.json();
+          // Return error object with proper message
           throw {
             message: error.error || error.message || 'Login failed',
             errors: [],
             status: response.status,
           };
-        } catch {
-          throw {
-            message:
-              'Network error. Please check your connection and try again.',
-            errors: [],
-            status: response.status,
-          };
+        } catch (parseError) {
+          // If parseError is already our error object (has status and message), re-throw it
+          if (
+            typeof parseError === 'object' &&
+            parseError !== null &&
+            'status' in parseError &&
+            'message' in parseError
+          ) {
+            throw parseError;
+          }
+          // JSON parsing failed - try to read as text
+          try {
+            const text = await responseClone.text();
+            throw {
+              message: text || `Authentication failed (${response.status})`,
+              errors: [],
+              status: response.status,
+            };
+          } catch {
+            // Couldn't read response, use status-based message
+            const statusMessage =
+              response.status === 401
+                ? 'Invalid email or password'
+                : `Server error (${response.status})`;
+            throw {
+              message: statusMessage,
+              errors: [],
+              status: response.status,
+            };
+          }
         }
-      }
+    }
 
-      return response.json();
+    return response.json();
     } catch (error) {
       // Handle network errors (fetch failures)
       if (error instanceof TypeError && error.message.includes('fetch')) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  Image,
   Keyboard,
   ScrollView,
   Text,
@@ -15,8 +16,11 @@ import {
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { DriverSignupData } from '../../../../api/config';
-import Button from '../../../components/Button/Button';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
+
+// Assets
+const SIGNUP_LOGO = require('../../../../assets/signup-logo.png');
+const CHECK_ICON = require('../../../../assets/check-icon.png');
 import { useAuth } from '../../../utils/AuthContext';
 import {
   validateEmail,
@@ -114,32 +118,32 @@ export default function SignupPage() {
 
   const firstNameBorderColor = firstNameBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const lastNameBorderColor = lastNameBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const phoneBorderColor = phoneBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const confirmPasswordBorderColor = confirmPasswordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const handleSignUp = async () => {
@@ -373,22 +377,33 @@ export default function SignupPage() {
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={[
-          authStyles.content,
-          { paddingBottom: insets.bottom + 250 }, // Extra padding at bottom for keyboard
+          {
+            padding: 20,
+            paddingTop: 40,
+            paddingBottom: Math.max(insets.bottom + 40, 60),
+          },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={true}
         keyboardDismissMode="interactive"
         contentInsetAdjustmentBehavior="automatic"
+        style={{ flex: 1 }}
       >
         <View style={authStyles.formCard}>
-          <Text style={authStyles.title}>Let's get started</Text>
-          <Text style={authStyles.subtitle}>Please input your details</Text>
+          {/* Logo */}
+          <View style={authStyles.logoContainer}>
+            <Image source={SIGNUP_LOGO} style={authStyles.logoImage} />
+          </View>
+
+          <Text style={authStyles.titleCentered}>Welcome!</Text>
+          <Text style={authStyles.subtitleCentered}>
+            Please enter your details
+          </Text>
 
           <View style={authStyles.nameRow}>
             <View style={authStyles.nameFieldContainer}>
-              <Text style={authStyles.inputLabel}>NAME</Text>
+              <Text style={authStyles.inputLabelDark}>NAME</Text>
               <Animated.View
                 style={[
                   authStyles.inputHalfWrapper,
@@ -399,22 +414,23 @@ export default function SignupPage() {
                   },
                 ]}
               >
-                <TextInput
-                  style={authStyles.inputHalfInner}
-                  placeholder="First name"
-                  value={first_name}
-                  onChangeText={handleFirstNameChange}
-                  autoComplete="off"
-                  textContentType="none"
-                  autoCorrect={false}
-                />
+              <TextInput
+                style={[authStyles.inputHalfInner, { color: '#000' }]}
+                placeholder="First name "
+                placeholderTextColor="#989898"
+                value={first_name}
+                onChangeText={handleFirstNameChange}
+                autoComplete="off"
+                textContentType="none"
+                autoCorrect={false}
+              />
               </Animated.View>
               {firstNameError && (
                 <Text style={authStyles.errorText}>{firstNameError}</Text>
               )}
             </View>
             <View style={authStyles.nameFieldContainer}>
-              <Text style={authStyles.inputLabel}>LAST</Text>
+              <Text style={authStyles.inputLabelDark}>LAST</Text>
               <Animated.View
                 style={[
                   authStyles.inputHalfWrapper,
@@ -425,24 +441,25 @@ export default function SignupPage() {
                   },
                 ]}
               >
-                <TextInput
-                  style={authStyles.inputHalfInner}
-                  placeholder="Last name"
-                  value={last_name}
-                  onChangeText={handleLastNameChange}
-                  autoComplete="off"
-                  textContentType="none"
-                  autoCorrect={false}
-                />
+              <TextInput
+                style={[authStyles.inputHalfInner, { color: '#000' }]}
+                placeholder="Last name "
+                placeholderTextColor="#989898"
+                value={last_name}
+                onChangeText={handleLastNameChange}
+                autoComplete="off"
+                textContentType="none"
+                autoCorrect={false}
+              />
               </Animated.View>
               {lastNameError && (
                 <Text style={authStyles.errorText}>{lastNameError}</Text>
               )}
             </View>
-          </View>
+        </View>
 
           <View>
-            <Text style={authStyles.inputLabel}>EMAIL</Text>
+            <Text style={authStyles.inputLabelDark}>EMAIL</Text>
             <Animated.View
               style={[
                 authStyles.inputWrapper,
@@ -450,8 +467,9 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={authStyles.inputInner}
+                style={[authStyles.inputInner, { color: '#000' }]}
                 placeholder="Email@gmail.com"
+                placeholderTextColor="#989898"
                 value={email}
                 onChangeText={handleEmailChange}
                 keyboardType="email-address"
@@ -467,7 +485,7 @@ export default function SignupPage() {
           </View>
 
           <View>
-            <Text style={authStyles.inputLabel}>PHONE</Text>
+            <Text style={authStyles.inputLabelDark}>PHONE</Text>
             <Animated.View
               style={[
                 authStyles.inputWrapper,
@@ -475,8 +493,9 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={authStyles.inputInner}
+                style={[authStyles.inputInner, { color: '#000' }]}
                 placeholder="(123) 456-7890"
+                placeholderTextColor="#989898"
                 value={phone_number}
                 onChangeText={handlePhoneChange}
                 keyboardType="phone-pad"
@@ -491,7 +510,7 @@ export default function SignupPage() {
           </View>
 
           <View>
-            <Text style={authStyles.inputLabel}>PASSWORD</Text>
+            <Text style={authStyles.inputLabelDark}>PASSWORD</Text>
             <Animated.View
               style={[
                 authStyles.passwordContainer,
@@ -503,8 +522,9 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={authStyles.passwordInput}
+                style={[authStyles.passwordInput, { color: '#000' }]}
                 placeholder="Enter password"
+                placeholderTextColor="#989898"
                 value={password}
                 onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
@@ -515,50 +535,52 @@ export default function SignupPage() {
                 blurOnSubmit={false}
                 onSubmitEditing={() => Keyboard.dismiss()}
               />
-              <TouchableOpacity
-                style={authStyles.showButton}
-                onPress={() => setShowPassword(!showPassword)}
-              >
+          <TouchableOpacity
+            style={authStyles.showButton}
+            onPress={() => setShowPassword(!showPassword)}
+          >
                 <Text style={authStyles.showButtonText}>Show</Text>
               </TouchableOpacity>
             </Animated.View>
             <View style={authStyles.passwordRequirements}>
               {[
                 {
-                  text: 'At least 8 characters',
+                  text: '8 characters',
                   met: password.length >= 8,
                 },
                 {
-                  text: 'One uppercase letter',
+                  text: '1 uppercase letter',
                   met: /[A-Z]/.test(password),
                 },
                 {
-                  text: 'One lowercase letter',
-                  met: /[a-z]/.test(password),
-                },
-                {
-                  text: 'One number',
-                  met: /[0-9]/.test(password),
-                },
-                {
-                  text: 'One special character',
+                  text: '1 special character',
                   met: /[!@#$%^&*(),.?":{}|<>]/.test(password),
                 },
-              ]
-                .sort((a, b) => (b.met ? 1 : 0) - (a.met ? 1 : 0))
-                .map((requirement, index) => (
-                  <Text
-                    key={index}
+                {
+                  text: '1 number',
+                  met: /[0-9]/.test(password),
+                },
+              ].map((requirement, index) => (
+                <View key={index} style={authStyles.requirementRow}>
+                  <View
                     style={[
-                      authStyles.requirementText,
-                      requirement.met
-                        ? authStyles.requirementMet
-                        : authStyles.requirementUnmet,
+                      authStyles.requirementCircle,
+                      requirement.met && authStyles.requirementCircleMet,
                     ]}
                   >
-                    • {requirement.text}
+                    <Image
+                      source={CHECK_ICON}
+                      style={[
+                        authStyles.requirementCheckmark,
+                        !requirement.met && { tintColor: '#898989', opacity: 0.5 },
+                      ]}
+                    />
+                  </View>
+                  <Text style={authStyles.requirementTextDark}>
+                    {requirement.text}
                   </Text>
-                ))}
+                </View>
+              ))}
             </View>
           </View>
 
@@ -570,7 +592,7 @@ export default function SignupPage() {
           />
 
           <View>
-            <Text style={authStyles.inputLabel}>CONFIRM PASSWORD</Text>
+            <Text style={authStyles.inputLabelDark}>CONFIRM PASSWORD</Text>
             <Animated.View
               style={[
                 authStyles.passwordContainer,
@@ -582,8 +604,9 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={authStyles.passwordInput}
-                placeholder="Re-enter password"
+                style={[authStyles.passwordInput, { color: '#000' }]}
+                placeholder="Enter same password"
+                placeholderTextColor="#989898"
                 value={confirmPassword}
                 onChangeText={handleConfirmPasswordChange}
                 secureTextEntry={!showConfirmPassword}
@@ -599,16 +622,31 @@ export default function SignupPage() {
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 <Text style={authStyles.showButtonText}>Show</Text>
-              </TouchableOpacity>
+          </TouchableOpacity>
             </Animated.View>
             {confirmPasswordError && (
               <Text style={authStyles.errorText}>{confirmPasswordError}</Text>
             )}
-          </View>
+        </View>
 
           <View style={authStyles.buttonContainer}>
-            <Button
-              text={isLoading ? 'Creating Account...' : 'Continue'}
+            <TouchableOpacity
+              style={[
+                authStyles.grayButton,
+                {
+                  opacity:
+                    !email ||
+                    !password ||
+                    !confirmPassword ||
+                    !first_name ||
+                    !last_name ||
+                    !phone_number ||
+                    !isPasswordValid ||
+                    isLoading
+                      ? 0.5
+                      : 1,
+                },
+              ]}
               disabled={
                 !email ||
                 !password ||
@@ -620,13 +658,18 @@ export default function SignupPage() {
                 isLoading
               }
               onPress={handleSignUp}
-            />
+              activeOpacity={0.8}
+            >
+              <Text style={authStyles.grayButtonText}>
+                {isLoading ? 'Creating Account...' : 'Continue '}
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <Text style={authStyles.linkText}>
+          <Text style={authStyles.linkTextSignup}>
             Already have an account?{' '}
             <Text
-              style={authStyles.link}
+              style={authStyles.linkSignup}
               onPress={() => router.push('/auth/login')}
             >
               Sign in

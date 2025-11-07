@@ -10,7 +10,6 @@ export const authStyles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   content: {
-    flex: 1,
     padding: 20,
     paddingTop: 40,
     justifyContent: 'flex-start',
@@ -50,21 +49,21 @@ export const authStyles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   inputWrapper: {
-    borderWidth: 1,
-    borderRadius: 6,
+    borderWidth: 0.8,
+    borderRadius: 5,
     marginBottom: 16,
     backgroundColor: '#fff',
   },
   inputInner: {
     padding: 12,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: REGULAR,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 6,
+    borderWidth: 0.8,
+    borderRadius: 5,
     marginBottom: 16,
     backgroundColor: '#fff',
   },
@@ -96,7 +95,7 @@ export const authStyles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     padding: 12,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: REGULAR,
   },
   showButton: {
@@ -124,13 +123,13 @@ export const authStyles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   inputHalfWrapper: {
-    borderWidth: 1,
-    borderRadius: 6,
+    borderWidth: 0.8,
+    borderRadius: 5,
     backgroundColor: '#fff',
   },
   inputHalfInner: {
     padding: 12,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: REGULAR,
   },
   linkText: {
@@ -183,5 +182,92 @@ export const authStyles = StyleSheet.create({
   },
   requirementUnmet: {
     color: ERROR_COLOR,
+  },
+  // Signup page specific styles
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+    marginTop: 20,
+  },
+  logoImage: {
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
+  },
+  titleCentered: {
+    fontSize: 30,
+    fontFamily: BOLD,
+    textAlign: 'center',
+    marginBottom: 12,
+    color: '#000',
+  },
+  subtitleCentered: {
+    fontSize: 15,
+    fontFamily: REGULAR,
+    textAlign: 'center',
+    marginBottom: 24,
+    color: '#898989',
+  },
+  inputLabelDark: {
+    fontSize: 12,
+    fontFamily: BOLD,
+    color: '#525454',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  requirementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  requirementCircle: {
+    width: 11,
+    height: 11,
+    borderRadius: 8,
+    backgroundColor: '#898989',
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  requirementCircleMet: {
+    backgroundColor: '#898989',
+  },
+  requirementCheckmark: {
+    width: 9,
+    height: 9,
+  },
+  requirementTextDark: {
+    fontSize: 12,
+    fontFamily: REGULAR,
+    color: '#000',
+    lineHeight: 19.2, // 1.6 * 12
+  },
+  grayButton: {
+    width: '100%',
+    backgroundColor: '#bababa',
+    borderRadius: 10,
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+  },
+  grayButtonText: {
+    fontSize: 16,
+    fontFamily: BOLD,
+    color: '#fff',
+    lineHeight: 30,
+  },
+  linkTextSignup: {
+    textAlign: 'center',
+    color: '#4f4f4f',
+    fontFamily: REGULAR,
+    fontSize: 14,
+    marginTop: 16,
+  },
+  linkSignup: {
+    color: '#58ad85',
+    textDecorationLine: 'underline',
+    fontFamily: BOLD,
   },
 });

@@ -1,110 +1,22 @@
-=> Booting Puma
-=> Rails 6.0.6.1 application starting in development 
-=> Run `rails server --help` for more startup options
-W, [2025-11-03T17:02:44.724445 #28732]  WARN -- Skylight: [SKYLIGHT] [5.0.1] Running Skylight in development mode. No data will be reported until you deploy your app.
-(To disable this message for all local apps, run `skylight disable_dev_warning`.)
-[28732] Puma starting in cluster mode...
-[28732] * Puma version: 5.6.9 (ruby 3.1.6-p260) ("Birdie's Version")
-[28732] *  Min threads: 5
-[28732] *  Max threads: 5
-[28732] *  Environment: development
-[28732] *   Master PID: 28732
-[28732] *      Workers: 2
-[28732] *     Restarts: (✔) hot (✖) phased
-[28732] * Preloading application
-[28732] * Listening on http://0.0.0.0:3000
-[28732] Use Ctrl-C to stop
-[28732] - Worker 0 (PID: 28927) booted in 0.0s, phase: 0
-[28732] - Worker 1 (PID: 28928) booted in 0.0s, phase: 0
-Started POST "/api/drivers" for 192.168.102.110 at 2025-11-03 17:03:43 -0800
-Cannot render console from 192.168.102.110! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
-  [1m[35m (4.7ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
-Processing by API::DriversController#create as JSON
-  Parameters: {"driver"=>{"email"=>"stephenh@gmail.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]", "first_name"=>"stephen", "last_name"=>"hung", "phone"=>"1234567890"}}
-Can't verify CSRF token authenticity.
-  [1m[35m (0.2ms)[0m  [1m[35mBEGIN[0m
-  ↳ app/controllers/api/drivers_controller.rb:17:in `create'
-  [1m[36mDriver Exists? (1.9ms)[0m  [1m[34mSELECT 1 AS one FROM "drivers" WHERE "drivers"."email" = $1 LIMIT $2[0m  [["email", "stephenh@gmail.com"], ["LIMIT", 1]]
-  ↳ app/controllers/api/drivers_controller.rb:17:in `create'
-  [1m[36mDriver Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "drivers" WHERE "drivers"."email" = $1 LIMIT $2[0m  [["email", "stephenh@gmail.com"], ["LIMIT", 1]]
-  ↳ app/controllers/api/drivers_controller.rb:17:in `create'
-  [1m[36mDriver Create (1.0ms)[0m  [1m[32mINSERT INTO "drivers" ("first_name", "last_name", "phone", "created_at", "updated_at", "email", "encrypted_password") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["first_name", "stephen"], ["last_name", "hung"], ["phone", "1234567890"], ["created_at", "2025-11-04 01:03:43.257121"], ["updated_at", "2025-11-04 01:03:43.257121"], ["email", "stephenh@gmail.com"], ["encrypted_password", "$2a$10$FqFUIxCUvuXqnUgmjRfZnuQZiKn.esW9y9imTDxDvXBEQAA2nWbLy"]]
-  ↳ app/controllers/api/drivers_controller.rb:17:in `create'
-  [1m[36mPaperTrail::Version Create (1.2ms)[0m  [1m[32mINSERT INTO "versions" ("item_type", "item_id", "event", "created_at", "object_changes") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["item_type", "Driver"], ["item_id", 22], ["event", "create"], ["created_at", "2025-11-04 01:03:43.257121"], ["object_changes", "{\"id\":[null,22],\"first_name\":[null,\"stephen\"],\"last_name\":[null,\"hung\"],\"phone\":[null,\"1234567890\"],\"created_at\":[null,\"2025-11-04T01:03:43.257Z\"],\"updated_at\":[null,\"2025-11-04T01:03:43.257Z\"],\"email\":[null,\"stephenh@gmail.com\"],\"encrypted_password\":[\"\",\"$2a$10$FqFUIxCUvuXqnUgmjRfZnuQZiKn.esW9y9imTDxDvXBEQAA2nWbLy\"]}"]]
-  ↳ app/controllers/api/drivers_controller.rb:17:in `create'
-  [1m[35m (0.7ms)[0m  [1m[35mCOMMIT[0m
-  ↳ app/controllers/api/drivers_controller.rb:17:in `create'
-Completed 201 Created in 96ms (Views: 0.2ms | ActiveRecord: 20.8ms | Allocations: 32961)
-
-
-[28732] === puma shutdown: 2025-11-03 17:05:06 -0800 ===
-[28732] - Goodbye!
-[28732] - Gracefully shutting down workers...
-Exiting
-[2025-11-03 17:05:29] => Booting Puma
-[2025-11-03 17:05:29] => Rails 6.0.6.1 application starting in development 
-[2025-11-03 17:05:29] => Run `rails server --help` for more startup options
-[2025-11-03 17:05:29] [WARN]  W, [2025-11-03T17:05:29.985765 #32099]  WARN -- Skylight: [SKYLIGHT] [5.0.1] Running Skylight in development mode. No data will be reported until you deploy your app.
-[2025-11-03 17:05:30] (To disable this message for all local apps, run `skylight disable_dev_warning`.)
-[2025-11-03 17:05:30] [32099] Puma starting in cluster mode...
-[2025-11-03 17:05:30] [32099] * Puma version: 5.6.9 (ruby 3.1.6-p260) ("Birdie's Version")
-[2025-11-03 17:05:30] [32099] *  Min threads: 5
-[2025-11-03 17:05:30] [32099] *  Max threads: 5
-[2025-11-03 17:05:30] [32099] *  Environment: development
-[2025-11-03 17:05:30] [32099] *   Master PID: 32099
-[2025-11-03 17:05:30] [32099] *      Workers: 2
-[2025-11-03 17:05:30] [32099] *     Restarts: (✔) hot (✖) phased
-[2025-11-03 17:05:30] [32099] * Preloading application
-[2025-11-03 17:05:30] [32099] * Listening on http://0.0.0.0:3000
-[2025-11-03 17:05:30] [32099] Use Ctrl-C to stop
-[2025-11-03 17:05:30] [32099] - Worker 0 (PID: 32355) booted in 0.01s, phase: 0
-[2025-11-03 17:05:30] [32099] - Worker 1 (PID: 32365) booted in 0.0s, phase: 0
-
-[2025-11-03 17:05:57] Started POST "/api/login" for 192.168.102.110 at 2025-11-03 17:05:57 -0800
-[2025-11-03 17:05:57] Cannot render console from 192.168.102.110! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
-[2025-11-03 17:05:57] [SQL]      (4.6ms)  SELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC
-
-[2025-11-03 17:05:57] Processing by Drivers::SessionsController#create as JSON
-[2025-11-03 17:05:57]   Parameters: {"email"=>"stephenh@gmail.com", "password"=>"[FILTERED]", "session"=>{"email"=>"stephenh@gmail.com", "password"=>"[FILTERED]"}}
-[2025-11-03 17:05:57] [SQL]     Driver Load (1.2ms)  SELECT "drivers".* FROM "drivers" WHERE "drivers"."deleted_at" IS NULL AND "drivers"."email" = $1 ORDER BY "drivers"."id" ASC LIMIT $2  [["email", "stephenh@gmail.com"], ["LIMIT", 1]]
-[2025-11-03 17:05:57]   ↳ app/controllers/drivers/sessions_controller.rb:10:in `create'
-[2025-11-03 17:05:57] [SQL]     Driver Load (0.3ms)  SELECT "drivers".* FROM "drivers" WHERE "drivers"."deleted_at" IS NULL AND "drivers"."id" = $1 ORDER BY "drivers"."id" ASC LIMIT $2  [["id", 21], ["LIMIT", 1]]
-[2025-11-03 17:05:57]   ↳ app/controllers/drivers/sessions_controller.rb:13:in `create'
-[2025-11-03 17:05:57] [SQL]      (0.1ms)  BEGIN
-[2025-11-03 17:05:57]   ↳ app/controllers/drivers/sessions_controller.rb:13:in `create'
-[2025-11-03 17:05:57] [SQL]     Driver Update (0.4ms)  UPDATE "drivers" SET "current_sign_in_at" = $1, "last_sign_in_at" = $2, "current_sign_in_ip" = $3, "last_sign_in_ip" = $4, "sign_in_count" = $5, "updated_at" = $6 WHERE "drivers"."id" = $7  [["current_sign_in_at", "2025-11-04 01:05:57.697693"], ["last_sign_in_at", "2025-11-04 01:05:57.697693"], ["current_sign_in_ip", "192.168.102.110/32"], ["last_sign_in_ip", "192.168.102.110/32"], ["sign_in_count", 1], ["updated_at", "2025-11-04 01:05:57.698059"], ["id", 22]]
-[2025-11-03 17:05:57]   ↳ app/controllers/drivers/sessions_controller.rb:13:in `create'
-[2025-11-03 17:05:57] [SQL]     PaperTrail::Version Create (1.0ms)  INSERT INTO "versions" ("item_type", "item_id", "event", "object", "created_at", "object_changes") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["item_type", "Driver"], ["item_id", 22], ["event", "update"], ["object", "{\"encrypted_password\":\"$2a$10$FqFUIxCUvuXqnUgmjRfZnuQZiKn.esW9y9imTDxDvXBEQAA2nWbLy\",\"id\":22,\"current_sign_in_at\":null,\"last_sign_in_at\":null,\"current_sign_in_ip\":null,\"last_sign_in_ip\":null,\"sign_in_count\":0,\"deleted_at\":null,\"first_name\":\"stephen\",\"last_name\":\"hung\",\"phone\":\"1234567890\",\"capacity_num_trays\":null,\"created_at\":\"2025-11-04T01:03:43.257Z\",\"updated_at\":\"2025-11-04T01:03:43.257Z\",\"email\":\"stephenh@gmail.com\",\"reset_password_token\":null,\"reset_password_sent_at\":null,\"remember_created_at\":null}"], ["created_at", "2025-11-04 01:05:57.698059"], ["object_changes", "{\"current_sign_in_at\":[null,\"2025-11-04T01:05:57.697Z\"],\"last_sign_in_at\":[null,\"2025-11-04T01:05:57.697Z\"],\"current_sign_in_ip\":[null,{\"mask_addr\":4294967295,\"family\":2,\"addr\":3232261742,\"zone_id\":null}],\"last_sign_in_ip\":[null,{\"mask_addr\":4294967295,\"family\":2,\"addr\":3232261742,\"zone_id\":null}],\"sign_in_count\":[0,1],\"updated_at\":[\"2025-11-04T01:03:43.257Z\",\"2025-11-04T01:05:57.698Z\"]}"]]
-[2025-11-03 17:05:57]   ↳ app/controllers/drivers/sessions_controller.rb:13:in `create'
-[2025-11-03 17:05:57] [SQL]      (0.7ms)  COMMIT
-[2025-11-03 17:05:57]   ↳ app/controllers/drivers/sessions_controller.rb:13:in `create'
-[2025-11-03 17:05:57] Completed 200 OK in 89ms (Views: 0.1ms | ActiveRecord: 13.8ms | Allocations: 33601)
-
-[2025-11-03 17:05:57] 
-[2025-11-03 17:05:57] 
-[2025-11-03 17:07:19] [32099] === puma shutdown: 2025-11-03 17:07:19 -0800 ===
-[2025-11-03 17:07:19] [32099] - Goodbye!
-[2025-11-03 17:07:19] [32099] - Gracefully shutting down workers...
-[2025-11-03 17:07:20] Exiting
-[17:51:12] => Booting Puma
-[17:51:12] => Rails 6.0.6.1 application starting in development 
-[17:51:12] => Run `rails server --help` for more startup options
-[17:51:12] W, [2025-11-03T17:51:12.501111 #69797]  WARN -- Skylight: [SKYLIGHT] [5.0.1] Running Skylight in development mode. No data will be reported until you deploy your app.
-[17:51:12] (To disable this message for all local apps, run `skylight disable_dev_warning`.)
-[17:51:12] [69797] Puma starting in cluster mode...
-[17:51:12] [69797] * Puma version: 5.6.9 (ruby 3.1.6-p260) ("Birdie's Version")
-[17:51:12] [69797] *  Min threads: 5
-[17:51:12] [69797] *  Max threads: 5
-[17:51:12] [69797] *  Environment: development
-[17:51:12] [69797] *   Master PID: 69797
-[17:51:12] [69797] *      Workers: 2
-[17:51:12] [69797] *     Restarts: (✔) hot (✖) phased
-[17:51:12] [69797] * Preloading application
-[17:51:12] [69797] * Listening on http://0.0.0.0:3000
-[17:51:12] [69797] Use Ctrl-C to stop
-[17:51:12] [69797] - Worker 0 (PID: 70065) booted in 0.01s, phase: 0
-[17:51:12] [69797] - Worker 1 (PID: 70078) booted in 0.0s, phase: 0
-[17:51:44] [69797] === puma shutdown: 2025-11-03 17:51:44 -0800 ===
-[17:51:44] [69797] - Goodbye!
-[17:51:44] [69797] - Gracefully shutting down workers...
-[17:51:44] Exiting
+[12:15:57] => Booting Puma
+[12:15:57] => Rails 6.0.6.1 application starting in development 
+[12:15:57] => Run `rails server --help` for more startup options
+[12:15:57] W, [2025-11-07T12:15:57.645388 #2813]  WARN -- Skylight: [SKYLIGHT] [5.0.1] Running Skylight in development mode. No data will be reported until you deploy your app.
+[12:15:57] (To disable this message for all local apps, run `skylight disable_dev_warning`.)
+[12:15:57] [2813] Puma starting in cluster mode...
+[12:15:57] [2813] * Puma version: 5.6.9 (ruby 3.1.6-p260) ("Birdie's Version")
+[12:15:57] [2813] *  Min threads: 5
+[12:15:57] [2813] *  Max threads: 5
+[12:15:57] [2813] *  Environment: development
+[12:15:58] [2813] *   Master PID: 2813
+[12:15:58] [2813] *      Workers: 2
+[12:15:58] [2813] *     Restarts: (✔) hot (✖) phased
+[12:15:58] [2813] * Preloading application
+[12:15:58] [2813] * Listening on http://0.0.0.0:3000
+[12:15:58] [2813] Use Ctrl-C to stop
+[12:15:58] [2813] - Worker 0 (PID: 3019) booted in 0.01s, phase: 0
+[12:15:58] [2813] - Worker 1 (PID: 3040) booted in 0.0s, phase: 0
+[12:37:45] [2813] === puma shutdown: 2025-11-07 12:37:45 -0800 ===
+[12:37:45] [2813] - Goodbye!
+[12:37:45] [2813] - Gracefully shutting down workers...
+[12:37:46] Exiting

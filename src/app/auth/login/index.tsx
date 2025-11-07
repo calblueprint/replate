@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  Image,
   Keyboard,
   ScrollView,
   Text,
@@ -15,10 +16,12 @@ import {
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
-import Button from '../../../components/Button/Button';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
-import { validateEmail, validatePassword } from '../../../utils/validation';
+import { validateEmail } from '../../../utils/validation';
+
+// Assets
+const LOGIN_LOGO = require('../../../../assets/login-logo.png');
 
 interface ApiErrorResponse {
   message?: string;
@@ -30,7 +33,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [staySignedIn, setStaySignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Error states
@@ -63,12 +65,12 @@ export default function LoginPage() {
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E5E5E5', '#000000'],
+    outputRange: ['#a9a9a9', '#a9a9a9'],
   });
 
   const handleLogin = async () => {
@@ -78,7 +80,8 @@ export default function LoginPage() {
 
     // Run validations
     const emailErr = validateEmail(email);
-    const passwordErr = validatePassword(password);
+    const passwordErr =
+      !password || password.trim() === '' ? 'Password is required' : null;
 
     // Set errors
     setEmailError(emailErr);
@@ -97,7 +100,7 @@ export default function LoginPage() {
         password,
       };
 
-      await login(loginData, staySignedIn);
+      await login(loginData, false);
       Toast.show({
         type: 'success',
         text1: 'Welcome back!',
@@ -199,21 +202,32 @@ export default function LoginPage() {
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={[
-          authStyles.content,
-          { paddingBottom: insets.bottom + 250 }, // Extra padding at bottom for keyboard
+          {
+            padding: 20,
+            paddingTop: 40,
+            paddingBottom: Math.max(insets.bottom + 40, 60),
+          },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={true}
         keyboardDismissMode="interactive"
         contentInsetAdjustmentBehavior="automatic"
+        style={{ flex: 1 }}
       >
         <View style={authStyles.formCard}>
-          <Text style={authStyles.title}>Welcome back</Text>
-          <Text style={authStyles.subtitle}>Please input your details</Text>
+          {/* Logo */}
+          <View style={authStyles.logoContainer}>
+            <Image source={LOGIN_LOGO} style={authStyles.logoImage} />
+          </View>
+
+          <Text style={authStyles.titleCentered}>Welcome!</Text>
+          <Text style={authStyles.subtitleCentered}>
+            Please enter your details
+          </Text>
 
           <View>
-            <Text style={authStyles.inputLabel}>EMAIL</Text>
+            <Text style={authStyles.inputLabelDark}>EMAIL</Text>
             <Animated.View
               style={[
                 authStyles.inputWrapper,
@@ -221,8 +235,9 @@ export default function LoginPage() {
               ]}
             >
               <TextInput
-                style={authStyles.inputInner}
+                style={[authStyles.inputInner, { color: '#000' }]}
                 placeholder="Email@gmail.com"
+                placeholderTextColor="#989898"
                 value={email}
                 onChangeText={handleEmailChange}
                 keyboardType="email-address"
@@ -238,7 +253,7 @@ export default function LoginPage() {
           </View>
 
           <View>
-            <Text style={authStyles.inputLabel}>PASSWORD</Text>
+            <Text style={authStyles.inputLabelDark}>PASSWORD</Text>
             <Animated.View
               style={[
                 authStyles.passwordContainer,
@@ -250,8 +265,9 @@ export default function LoginPage() {
               ]}
             >
               <TextInput
-                style={authStyles.passwordInput}
+                style={[authStyles.passwordInput, { color: '#000' }]}
                 placeholder="Enter password"
+                placeholderTextColor="#989898"
                 value={password}
                 onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
@@ -274,31 +290,28 @@ export default function LoginPage() {
             )}
           </View>
 
-          <View style={authStyles.checkboxRow}>
-            <TouchableOpacity
-              onPress={() => setStaySignedIn(!staySignedIn)}
-              style={[
-                authStyles.checkboxBox,
-                { backgroundColor: staySignedIn ? '#000' : 'transparent' },
-              ]}
-            >
-              {staySignedIn && <Text style={authStyles.checkboxMark}>✓</Text>}
-            </TouchableOpacity>
-            <Text style={authStyles.checkboxLabel}>Stay signed in</Text>
-          </View>
-
           <View style={authStyles.buttonContainer}>
-            <Button
-              text={isLoading ? 'Logging in...' : 'Log in'}
+            <TouchableOpacity
+              style={[
+                authStyles.grayButton,
+                {
+                  opacity: !email || !password || isLoading ? 0.5 : 1,
+                },
+              ]}
               disabled={!email || !password || isLoading}
               onPress={handleLogin}
-            />
+              activeOpacity={0.8}
+            >
+              <Text style={authStyles.grayButtonText}>
+                {isLoading ? 'Logging in...' : 'Log in '}
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <Text style={authStyles.linkText}>
+          <Text style={authStyles.linkTextSignup}>
             Need an account?{' '}
             <Text
-              style={authStyles.link}
+              style={authStyles.linkSignup}
               onPress={() => router.push('/auth/signup')}
             >
               Sign up
