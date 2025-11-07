@@ -37,11 +37,7 @@ importers:
         version: 54.0.13(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(@modelcontextprotocol/sdk@1.20.1)(expo-router@6.0.12)(graphql@16.11.0)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       expo-constants:
         specifier: ~18.0.9
-<<<<<<< HEAD
         version: 18.0.9(expo@54.0.13)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))
-=======
-        version: 18.0.9(expo@54.0.13)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.15)(react@19.1.0))
->>>>>>> 0969ff0549a972a311302c0e5e613e8dfccde331
       expo-image-picker:
         specifier: ~17.0.8
         version: 17.0.8(expo@54.0.13)
@@ -8389,15 +8385,6 @@ snapshots:
   expo-image-picker@17.0.8(expo@54.0.13):
     dependencies:
       expo: 54.0.13(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(@modelcontextprotocol/sdk@1.20.1)(expo-router@6.0.12)(graphql@16.11.0)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
-      expo-image-loader: 6.0.0(expo@54.0.13)
-
-  expo-image-loader@6.0.0(expo@54.0.13):
-    dependencies:
-      expo: 54.0.13(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(expo-router@6.0.12)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.15)(react@19.1.0))(react@19.1.0)
-
-  expo-image-picker@17.0.8(expo@54.0.13):
-    dependencies:
-      expo: 54.0.13(@babel/core@7.28.4)(@expo/metro-runtime@6.1.2)(expo-router@6.0.12)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.15)(react@19.1.0))(react@19.1.0)
       expo-image-loader: 6.0.0(expo@54.0.13)
 
   expo-keep-awake@15.0.7(expo@54.0.13)(react@19.1.0):
