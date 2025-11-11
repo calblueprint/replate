@@ -6,6 +6,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Lato_400Regular, Lato_700Bold } from '@expo-google-fonts/lato';
 import { AuthProvider } from '../utils/AuthContext';
+import { ProfileProvider } from '../utils/ProfileContext';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -27,20 +28,22 @@ function StackLayout() {
 
   return (
     <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="auth/login" />
-        <Stack.Screen name="auth/signup" />
-        <Stack.Screen name="auth/forgot-password" />
-        <Stack.Screen name="auth/reset-password" />
-        <Stack.Screen name="onboarding" />
-        <Stack.Screen name="pickup-details" />
-        <Stack.Screen name="my-tasks" />
-        <Stack.Screen name="donation-details/[id]" />
-        <Stack.Screen name="my-account" />
-        <Stack.Screen name="available-pick-ups" />
-      </Stack>
-      <Toast />
+      <ProfileProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="auth/login" />
+          <Stack.Screen name="auth/signup" />
+          <Stack.Screen name="auth/forgot-password" />
+          <Stack.Screen name="auth/reset-password" />
+          <Stack.Screen name="onboarding" />
+          <Stack.Screen name="pickup-details" />
+          <Stack.Screen name="my-tasks" />
+          <Stack.Screen name="donation-details/[id]" />
+          <Stack.Screen name="my-account" />
+          <Stack.Screen name="available-pick-ups" />
+        </Stack>
+        <Toast />
+      </ProfileProvider>
     </AuthProvider>
   );
 }
