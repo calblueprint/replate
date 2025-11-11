@@ -15,27 +15,30 @@ type TypographyStyles = {
 export const typography: TypographyStyles = StyleSheet.create({
   h1: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: 'Lato_700Bold',
   },
   h2: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: 'Lato_700Bold',
   },
   h3: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'Lato_700Bold',
   },
   h4: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Lato_700Bold',
   },
   p1: {
     fontSize: 16,
+    fontFamily: 'Lato_400Regular',
   },
   p2: {
     fontSize: 14,
+    fontFamily: 'Lato_400Regular',
   },
   p3: {
     fontSize: 12,
+    fontFamily: 'Lato_400Regular',
   },
 });

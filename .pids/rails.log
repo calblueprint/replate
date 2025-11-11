@@ -1,0 +1,22 @@
+[12:15:57] => Booting Puma
+[12:15:57] => Rails 6.0.6.1 application starting in development 
+[12:15:57] => Run `rails server --help` for more startup options
+[12:15:57] W, [2025-11-07T12:15:57.645388 #2813]  WARN -- Skylight: [SKYLIGHT] [5.0.1] Running Skylight in development mode. No data will be reported until you deploy your app.
+[12:15:57] (To disable this message for all local apps, run `skylight disable_dev_warning`.)
+[12:15:57] [2813] Puma starting in cluster mode...
+[12:15:57] [2813] * Puma version: 5.6.9 (ruby 3.1.6-p260) ("Birdie's Version")
+[12:15:57] [2813] *  Min threads: 5
+[12:15:57] [2813] *  Max threads: 5
+[12:15:57] [2813] *  Environment: development
+[12:15:58] [2813] *   Master PID: 2813
+[12:15:58] [2813] *      Workers: 2
+[12:15:58] [2813] *     Restarts: (✔) hot (✖) phased
+[12:15:58] [2813] * Preloading application
+[12:15:58] [2813] * Listening on http://0.0.0.0:3000
+[12:15:58] [2813] Use Ctrl-C to stop
+[12:15:58] [2813] - Worker 0 (PID: 3019) booted in 0.01s, phase: 0
+[12:15:58] [2813] - Worker 1 (PID: 3040) booted in 0.0s, phase: 0
+[12:37:45] [2813] === puma shutdown: 2025-11-07 12:37:45 -0800 ===
+[12:37:45] [2813] - Goodbye!
+[12:37:45] [2813] - Gracefully shutting down workers...
+[12:37:46] Exiting
