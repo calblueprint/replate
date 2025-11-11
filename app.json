@@ -27,7 +27,7 @@
     },
     "plugins": ["expo-router"],
     "extra": {
-      "EXPO_PUBLIC_BACKEND_URL": "http:10.40.164.190:3000"
+      "EXPO_PUBLIC_BACKEND_URL": "http://10.40.167.36:3000"
     }
   }
 }

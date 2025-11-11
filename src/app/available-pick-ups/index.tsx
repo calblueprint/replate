@@ -2,6 +2,7 @@ import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type AppExtra = { EXPO_PUBLIC_BACKEND_URL?: string };
 
@@ -12,29 +13,33 @@ const extra: AppExtra =
 export const BACKEND_URL =
   typeof extra.EXPO_PUBLIC_BACKEND_URL === 'string'
     ? extra.EXPO_PUBLIC_BACKEND_URL
-    : '10.40.164.190:3000';
+    : '10.40.167.36';
 
 export const MOCK_PICKUPS = [
   {
     id: 1,
+    encrypted_id: 'mock-encrypted-id-1',
     slot_start_time: '2025-10-14T09:00:00',
     slot_end_time: '2025-10-14T10:00:00',
     pickup_location: 'BP House',
   },
   {
     id: 2,
-    slot_start_time: '2025-11-02T13:00:00',
-    slot_end_time: '2025-11-02T15:00:00',
+    encrypted_id: 'mock-encrypted-id-2',
+    slot_start_time: '2025-10-13T13:00:00',
+    slot_end_time: '2025-10-13T15:00:00',
     pickup_location: 'Rockridge Cafe',
   },
   {
     id: 3,
+    encrypted_id: 'mock-encrypted-id-3',
     slot_start_time: '2025-10-13T15:00:00',
     slot_end_time: '2025-10-13T18:00:00',
     pickup_location: 'Bongo’s Burgers',
   },
   {
     id: 4,
+    encrypted_id: 'mock-encrypted-id-4',
     slot_start_time: '2025-10-13T15:00:00',
     slot_end_time: '2025-10-13T18:00:00',
     pickup_location: 'Kingman Hall',
@@ -89,6 +94,7 @@ function fmtShortHourRange(
 
 type ApiTask = {
   id: number;
+  encrypted_id: string;
   pickup_date: string;
   start_time: string | null;
   end_time: string | null;
@@ -97,6 +103,7 @@ type ApiTask = {
 
 type UiPickup = {
   id: number;
+  encrypted_id: string;
   slot_start_time: string | null;
   slot_end_time: string | null;
   pickup_location: string;
@@ -191,18 +198,29 @@ export default function AvailablePickupsPage() {
   React.useEffect(() => {
     (async () => {
       try {
+        const savedTasks = await AsyncStorage.getItem('tasks');
+        if (savedTasks) {
+          setRemote(JSON.parse(savedTasks));
+        }
         const res = await fetch(`${BACKEND_URL}/api/tasks`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: ApiTask[] = await res.json();
         const mapped = data.map(t => ({
           id: t.id,
+          encrypted_id: t.encrypted_id,
           slot_start_time: t.start_time,
           slot_end_time: t.end_time,
           pickup_location: t.location_name ?? 'Unknown location',
         }));
+
+        await AsyncStorage.setItem('tasks', JSON.stringify(mapped));
         setRemote(mapped);
       } catch (e: unknown) {
         setError(getErrorMessage(e));
+        const savedTasks = await AsyncStorage.getItem('tasks');
+        if (savedTasks) {
+          setRemote(JSON.parse(savedTasks));
+        }
       }
     })();
   }, []);
@@ -257,7 +275,14 @@ export default function AvailablePickupsPage() {
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
       renderItem={({ item }) => (
         <Pressable
-          onPress={() => router.push(`/pickup-details/${item.id}`)}
+          onPress={() => {
+            console.log('task id', item.id);
+            console.log('Navigating with encrypted_id:', item.encrypted_id);
+            router.push({
+              pathname: '/pickup-details/[id]',
+              params: { id: item.encrypted_id },
+            });
+          }}
           style={({ pressed }) => ({
             padding: 16,
             borderWidth: 1,
