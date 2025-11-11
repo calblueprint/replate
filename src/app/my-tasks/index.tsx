@@ -1,15 +1,26 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import styles from './styles';
 
-const MOCK_MY_PICKUPS = [
+const MOCK_TASKS = [
   {
     id: 1,
-    pickup_location: 'BP House',
+    location: 'Rockridge Cafe',
+    address: '5492 College Ave, Oakland',
+    time: '09:00 - 10:00 AM',
   },
   {
     id: 2,
-    pickup_location: 'Tause',
+    location: 'Strada Cafe',
+    address: '2430 Bancroft Way, Berkeley',
+    time: '10:30 - 11:00 AM',
+  },
+  {
+    id: 3,
+    location: 'Chipotle',
+    address: '2136 Oxford St, Berkeley',
+    time: '12:00 - 12:30 PM',
   },
 ];
 
@@ -17,60 +28,65 @@ export default function MyTasksPage() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.greeting}>Welcome Back</Text>
-      <Text style={styles.name}>Eric Evans</Text>
-      <Text style={styles.subtitle}>
-        You have {MOCK_MY_PICKUPS.length} pick up(s) in progress
-      </Text>
-
-      {MOCK_MY_PICKUPS.map(pickup => (
-        <TouchableOpacity
-          key={pickup.id}
-          style={styles.card}
-          onPress={() =>
-            router.push(
-              `/donation-details/${pickup.id}?location=${pickup.pickup_location}`,
-            )
-          }
-        >
-          <View>
-            <Text style={styles.location}>{pickup.pickup_location}</Text>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* HEADER SECTION */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerTopRow}>
+          <Text style={styles.date}>Monday, 12 October</Text>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarLetter}>E</Text>
           </View>
-          <View style={styles.button}>
-            <Text style={styles.buttonText}>Enter Data</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
+        </View>
 
-      <Text style={styles.upcoming}>Upcoming Pick-ups</Text>
-    </View>
+        <Text style={styles.greeting}>Welcome Back, Eric</Text>
+        <Text style={styles.subtext}>
+          You have <Text style={styles.bold}>3 tasks</Text> in progress today
+        </Text>
+      </View>
+
+      {/* TASKS SECTION */}
+      <View style={styles.taskSection}>
+        <Text style={styles.sectionHeader}>TODAY ({MOCK_TASKS.length})</Text>
+
+        {MOCK_TASKS.map(task => (
+          <View key={task.id} style={styles.card}>
+            <View style={styles.cardAccent} />
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Pickup from {task.location}</Text>
+              <Text style={styles.cardAddress}>{task.address}</Text>
+              <Text style={styles.cardTime}>{task.time}</Text>
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.button, styles.buttonOutline]}
+                  onPress={() =>
+                    router.push(
+                      `/pickup-details/${task.id}?location=${task.location}`,
+                    )
+                  }
+                >
+                  <Text style={[styles.buttonText, styles.buttonOutlineText]}>
+                    View pickup details
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.button, styles.buttonFilled]}
+                  onPress={() =>
+                    router.push(
+                      `/donation-details/${task.id}?location=${task.location}`,
+                    )
+                  }
+                >
+                  <Text style={[styles.buttonText, styles.buttonFilledText]}>
+                    Enter donation details
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: 'white' },
-  greeting: { fontSize: 16, color: '#444', marginTop: 12 },
-  name: { fontSize: 24, fontWeight: '700', marginBottom: 8 },
-  subtitle: { color: '#666', marginBottom: 16 },
-  card: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 24,
-  },
-  location: { fontWeight: '700', fontSize: 16, marginBottom: 4 },
-  button: {
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-  },
-  buttonText: { fontWeight: '500' },
-  upcoming: { fontSize: 16, fontWeight: '600' },
-});

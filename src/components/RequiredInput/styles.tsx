@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    borderRadius: 20, // <<< this makes it pill shape
+    borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 18,
     fontSize: 16,
@@ -38,11 +38,7 @@ export const styles = StyleSheet.create({
     borderColor: '#DE3B40',
   },
 
-  picker: {
-    width: '100%',
-  },
-
   focusBorder: {
-    borderColor: 'green',
+    borderColor: '#77C29F',
   },
 });

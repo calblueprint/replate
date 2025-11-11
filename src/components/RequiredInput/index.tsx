@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { styles } from './styles';
 
 interface RequiredInputProps {
@@ -23,6 +23,7 @@ export default function RequiredInput({
   options,
 }: RequiredInputProps) {
   const [focused, setFocused] = useState(false);
+  const [open, setOpen] = useState(false);
   const hasError = required && value.trim().length === 0;
 
   return (
@@ -33,24 +34,29 @@ export default function RequiredInput({
       </View>
 
       {isPicker ? (
-        <View style={[styles.input, focused && styles.focusBorder]}>
-          <Picker
-            selectedValue={value}
-            onValueChange={onChangeText}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            style={styles.picker}
-          >
-            <Picker.Item label={placeholder ?? ''} value="" />
-            {options?.map(opt => (
-              <Picker.Item
-                key={opt.value}
-                label={opt.label}
-                value={opt.value}
-              />
-            ))}
-          </Picker>
-        </View>
+        <DropDownPicker
+          open={open}
+          value={value}
+          items={options || []}
+          setOpen={setOpen}
+          setValue={callback => onChangeText(callback(value))}
+          placeholder={placeholder}
+          style={[
+            styles.input,
+            focused && styles.focusBorder,
+            { borderColor: open ? '#77C29F' : '#E0E0E0' },
+          ]}
+          dropDownContainerStyle={{
+            borderColor: '#E0E0E0',
+            borderRadius: 20,
+          }}
+          textStyle={{
+            fontSize: 16,
+            color: '#000',
+          }}
+          onOpen={() => setFocused(true)}
+          onClose={() => setFocused(false)}
+        />
       ) : (
         <TextInput
           placeholder={placeholder}
