@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import {styles} from '../available-pick-ups/styles';
 import { BACKEND_URL } from '../available-pick-ups';
 
 function Section({

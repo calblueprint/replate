@@ -3,6 +3,7 @@ import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { styles } from './styles';
 
 type AppExtra = { EXPO_PUBLIC_BACKEND_URL?: string };
 
