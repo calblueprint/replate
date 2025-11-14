@@ -50,6 +50,8 @@ export default function OnboardingFlow() {
           style={styles.dropdownStyle}
           placeholderStyle={styles.placeholderStyle}
           dropDownContainerStyle={styles.dropdownListStyle}
+          selectedItemContainerStyle={styles.selectedItemContainer}
+          showTickIcon={false}
           zIndex={1000}
         />
       </View>

@@ -26,6 +26,9 @@ export const styles = StyleSheet.create({
     borderColor: '#b0b0b0',
     borderWidth: 1,
   },
+  selectedItemContainer: {
+    backgroundColor: '#AEDDC4',
+  },
   buttonBase: {
     marginBottom: 35,
     paddingVertical: 16,
@@ -34,7 +37,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonEnabled: {
-    backgroundColor: '#16559F',
+    backgroundColor: '#58AD85',
   },
   buttonDisabled: {
     backgroundColor: '#cccccc',
