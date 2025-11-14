@@ -8,6 +8,8 @@ export { BASE_URL };
 export const API_ENDPOINTS = {
   LOGIN: '/api/drivers/login',
   DRIVERS: '/api/drivers',
+  REQUEST_PASSWORD_RESET: '/api/drivers/password',
+  RESET_PASSWORD: '/api/drivers/password',
 } as const;
 
 // Types for driver auth
@@ -23,6 +25,16 @@ export interface DriverSignupData {
 export interface DriverLoginData {
   email: string;
   password: string;
+}
+
+export interface PasswordResetRequestData {
+  email: string;
+}
+
+export interface PasswordResetData {
+  reset_password_token: string;
+  password: string;
+  password_confirmation: string;
 }
 
 export interface DriverResponse {
@@ -181,6 +193,158 @@ export const driverAPI = {
         };
       }
       // Re-throw API errors
+      throw error;
+    }
+  },
+
+  requestPasswordReset: async (email: string): Promise<{ message: string }> => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}${API_ENDPOINTS.REQUEST_PASSWORD_RESET}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ driver: { email } }),
+        },
+      );
+
+      if (!response.ok) {
+        const responseClone = response.clone();
+        try {
+          const error: ApiError = await response.json();
+          throw {
+            message:
+              error.errors?.join(', ') ||
+              error.error ||
+              error.message ||
+              'Failed to send reset email',
+            errors: error.errors || [],
+            status: response.status,
+          };
+        } catch (parseError) {
+          if (
+            typeof parseError === 'object' &&
+            parseError !== null &&
+            'status' in parseError &&
+            'message' in parseError
+          ) {
+            throw parseError;
+          }
+          try {
+            const text = await responseClone.text();
+            try {
+              const parsed = JSON.parse(text);
+              throw {
+                message:
+                  parsed.errors?.join(', ') ||
+                  parsed.error ||
+                  'Failed to send reset email',
+                errors: parsed.errors || [],
+                status: response.status,
+              };
+            } catch {
+              throw {
+                message: text || `Server error (${response.status})`,
+                errors: [],
+                status: response.status,
+              };
+            }
+          } catch {
+            throw {
+              message: `Server error (${response.status}). Please try again.`,
+              errors: [],
+              status: response.status,
+            };
+          }
+        }
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw {
+          message: 'Network error. Please check your connection and try again.',
+          errors: [],
+          status: 0,
+        };
+      }
+      throw error;
+    }
+  },
+
+  resetPassword: async (
+    data: PasswordResetData,
+  ): Promise<{ message: string }> => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}${API_ENDPOINTS.RESET_PASSWORD}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ driver: data }),
+        },
+      );
+
+      if (!response.ok) {
+        const responseClone = response.clone();
+        try {
+          const error: ApiError = await response.json();
+          throw {
+            message:
+              error.errors?.join(', ') ||
+              error.error ||
+              error.message ||
+              'Failed to reset password',
+            errors: error.errors || [],
+            status: response.status,
+          };
+        } catch (parseError) {
+          if (
+            typeof parseError === 'object' &&
+            parseError !== null &&
+            'status' in parseError &&
+            'message' in parseError
+          ) {
+            throw parseError;
+          }
+          try {
+            const text = await responseClone.text();
+            try {
+              const parsed = JSON.parse(text);
+              throw {
+                message:
+                  parsed.errors?.join(', ') ||
+                  parsed.error ||
+                  'Failed to reset password',
+                errors: parsed.errors || [],
+                status: response.status,
+              };
+            } catch {
+              throw {
+                message: text || `Server error (${response.status})`,
+                errors: [],
+                status: response.status,
+              };
+            }
+          } catch {
+            throw {
+              message: `Server error (${response.status}). Please try again.`,
+              errors: [],
+              status: response.status,
+            };
+          }
+        }
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw {
+          message: 'Network error. Please check your connection and try again.',
+          errors: [],
+          status: 0,
+        };
+      }
       throw error;
     }
   },

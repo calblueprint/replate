@@ -289,6 +289,15 @@ export default function LoginPage() {
             )}
           </View>
 
+          <TouchableOpacity
+            onPress={() => router.push('/auth/forgot-password')}
+            style={{ alignSelf: 'flex-start', marginBottom: 24 }}
+          >
+            <Text style={[authStyles.linkSignup, { fontSize: 12 }]}>
+              Forgot password?
+            </Text>
+          </TouchableOpacity>
+
           <View style={authStyles.buttonContainer}>
             <TouchableOpacity
               style={[

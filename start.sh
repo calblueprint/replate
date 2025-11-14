@@ -54,25 +54,29 @@ if ! command -v bundle &> /dev/null; then
   echo -e "${YELLOW}Rails server may not start. Install with: gem install bundler${NC}"
 fi
 
-# Check if ports are in use
+# Check if ports are in use and kill them automatically
 echo -e "${BLUE}Checking ports...${NC}"
 if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
-  echo -e "${YELLOW}Warning: Port 3000 is already in use${NC}"
-  echo -e "${YELLOW}Kill it with: lsof -ti:3000 | xargs kill -9${NC}"
-  read -p "Continue anyway? (y/n) " -n 1 -r
-  echo
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    exit 1
+  echo -e "${YELLOW}Port 3000 is already in use. Killing existing process...${NC}"
+  lsof -ti:3000 | xargs kill -9 2>/dev/null
+  sleep 1
+  # Verify it's actually killed
+  if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+    echo -e "${YELLOW}Warning: Could not kill process on port 3000. Continuing anyway...${NC}"
+  else
+    echo -e "${GREEN}Port 3000 is now free${NC}"
   fi
 fi
 
 if lsof -Pi :8081 -sTCP:LISTEN -t >/dev/null 2>&1; then
-  echo -e "${YELLOW}Warning: Port 8081 is already in use (Expo Metro)${NC}"
-  echo -e "${YELLOW}Kill it with: lsof -ti:8081 | xargs kill -9${NC}"
-  read -p "Continue anyway? (y/n) " -n 1 -r
-  echo
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    exit 1
+  echo -e "${YELLOW}Port 8081 is already in use (Expo Metro). Killing existing process...${NC}"
+  lsof -ti:8081 | xargs kill -9 2>/dev/null
+  sleep 1
+  # Verify it's actually killed
+  if lsof -Pi :8081 -sTCP:LISTEN -t >/dev/null 2>&1; then
+    echo -e "${YELLOW}Warning: Could not kill process on port 8081. Continuing anyway...${NC}"
+  else
+    echo -e "${GREEN}Port 8081 is now free${NC}"
   fi
 fi
 

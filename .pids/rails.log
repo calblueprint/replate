@@ -1,22 +1,136 @@
-[12:15:57] => Booting Puma
-[12:15:57] => Rails 6.0.6.1 application starting in development 
-[12:15:57] => Run `rails server --help` for more startup options
-[12:15:57] W, [2025-11-07T12:15:57.645388 #2813]  WARN -- Skylight: [SKYLIGHT] [5.0.1] Running Skylight in development mode. No data will be reported until you deploy your app.
-[12:15:57] (To disable this message for all local apps, run `skylight disable_dev_warning`.)
-[12:15:57] [2813] Puma starting in cluster mode...
-[12:15:57] [2813] * Puma version: 5.6.9 (ruby 3.1.6-p260) ("Birdie's Version")
-[12:15:57] [2813] *  Min threads: 5
-[12:15:57] [2813] *  Max threads: 5
-[12:15:57] [2813] *  Environment: development
-[12:15:58] [2813] *   Master PID: 2813
-[12:15:58] [2813] *      Workers: 2
-[12:15:58] [2813] *     Restarts: (✔) hot (✖) phased
-[12:15:58] [2813] * Preloading application
-[12:15:58] [2813] * Listening on http://0.0.0.0:3000
-[12:15:58] [2813] Use Ctrl-C to stop
-[12:15:58] [2813] - Worker 0 (PID: 3019) booted in 0.01s, phase: 0
-[12:15:58] [2813] - Worker 1 (PID: 3040) booted in 0.0s, phase: 0
-[12:37:45] [2813] === puma shutdown: 2025-11-07 12:37:45 -0800 ===
-[12:37:45] [2813] - Goodbye!
-[12:37:45] [2813] - Gracefully shutting down workers...
-[12:37:46] Exiting
+[12:50:55] => Booting Puma
+[12:50:55] => Rails 6.0.6.1 application starting in development 
+[12:50:55] => Run `rails server --help` for more startup options
+[12:50:55] 📧 Using SMTP with username: stephen.replate@gmail.com
+[12:50:56] W, [2025-11-14T12:50:56.124325 #23173]  WARN -- Skylight: [SKYLIGHT] [5.0.1] Running Skylight in development mode. No data will be reported until you deploy your app.
+[12:50:56] (To disable this message for all local apps, run `skylight disable_dev_warning`.)
+[12:50:56] [23173] Puma starting in cluster mode...
+[12:50:56] [23173] * Puma version: 5.6.9 (ruby 3.1.6-p260) ("Birdie's Version")
+[12:50:56] [23173] *  Min threads: 5
+[12:50:56] [23173] *  Max threads: 5
+[12:50:56] [23173] *  Environment: development
+[12:50:56] [23173] *   Master PID: 23173
+[12:50:56] [23173] *      Workers: 2
+[12:50:56] [23173] *     Restarts: (✔) hot (✖) phased
+[12:50:56] [23173] * Preloading application
+[12:50:56] [23173] * Listening on http://0.0.0.0:3000
+[12:50:56] [23173] Use Ctrl-C to stop
+[12:50:56] [23173] - Worker 0 (PID: 23382) booted in 0.01s, phase: 0
+[12:50:56] [23173] - Worker 1 (PID: 23396) booted in 0.0s, phase: 0
+
+[12:51:00] Started POST "/api/drivers/password" for 192.168.102.110 at 2025-11-14 12:51:00 -0800
+[12:51:00] (4.3ms)  SELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC
+[12:51:00] Processing by Drivers::PasswordsController#create as JSON
+[12:51:00] Parameters: {"driver"=>{"email"=>"stephenhung@berkeley.edu"}, "password"=>{"driver"=>{"email"=>"stephenhung@berkeley.edu"}}}
+[12:51:00] Driver Load (1.3ms)  SELECT "drivers".* FROM "drivers" WHERE "drivers"."deleted_at" IS NULL AND "drivers"."email" = $1 ORDER BY "drivers"."id" ASC LIMIT $2  [["email", "stephenhung@berkeley.edu"], ["LIMIT", 1]]
+[12:51:00] app/controllers/drivers/passwords_controller.rb:10:in `create'
+[12:51:00] Driver Load (0.4ms)  SELECT "drivers".* FROM "drivers" WHERE "drivers"."deleted_at" IS NULL AND "drivers"."reset_password_token" = $1 ORDER BY "drivers"."id" ASC LIMIT $2  [["reset_password_token", "98a547a45273f9ceba3973d274820d7d6048353aa717a3da119959627ca49cdf"], ["LIMIT", 1]]
+[12:51:00] app/controllers/drivers/passwords_controller.rb:10:in `create'
+[12:51:00] (0.1ms)  BEGIN
+[12:51:00] app/controllers/drivers/passwords_controller.rb:10:in `create'
+[12:51:00] Driver Update (1.1ms)  UPDATE "drivers" SET "reset_password_token" = $1, "reset_password_sent_at" = $2, "updated_at" = $3 WHERE "drivers"."id" = $4  [["reset_password_token", "98a547a45273f9ceba3973d274820d7d6048353aa717a3da119959627ca49cdf"], ["reset_password_sent_at", "2025-11-14 20:51:00.158752"], ["updated_at", "2025-11-14 20:51:00.159317"], ["id", 24]]
+[12:51:00] app/controllers/drivers/passwords_controller.rb:10:in `create'
+[12:51:00] PaperTrail::Version Create (0.7ms)  INSERT INTO "versions" ("item_type", "item_id", "event", "object", "created_at", "object_changes") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["item_type", "Driver"], ["item_id", 24], ["event", "update"], ["object", "{\"reset_password_token\":\"3533a0b8fa9ecb55a3c1231ad4e73ac9b85a92e6987d363424b889408ede8874\",\"reset_password_sent_at\":\"2025-11-14T20:46:37.033Z\",\"id\":24,\"deleted_at\":null,\"first_name\":\"Stephen\",\"last_name\":\"Hung\",\"phone\":\"9094144364\",\"capacity_num_trays\":null,\"created_at\":\"2025-11-11T02:55:33.593Z\",\"updated_at\":\"2025-11-14T20:46:37.033Z\",\"email\":\"stephenhung@berkeley.edu\",\"encrypted_password\":\"$2a$10$Tm23FWLw.JpxUUGuyQna5eU2aQRwHWSAZ1CGiCwE/fHNIWpHOkCcq\",\"remember_created_at\":null,\"sign_in_count\":0,\"current_sign_in_at\":null,\"last_sign_in_at\":null,\"current_sign_in_ip\":null,\"last_sign_in_ip\":null,\"partner_id\":null}"], ["created_at", "2025-11-14 20:51:00.159317"], ["object_changes", "{\"reset_password_token\":[\"3533a0b8fa9ecb55a3c1231ad4e73ac9b85a92e6987d363424b889408ede8874\",\"98a547a45273f9ceba3973d274820d7d6048353aa717a3da119959627ca49cdf\"],\"reset_password_sent_at\":[\"2025-11-14T20:46:37.033Z\",\"2025-11-14T20:51:00.158Z\"],\"updated_at\":[\"2025-11-14T20:46:37.033Z\",\"2025-11-14T20:51:00.159Z\"]}"]]
+[12:51:00] app/controllers/drivers/passwords_controller.rb:10:in `create'
+[12:51:00] (0.7ms)  COMMIT
+[12:51:00] app/controllers/drivers/passwords_controller.rb:10:in `create'
+[12:51:00] Rendering /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/mailer/reset_password_instructions.html.erb
+[12:51:00] Rendered /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/mailer/reset_password_instructions.html.erb (Duration: 1.2ms | Allocations: 824)
+[12:51:00] Devise::Mailer#reset_password_instructions: processed outbound mail in 47.6ms
+[12:51:01] Delivered mail 691796343cbd0_5b56147bc8098f@Stephens-MacBook-Pro.local.mail (903.3ms)
+[12:51:01] Date: Fri, 14 Nov 2025 12:51:00 -0800
+[12:51:01] From: noreply@replate.com
+[12:51:01] Reply-To: noreply@replate.com
+[12:51:01] To: stephenhung@berkeley.edu
+[12:51:01] Message-ID: <691796343cbd0_5b56147bc8098f@Stephens-MacBook-Pro.local.mail>
+[12:51:01] Subject: Reset password instructions
+[12:51:01] Mime-Version: 1.0
+[12:51:01] Content-Type: text/html;
+[12:51:01] charset=UTF-8
+[12:51:01] Content-Transfer-Encoding: 7bit
+[12:51:01] <p>Hello stephenhung@berkeley.edu!</p>
+[12:51:01] <p>Someone has requested a link to change your password. You can do this through the link below.</p>
+[12:51:01] <p><a href="http://localhost:3000/drivers/password/edit?reset_password_token=zdEPxwsMKUU5ezTLHRa_">Change my password</a></p>
+[12:51:01] <p>If you didn't request this, please ignore this email.</p>
+[12:51:01] <p>Your password won't change until you access the link above and create a new one.</p>
+[12:51:01] Completed 200 OK in 1050ms (Views: 2.4ms | ActiveRecord: 14.3ms | Allocations: 123104)
+
+[12:58:48] Started GET "/drivers/password/edit?reset_password_token=[FILTERED]" for 127.0.0.1 at 2025-11-14 12:58:48 -0800
+[12:58:48] (5.0ms)  SELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC
+[12:58:48] Processing by Drivers::PasswordsController#edit as HTML
+[12:58:48] Parameters: {"reset_password_token"=>"[FILTERED]"}
+[12:58:48] Rendering /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/passwords/edit.html.erb within layouts/application
+[12:58:48] Rendered /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/shared/_error_messages.html.erb (Duration: 0.6ms | Allocations: 240)
+[12:58:48] Rendered /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/shared/_links.html.erb (Duration: 0.6ms | Allocations: 569)
+[12:58:48] Rendered /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/passwords/edit.html.erb within layouts/application (Duration: 9.4ms | Allocations: 4987)
+[12:58:51] Completed 200 OK in 3065ms (Views: 3043.7ms | ActiveRecord: 5.8ms | Allocations: 4965046)
+
+[12:59:45] Started GET "/drivers/password/edit?reset_password_token=[FILTERED]" for 127.0.0.1 at 2025-11-14 12:59:45 -0800
+[12:59:45] Processing by Drivers::PasswordsController#edit as HTML
+[12:59:45] Parameters: {"reset_password_token"=>"[FILTERED]"}
+[12:59:45] Rendering /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/passwords/edit.html.erb within layouts/application
+[12:59:45] Rendered /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/shared/_error_messages.html.erb (Duration: 0.5ms | Allocations: 204)
+[12:59:45] Rendered /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/shared/_links.html.erb (Duration: 0.5ms | Allocations: 560)
+[12:59:45] Rendered /Users/stephenhung/.rbenv/versions/3.1.6/lib/ruby/gems/3.1.0/gems/devise-4.8.1/app/views/devise/passwords/edit.html.erb within layouts/application (Duration: 27.3ms | Allocations: 11450)
+[12:59:46] Completed 200 OK in 1702ms (Views: 1697.9ms | ActiveRecord: 0.0ms | Allocations: 4956993)
+
+[13:02:12] Started PUT "/drivers/password" for 127.0.0.1 at 2025-11-14 13:02:12 -0800
+[13:02:12] Processing by Drivers::PasswordsController#update as HTML
+[13:02:12] Parameters: {"utf8"=>"✓", "authenticity_token"=>"cr389+vdLoQ7tM+6qZDQDQxTxjVZxIpJtuHy3ha+hGcZlSFrsU3/V699vpKPEHSIDX+DdLuJkB7SDyjQpK+xfg==", "driver"=>{"reset_password_token"=>"[FILTERED]", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}, "commit"=>"Change my password"}
+[13:02:12] Driver Load (1.8ms)  SELECT "drivers".* FROM "drivers" WHERE "drivers"."deleted_at" IS NULL AND "drivers"."reset_password_token" = $1 ORDER BY "drivers"."id" ASC LIMIT $2  [["reset_password_token", "98a547a45273f9ceba3973d274820d7d6048353aa717a3da119959627ca49cdf"], ["LIMIT", 1]]
+[13:02:12] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:12] (0.1ms)  BEGIN
+[13:02:12] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:12] Driver Exists? (0.7ms)  SELECT 1 AS one FROM "drivers" WHERE "drivers"."email" = $1 AND "drivers"."id" != $2 LIMIT $3  [["email", "stephenhung@berkeley.edu"], ["id", 24], ["LIMIT", 1]]
+[13:02:12] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:12] (0.1ms)  ROLLBACK
+[13:02:12] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:12] Completed 422 Unprocessable Entity in 120ms (Views: 0.1ms | ActiveRecord: 3.0ms | Allocations: 73579)
+
+[13:02:39] Started PUT "/drivers/password" for 127.0.0.1 at 2025-11-14 13:02:39 -0800
+[13:02:39] Processing by Drivers::PasswordsController#update as HTML
+[13:02:39] Parameters: {"utf8"=>"✓", "authenticity_token"=>"cr389+vdLoQ7tM+6qZDQDQxTxjVZxIpJtuHy3ha+hGcZlSFrsU3/V699vpKPEHSIDX+DdLuJkB7SDyjQpK+xfg==", "driver"=>{"reset_password_token"=>"[FILTERED]", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}, "commit"=>"Change my password"}
+[13:02:39] Driver Load (0.7ms)  SELECT "drivers".* FROM "drivers" WHERE "drivers"."deleted_at" IS NULL AND "drivers"."reset_password_token" = $1 ORDER BY "drivers"."id" ASC LIMIT $2  [["reset_password_token", "98a547a45273f9ceba3973d274820d7d6048353aa717a3da119959627ca49cdf"], ["LIMIT", 1]]
+[13:02:39] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:39] (0.2ms)  BEGIN
+[13:02:39] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:39] Driver Exists? (0.3ms)  SELECT 1 AS one FROM "drivers" WHERE "drivers"."email" = $1 AND "drivers"."id" != $2 LIMIT $3  [["email", "stephenhung@berkeley.edu"], ["id", 24], ["LIMIT", 1]]
+[13:02:39] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:39] Driver Update (0.7ms)  UPDATE "drivers" SET "reset_password_sent_at" = $1, "encrypted_password" = $2, "updated_at" = $3, "reset_password_token" = $4 WHERE "drivers"."id" = $5  [["reset_password_sent_at", nil], ["encrypted_password", "$2a$10$CZdCtRyj8d4O5B0jQxlSneOpbvm6pymFy58bNR9GLU/sAbQKsI1IO"], ["updated_at", "2025-11-14 21:02:39.478694"], ["reset_password_token", nil], ["id", 24]]
+[13:02:39] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:39] PaperTrail::Version Create (0.9ms)  INSERT INTO "versions" ("item_type", "item_id", "event", "object", "created_at", "object_changes") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["item_type", "Driver"], ["item_id", 24], ["event", "update"], ["object", "{\"reset_password_sent_at\":\"2025-11-14T20:51:00.158Z\",\"encrypted_password\":\"$2a$10$Tm23FWLw.JpxUUGuyQna5eU2aQRwHWSAZ1CGiCwE/fHNIWpHOkCcq\",\"id\":24,\"email\":\"stephenhung@berkeley.edu\",\"first_name\":\"Stephen\",\"last_name\":\"Hung\",\"phone\":\"9094144364\",\"deleted_at\":null,\"capacity_num_trays\":null,\"created_at\":\"2025-11-11T02:55:33.593Z\",\"updated_at\":\"2025-11-14T20:51:00.159Z\",\"reset_password_token\":\"98a547a45273f9ceba3973d274820d7d6048353aa717a3da119959627ca49cdf\",\"remember_created_at\":null,\"sign_in_count\":0,\"current_sign_in_at\":null,\"last_sign_in_at\":null,\"current_sign_in_ip\":null,\"last_sign_in_ip\":null,\"partner_id\":null}"], ["created_at", "2025-11-14 21:02:39.478694"], ["object_changes", "{\"reset_password_sent_at\":[\"2025-11-14T20:51:00.158Z\",null],\"encrypted_password\":[\"$2a$10$Tm23FWLw.JpxUUGuyQna5eU2aQRwHWSAZ1CGiCwE/fHNIWpHOkCcq\",\"$2a$10$CZdCtRyj8d4O5B0jQxlSneOpbvm6pymFy58bNR9GLU/sAbQKsI1IO\"],\"updated_at\":[\"2025-11-14T20:51:00.159Z\",\"2025-11-14T21:02:39.478Z\"],\"reset_password_token\":[\"98a547a45273f9ceba3973d274820d7d6048353aa717a3da119959627ca49cdf\",null]}"]]
+[13:02:39] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:39] (0.4ms)  COMMIT
+[13:02:39] app/controllers/drivers/passwords_controller.rb:26:in `update'
+[13:02:39] Completed 200 OK in 85ms (Views: 0.1ms | ActiveRecord: 9.1ms | Allocations: 18170)
+
+[13:02:59] Started POST "/api/drivers/login" for 192.168.102.110 at 2025-11-14 13:02:59 -0800
+[13:02:59] Processing by Drivers::SessionsController#create as JSON
+[13:02:59] Parameters: {"email"=>"stephenhung@berkeley.edu", "password"=>"[FILTERED]", "session"=>{"email"=>"stephenhung@berkeley.edu", "password"=>"[FILTERED]"}}
+[13:02:59] Driver Load (2.0ms)  SELECT "drivers".* FROM "drivers" WHERE "drivers"."deleted_at" IS NULL AND "drivers"."email" = $1 ORDER BY "drivers"."id" ASC LIMIT $2  [["email", "stephenhung@berkeley.edu"], ["LIMIT", 1]]
+[13:02:59] app/controllers/drivers/sessions_controller.rb:10:in `create'
+[13:02:59] (0.2ms)  BEGIN
+[13:02:59] app/controllers/drivers/sessions_controller.rb:13:in `create'
+[13:02:59] Driver Update (0.9ms)  UPDATE "drivers" SET "current_sign_in_at" = $1, "last_sign_in_at" = $2, "current_sign_in_ip" = $3, "last_sign_in_ip" = $4, "sign_in_count" = $5, "updated_at" = $6 WHERE "drivers"."id" = $7  [["current_sign_in_at", "2025-11-14 21:02:59.465108"], ["last_sign_in_at", "2025-11-14 21:02:59.465108"], ["current_sign_in_ip", "192.168.102.110/32"], ["last_sign_in_ip", "192.168.102.110/32"], ["sign_in_count", 1], ["updated_at", "2025-11-14 21:02:59.465332"], ["id", 24]]
+[13:02:59] app/controllers/drivers/sessions_controller.rb:13:in `create'
+[13:02:59] PaperTrail::Version Create (0.9ms)  INSERT INTO "versions" ("item_type", "item_id", "event", "object", "created_at", "object_changes") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["item_type", "Driver"], ["item_id", 24], ["event", "update"], ["object", "{\"encrypted_password\":\"$2a$10$CZdCtRyj8d4O5B0jQxlSneOpbvm6pymFy58bNR9GLU/sAbQKsI1IO\",\"id\":24,\"current_sign_in_at\":null,\"last_sign_in_at\":null,\"current_sign_in_ip\":null,\"last_sign_in_ip\":null,\"sign_in_count\":0,\"deleted_at\":null,\"first_name\":\"Stephen\",\"last_name\":\"Hung\",\"phone\":\"9094144364\",\"capacity_num_trays\":null,\"created_at\":\"2025-11-11T02:55:33.593Z\",\"updated_at\":\"2025-11-14T21:02:39.478Z\",\"email\":\"stephenhung@berkeley.edu\",\"reset_password_token\":null,\"reset_password_sent_at\":null,\"remember_created_at\":null,\"partner_id\":null}"], ["created_at", "2025-11-14 21:02:59.465332"], ["object_changes", "{\"current_sign_in_at\":[null,\"2025-11-14T21:02:59.465Z\"],\"last_sign_in_at\":[null,\"2025-11-14T21:02:59.465Z\"],\"current_sign_in_ip\":[null,{\"mask_addr\":4294967295,\"family\":2,\"addr\":3232261742,\"zone_id\":null}],\"last_sign_in_ip\":[null,{\"mask_addr\":4294967295,\"family\":2,\"addr\":3232261742,\"zone_id\":null}],\"sign_in_count\":[0,1],\"updated_at\":[\"2025-11-14T21:02:39.478Z\",\"2025-11-14T21:02:59.465Z\"]}"]]
+[13:02:59] app/controllers/drivers/sessions_controller.rb:13:in `create'
+[13:02:59] (0.5ms)  COMMIT
+[13:02:59] app/controllers/drivers/sessions_controller.rb:13:in `create'
+[13:02:59] Completed 200 OK in 69ms (Views: 0.2ms | ActiveRecord: 5.0ms | Allocations: 9731)
+
+[13:08:15] Started GET "/drivers/password/edit?reset_password_token=[FILTERED]" for 127.0.0.1 at 2025-11-14 13:08:15 -0800
+[13:08:15] Processing by Drivers::PasswordsController#edit as HTML
+[13:08:15] Parameters: {"reset_password_token"=>"[FILTERED]"}
+[13:08:15] Rendering drivers/passwords/edit.html.erb within layouts/application
+[13:08:15] Rendered drivers/shared/_error_messages.html.erb (Duration: 0.9ms | Allocations: 193)
+[13:08:15] Rendered drivers/passwords/edit.html.erb within layouts/application (Duration: 2.2ms | Allocations: 1792)
+[13:08:15] Completed 200 OK in 103ms (Views: 101.1ms | ActiveRecord: 0.0ms | Allocations: 308476)
+
+[13:16:27] Started GET "/drivers/password/edit?reset_password_token=[FILTERED]" for 127.0.0.1 at 2025-11-14 13:16:27 -0800
+[13:16:27] Processing by Drivers::PasswordsController#edit as HTML
+[13:16:27] Parameters: {"reset_password_token"=>"[FILTERED]"}
+[13:16:27] Rendering drivers/passwords/edit.html.erb within layouts/application
+[13:16:27] Rendered drivers/shared/_error_messages.html.erb (Duration: 0.3ms | Allocations: 194)
+[13:16:27] Rendered drivers/passwords/edit.html.erb within layouts/application (Duration: 1.5ms | Allocations: 1841)
+[13:16:27] Completed 200 OK in 80ms (Views: 73.8ms | ActiveRecord: 0.0ms | Allocations: 320095)

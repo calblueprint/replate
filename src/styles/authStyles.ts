@@ -231,7 +231,7 @@ export const authStyles = StyleSheet.create({
     alignItems: 'center',
   },
   requirementCircleMet: {
-    backgroundColor: '#898989',
+    backgroundColor: '#58ad85',
   },
   requirementCheckmark: {
     width: 9,
@@ -245,7 +245,7 @@ export const authStyles = StyleSheet.create({
   },
   grayButton: {
     width: '100%',
-    backgroundColor: '#bababa',
+    backgroundColor: '#58ad85',
     borderRadius: 10,
     paddingVertical: 13,
     alignItems: 'center',
