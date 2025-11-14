@@ -9,6 +9,3 @@ function ResetPasswordLayout() {
 }
 
 export default ResetPasswordLayout;
-
-
-

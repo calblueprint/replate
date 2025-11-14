@@ -9,6 +9,3 @@ function ForgotPasswordLayout() {
 }
 
 export default ForgotPasswordLayout;
-
-
-
