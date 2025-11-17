@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -11,9 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import RequiredInput from '@/components/RequiredInput';
-import { styles } from './styles';
-import { Picker } from '@react-native-picker/picker';
 import PhotoUpload from '../../components/PhotoUpload';
+import { styles } from './styles';
 
 const MOCK_NPOS = [
   { label: 'Rescuing Leftover Cuisine (RLC)', value: 'RLC' },
@@ -41,11 +39,6 @@ export default function DonationLayout() {
       text1: 'Missed',
       text2: `Marked ${location} as missed.`,
     });
-  };
-
-  const handlePhotoSelect = (uri: string | null) => {
-    setPhoto(uri);
-    console.log(photo);
   };
 
   return (
