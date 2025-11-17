@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   Image,
@@ -16,14 +16,23 @@ interface PhotoUploadProps {
 export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
   const [image, setImage] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
+  const requestPermissions = async () => {
+    const { granted: cameraGranted } =
       await ImagePicker.requestCameraPermissionsAsync();
+    const { granted: galleryGranted } =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
-    })();
-  }, []);
+    if (!cameraGranted || !galleryGranted) {
+      Alert.alert(
+        'Permission needed',
+        'Please allow camera and photo library access.',
+      );
+      return false;
+    }
+    return true;
+  };
 
   const openCamera = async () => {
+    if (!(await requestPermissions())) return;
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [4, 3],
@@ -38,6 +47,7 @@ export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
   };
 
   const openGallery = async () => {
+    if (!(await requestPermissions())) return;
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
