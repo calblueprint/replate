@@ -40,6 +40,7 @@ export default function RequiredInput({
           items={options || []}
           setOpen={setOpen}
           setValue={callback => onChangeText(callback(value))}
+          listMode="SCROLLVIEW"
           placeholder={placeholder}
           style={[
             styles.input,
