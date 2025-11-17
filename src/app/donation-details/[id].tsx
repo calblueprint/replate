@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { Stack, useLocalSearchParams } from 'expo-router';
+import PhotoUpload from '@/components/PhotoUpload';
 import RequiredInput from '@/components/RequiredInput';
 import { styles } from './styles';
 
@@ -90,9 +91,8 @@ export default function DonationLayout() {
           />
 
           {/* Image upload placeholder */}
-          <View style={styles.imageBox}>
-            <Text style={styles.imagePlaceholder}>Add Pick-up Image</Text>
-          </View>
+          <Text style={styles.imagePlaceholder}>Add Pick-up Image</Text>
+          <PhotoUpload onSelect={uri => console.log('Selected:', uri)} />
 
           {/* Notes */}
           <Text style={styles.notesLabel}>Notes</Text>
