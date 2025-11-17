@@ -38,6 +38,7 @@ export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
       aspect: [4, 3],
       quality: 1,
     });
+
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setImage(uri);
@@ -53,6 +54,7 @@ export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
       aspect: [4, 3],
       quality: 1,
     });
+
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setImage(uri);
