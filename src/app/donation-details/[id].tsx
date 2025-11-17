@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import RequiredInput from '@/components/RequiredInput';
+import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import PhotoUpload from '../../components/PhotoUpload';
 import { styles } from './styles';
 
