@@ -1,41 +1,70 @@
-import React, { useState } from 'react';
-import { Alert, Button, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { router } from 'expo-router';
+import { getPartners, updateDriverPartner } from '~/api/config';
+import { styles } from './styles';
 
 export default function OnboardingFlow() {
-  const MOCK_NPOS = [
-    { id: 1, name: 'Replate' },
-    { id: 2, name: 'Adopt an Inmate' },
-    { id: 3, name: 'Amigos De Los Rios' },
-    { id: 4, name: 'Rose Academies' },
-    { id: 5, name: 'EcoVet' },
-  ];
-
+  const [partners, setPartners] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedNPOId, setSelectedNPOId] = useState(null);
-  const [items, setItems] = useState(
-    MOCK_NPOS.map(npo => ({ label: npo.name, value: npo.id })),
-  );
+  const [selectedNPOId, setSelectedNPOId] = useState(0);
+  const [items, setItems] = useState([{}]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const partnersList = await getPartners();
+        setPartners(partnersList);
+      } catch (err) {
+        console.error('Error fetching partners:', err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    setItems(partners.map(npo => ({ label: npo[1], value: npo[0] })));
+  }, [partners]);
+
+  const handleUpdatePress = () => async () => {
+    await updateDriverPartner(selectedNPOId);
+  };
 
   return (
-    <View style={{ marginTop: 50 }}>
-      <Text>Which NPO are you partnered with?</Text>
+    <View style={styles.container}>
+      <View>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backIcon}>‹</Text>
+          <Text style={styles.backText}>Back</Text>
+        </Pressable>
+        <Text style={styles.title}>Which NPO are you partnered with?</Text>
 
-      <DropDownPicker
-        open={open}
-        value={selectedNPOId}
-        items={items}
-        setOpen={setOpen}
-        setValue={setSelectedNPOId}
-        setItems={setItems}
-        placeholder="Select an NPO"
-      />
-
-      <Button
-        title="Finish"
-        disabled={selectedNPOId === null}
-        onPress={() => Alert.alert('Your NPO selection has been saved.')}
-      />
+        <DropDownPicker
+          open={open}
+          value={selectedNPOId}
+          items={items}
+          setOpen={setOpen}
+          setValue={setSelectedNPOId}
+          setItems={setItems}
+          placeholder="Select an NPO"
+          style={styles.dropdownStyle}
+          placeholderStyle={styles.placeholderStyle}
+          dropDownContainerStyle={styles.dropdownListStyle}
+          selectedItemContainerStyle={styles.selectedItemContainer}
+          showTickIcon={false}
+          zIndex={1000}
+        />
+      </View>
+      <Pressable
+        style={[
+          styles.buttonBase,
+          selectedNPOId === 0 ? styles.buttonDisabled : styles.buttonEnabled,
+        ]}
+        disabled={selectedNPOId === 0}
+        onPress={handleUpdatePress()}
+      >
+        <Text style={styles.buttonText}>Finish</Text>
+      </Pressable>
     </View>
   );
 }
