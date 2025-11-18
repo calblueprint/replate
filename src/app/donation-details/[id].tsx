@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import PhotoUpload from '../../components/PhotoUpload';
 import { styles } from './styles';
@@ -43,6 +43,14 @@ export default function DonationLayout() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+  <TouchableOpacity
+    style={styles.backButton}
+    onPress={() => router.back()}
+  >
+    <Text style={styles.backIcon}>{'←'}</Text>
+  </TouchableOpacity>
+</View>
       <Stack.Screen
         options={{
           headerTitle: 'Enter Donation Data',
@@ -92,7 +100,7 @@ export default function DonationLayout() {
 
           {/* Image upload placeholder */}
           <View style={styles.imageBox}>
-            <Text style={styles.imagePlaceholder}>Add Pick-up Image</Text>
+            <Text>Add Pick-up Image</Text>
             <PhotoUpload onSelect={uri => console.log('Selected:', uri)} />
           </View>
 
