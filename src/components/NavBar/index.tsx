@@ -1,11 +1,10 @@
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
-import { containerStyles, textStyles, iconStyles } from './styles';
-
 import homeIcon from 'assets/home.png';
-import tasksIcon from 'assets/tasks.png';
 import profileIcon from 'assets/profile.png';
+import tasksIcon from 'assets/tasks.png';
+import { containerStyles, iconStyles, textStyles } from './styles';
 
 export function NavBar() {
   const router = useRouter();

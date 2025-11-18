@@ -44,13 +44,13 @@ export default function DonationLayout() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-  <TouchableOpacity
-    style={styles.backButton}
-    onPress={() => router.back()}
-  >
-    <Text style={styles.backIcon}>{'←'}</Text>
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backIcon}>{'←'}</Text>
+        </TouchableOpacity>
+      </View>
       <Stack.Screen
         options={{
           headerTitle: 'Enter Donation Data',
