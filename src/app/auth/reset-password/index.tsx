@@ -211,7 +211,7 @@ export default function ResetPasswordPage() {
         <ScrollView
           ref={scrollViewRef}
           contentContainerStyle={[
-            authStyles.content,
+            authStyles.scrollViewContent,
             {
               paddingTop: Math.max(insets.top + 20, 40),
               paddingBottom: Math.max(insets.bottom + 40, 60),
@@ -239,7 +239,7 @@ export default function ResetPasswordPage() {
         <ScrollView
           ref={scrollViewRef}
           contentContainerStyle={[
-            authStyles.content,
+            authStyles.scrollViewContent,
             {
               paddingTop: Math.max(insets.top + 20, 40),
               paddingBottom: Math.max(insets.bottom + 40, 60),
@@ -319,7 +319,7 @@ export default function ResetPasswordPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.passwordInput, { color: '#000' }]}
+                style={[authStyles.passwordInput, authStyles.textBlack]}
                 placeholder="Enter password"
                 placeholderTextColor="#989898"
                 value={password}
@@ -374,14 +374,8 @@ export default function ResetPasswordPage() {
                       style={[
                         authStyles.requirementCheckmark,
                         requirement.met
-                          ? {
-                              tintColor: '#58ad85',
-                              opacity: 1,
-                            }
-                          : {
-                              tintColor: '#898989',
-                              opacity: 0.5,
-                            },
+                          ? authStyles.requirementCheckmarkMet
+                          : authStyles.requirementCheckmarkUnmet,
                       ]}
                     />
                   </View>
@@ -398,7 +392,7 @@ export default function ResetPasswordPage() {
 
           {/* Hidden dummy TextInput to prevent iOS strong password suggestion */}
           <TextInput
-            style={{ height: 0.1, opacity: 0, position: 'absolute' }}
+            style={authStyles.hiddenInput}
             autoComplete="off"
             textContentType="none"
           />
@@ -416,7 +410,7 @@ export default function ResetPasswordPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.passwordInput, { color: '#000' }]}
+                style={[authStyles.passwordInput, authStyles.textBlack]}
                 placeholder="Enter same password"
                 placeholderTextColor="#989898"
                 value={confirmPassword}
@@ -445,8 +439,8 @@ export default function ResetPasswordPage() {
             <TouchableOpacity
               style={[
                 authStyles.grayButton,
+                authStyles.buttonEnabled,
                 {
-                  backgroundColor: '#58ad85',
                   opacity:
                     !password ||
                     !confirmPassword ||

@@ -376,9 +376,8 @@ export default function SignupPage() {
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={[
+          authStyles.scrollViewContent,
           {
-            padding: 20,
-            paddingTop: 40,
             paddingBottom: Math.max(insets.bottom + 40, 60),
           },
         ]}
@@ -387,7 +386,7 @@ export default function SignupPage() {
         automaticallyAdjustKeyboardInsets={true}
         keyboardDismissMode="interactive"
         contentInsetAdjustmentBehavior="automatic"
-        style={{ flex: 1 }}
+        style={authStyles.scrollViewFlex}
       >
         <View style={authStyles.formCard}>
           {/* Logo */}
@@ -414,7 +413,7 @@ export default function SignupPage() {
                 ]}
               >
                 <TextInput
-                  style={[authStyles.inputHalfInner, { color: '#000' }]}
+                  style={[authStyles.inputHalfInner, authStyles.textBlack]}
                   placeholder="First name "
                   placeholderTextColor="#989898"
                   value={first_name}
@@ -441,7 +440,7 @@ export default function SignupPage() {
                 ]}
               >
                 <TextInput
-                  style={[authStyles.inputHalfInner, { color: '#000' }]}
+                  style={[authStyles.inputHalfInner, authStyles.textBlack]}
                   placeholder="Last name "
                   placeholderTextColor="#989898"
                   value={last_name}
@@ -466,7 +465,7 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.inputInner, { color: '#000' }]}
+                style={[authStyles.inputInner, authStyles.textBlack]}
                 placeholder="Email@gmail.com"
                 placeholderTextColor="#989898"
                 value={email}
@@ -492,7 +491,7 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.inputInner, { color: '#000' }]}
+                style={[authStyles.inputInner, authStyles.textBlack]}
                 placeholder="(123) 456-7890"
                 placeholderTextColor="#989898"
                 value={phone_number}
@@ -521,7 +520,7 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.passwordInput, { color: '#000' }]}
+                style={[authStyles.passwordInput, authStyles.textBlack]}
                 placeholder="Enter password"
                 placeholderTextColor="#989898"
                 value={password}
@@ -571,10 +570,9 @@ export default function SignupPage() {
                       source={CHECK_ICON}
                       style={[
                         authStyles.requirementCheckmark,
-                        !requirement.met && {
-                          tintColor: '#898989',
-                          opacity: 0.5,
-                        },
+                        requirement.met
+                          ? authStyles.requirementCheckmarkMet
+                          : authStyles.requirementCheckmarkUnmet,
                       ]}
                     />
                   </View>
@@ -588,7 +586,7 @@ export default function SignupPage() {
 
           {/* Hidden dummy TextInput to prevent iOS strong password suggestion */}
           <TextInput
-            style={{ height: 0.1, opacity: 0, position: 'absolute' }}
+            style={authStyles.hiddenInput}
             autoComplete="off"
             textContentType="none"
           />
@@ -606,7 +604,7 @@ export default function SignupPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.passwordInput, { color: '#000' }]}
+                style={[authStyles.passwordInput, authStyles.textBlack]}
                 placeholder="Enter same password"
                 placeholderTextColor="#989898"
                 value={confirmPassword}

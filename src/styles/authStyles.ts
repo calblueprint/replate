@@ -270,4 +270,38 @@ export const authStyles = StyleSheet.create({
     textDecorationLine: 'underline',
     fontFamily: BOLD,
   },
+  // Common utility styles
+  scrollViewFlex: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    padding: 20,
+    paddingTop: 40,
+  },
+  textBlack: {
+    color: '#000',
+  },
+  forgotPasswordLink: {
+    alignSelf: 'flex-start',
+    marginBottom: 24,
+  },
+  forgotPasswordLinkText: {
+    fontSize: 12,
+  },
+  hiddenInput: {
+    height: 0.1,
+    opacity: 0,
+    position: 'absolute',
+  },
+  requirementCheckmarkMet: {
+    tintColor: '#58ad85',
+    opacity: 1,
+  },
+  requirementCheckmarkUnmet: {
+    tintColor: '#898989',
+    opacity: 0.5,
+  },
+  buttonEnabled: {
+    backgroundColor: '#58ad85',
+  },
 });

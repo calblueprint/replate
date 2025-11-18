@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
         <ScrollView
           ref={scrollViewRef}
           contentContainerStyle={[
-            authStyles.content,
+            authStyles.scrollViewContent,
             {
               paddingTop: Math.max(insets.top + 20, 40),
               paddingBottom: Math.max(insets.bottom + 40, 60),
@@ -188,7 +188,7 @@ export default function ForgotPasswordPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.inputInner, { color: '#000' }]}
+                style={[authStyles.inputInner, authStyles.textBlack]}
                 placeholder="Enter your email"
                 placeholderTextColor="#989898"
                 value={email}
@@ -213,8 +213,8 @@ export default function ForgotPasswordPage() {
             <TouchableOpacity
               style={[
                 authStyles.grayButton,
+                authStyles.buttonEnabled,
                 {
-                  backgroundColor: '#58ad85',
                   opacity: !email || !isEmailValid || isLoading ? 0.5 : 1,
                 },
               ]}

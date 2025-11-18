@@ -201,9 +201,8 @@ export default function LoginPage() {
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={[
+          authStyles.scrollViewContent,
           {
-            padding: 20,
-            paddingTop: 40,
             paddingBottom: Math.max(insets.bottom + 40, 60),
           },
         ]}
@@ -212,7 +211,7 @@ export default function LoginPage() {
         automaticallyAdjustKeyboardInsets={true}
         keyboardDismissMode="interactive"
         contentInsetAdjustmentBehavior="automatic"
-        style={{ flex: 1 }}
+        style={authStyles.scrollViewFlex}
       >
         <View style={authStyles.formCard}>
           {/* Logo */}
@@ -234,7 +233,7 @@ export default function LoginPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.inputInner, { color: '#000' }]}
+                style={[authStyles.inputInner, authStyles.textBlack]}
                 placeholder="Email@gmail.com"
                 placeholderTextColor="#989898"
                 value={email}
@@ -264,7 +263,7 @@ export default function LoginPage() {
               ]}
             >
               <TextInput
-                style={[authStyles.passwordInput, { color: '#000' }]}
+                style={[authStyles.passwordInput, authStyles.textBlack]}
                 placeholder="Enter password"
                 placeholderTextColor="#989898"
                 value={password}
@@ -291,9 +290,11 @@ export default function LoginPage() {
 
           <TouchableOpacity
             onPress={() => router.push('/auth/forgot-password')}
-            style={{ alignSelf: 'flex-start', marginBottom: 24 }}
+            style={authStyles.forgotPasswordLink}
           >
-            <Text style={[authStyles.linkSignup, { fontSize: 12 }]}>
+            <Text
+              style={[authStyles.linkSignup, authStyles.forgotPasswordLinkText]}
+            >
               Forgot password?
             </Text>
           </TouchableOpacity>
