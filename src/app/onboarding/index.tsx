@@ -28,6 +28,7 @@ export default function OnboardingFlow() {
 
   const handleUpdatePress = () => async () => {
     await updateDriverPartner(selectedNPOId);
+    router.push('/my-tasks');
   };
 
   return (
