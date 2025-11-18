@@ -1,7 +1,10 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FBFBFB' },
+  container: {
+    flex: 1,
+    backgroundColor: '#FBFBFB',
+  },
 
   scrollContent: {
     paddingHorizontal: 20,
@@ -65,13 +68,12 @@ export const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: 20,
     height: 120,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 20,
   },
   imagePlaceholder: {
     color: '#9A9A9A',
     fontSize: 15,
+    width: '100%',
   },
 
   notesLabel: {
@@ -97,10 +99,6 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
     backgroundColor: '#FFFFFF',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
   },
 
   missedButton: {
@@ -130,5 +128,35 @@ export const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backIcon: {
+    fontSize: 20,
+    color: '#525454',
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+    marginLeft: -40, // keeps title centered even with the back button
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
   },
 });

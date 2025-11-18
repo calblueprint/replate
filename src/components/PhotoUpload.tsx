@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   placeholder: {
-    width: 90,
-    height: 90,
+    width: '90%',
+    height: 70,
     borderRadius: 12,
     backgroundColor: '#F2F2F2',
     justifyContent: 'center',
