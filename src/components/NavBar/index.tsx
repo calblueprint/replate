@@ -14,6 +14,10 @@ export function NavBar() {
     return null;
   }
 
+  if (pathname.startsWith('/onboarding')) {
+    return null;
+  }
+
   const isActive = (route: string) => pathname.startsWith(route);
 
   return (
