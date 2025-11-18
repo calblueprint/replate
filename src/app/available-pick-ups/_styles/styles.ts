@@ -19,6 +19,14 @@ export const styles = StyleSheet.create({
     justifyContent: 'center', // center children horizontally
     alignItems: 'center',
   },
+  card: {
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 16,
+    backgroundColor: '#eee',
+  },
+  pressedCard: { opacity: 0.6 },
   contentContainer: {
     fontSize: 18,
     fontWeight: '700',
@@ -49,6 +57,12 @@ export const styles = StyleSheet.create({
   dateText: {
     fontSize: 10,
   },
+  error: {
+    padding: 16,
+    backgroundColor: '#fee2e2',
+    borderRadius: 8,
+    marginTop: 16,
+  },
   todayText: {
     marginTop: 2,
     fontSize: 9,
@@ -60,7 +74,6 @@ export const styles = StyleSheet.create({
   },
   selectedCard: { borderColor: '#000', backgroundColor: '#000' },
   unselectedCard: { borderColor: '#d1d5db', backgroundColor: '#f3f4f6' },
-  pressedCard: { opacity: 0.7 },
   selectedText: { color: 'white' },
   unselectedText: { color: 'black' },
 });

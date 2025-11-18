@@ -253,14 +253,7 @@ export default function AvailablePickupsPage() {
       ListHeaderComponent={
         <View>
           {error ? (
-            <View
-              style={{
-                padding: 16,
-                backgroundColor: '#fee2e2',
-                borderRadius: 8,
-                marginTop: 16,
-              }}
-            >
+            <View style={styles.error}>
               <Text style={{ color: '#991b1b' }}>
                 Failed to load tasks: {error}
               </Text>
@@ -279,21 +272,12 @@ export default function AvailablePickupsPage() {
       renderItem={({ item }) => (
         <Pressable
           onPress={() => {
-            console.log('task id', item.id);
-            console.log('Navigating with encrypted_id:', item.encrypted_id);
             router.push({
               pathname: '/pickup-details/[id]',
               params: { id: item.encrypted_id },
             });
           }}
-          style={({ pressed }) => ({
-            padding: 16,
-            borderWidth: 1,
-            borderColor: '#d1d5db',
-            borderRadius: 16,
-            backgroundColor: '#eee',
-            opacity: pressed ? 0.6 : 1,
-          })}
+          style={({ pressed }) => [styles.card, pressed && styles.pressedCard]}
         >
           <Text style={{ fontWeight: '700', marginBottom: 6 }}>
             {fmtShortHourRange(item.slot_start_time, item.slot_end_time, {
@@ -304,7 +288,7 @@ export default function AvailablePickupsPage() {
         </Pressable>
       )}
       ListEmptyComponent={
-        <Text style={{ padding: 16 }}>No pickups for this date.</Text>
+        <Text style={styles.claimPickupText}>No pickups for this date.</Text>
       }
     />
   );
