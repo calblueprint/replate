@@ -18,6 +18,7 @@ import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
 // Assets
 import LOGIN_LOGO from '../../../../assets/login-logo.png';
+import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
 import { validateEmail } from '../../../utils/validation';
@@ -38,6 +39,10 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Focus states
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
 
@@ -48,28 +53,38 @@ export default function LoginPage() {
 
   useEffect(() => {
     Animated.timing(emailBorderAnim, {
-      toValue: email ? 1 : 0,
+      toValue: emailFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [email]);
+  }, [emailFocused]);
 
   useEffect(() => {
     Animated.timing(passwordBorderAnim, {
-      toValue: password ? 1 : 0,
+      toValue: passwordFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [password]);
+  }, [passwordFocused]);
+
+  const emailBorderWidth = emailBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
+  });
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
+  });
+
+  const passwordBorderWidth = passwordBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
   });
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
   });
 
   const handleLogin = async () => {
@@ -214,6 +229,7 @@ export default function LoginPage() {
         style={authStyles.scrollViewFlex}
       >
         <View style={authStyles.formCard}>
+          <BackButton />
           {/* Logo */}
           <View style={authStyles.logoContainer}>
             <Image source={LOGIN_LOGO} style={authStyles.logoImage} />
@@ -229,7 +245,10 @@ export default function LoginPage() {
             <Animated.View
               style={[
                 authStyles.inputWrapper,
-                { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
+                {
+                  borderColor: emailError ? ERROR_COLOR : emailBorderColor,
+                  borderWidth: emailBorderWidth,
+                },
               ]}
             >
               <TextInput
@@ -238,6 +257,8 @@ export default function LoginPage() {
                 placeholderTextColor="#989898"
                 value={email}
                 onChangeText={handleEmailChange}
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="off"
@@ -259,6 +280,7 @@ export default function LoginPage() {
                   borderColor: passwordError
                     ? ERROR_COLOR
                     : passwordBorderColor,
+                  borderWidth: passwordBorderWidth,
                 },
               ]}
             >
@@ -268,6 +290,8 @@ export default function LoginPage() {
                 placeholderTextColor="#989898"
                 value={password}
                 onChangeText={handlePasswordChange}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 secureTextEntry={!showPassword}
                 autoComplete="off"
                 textContentType="oneTimeCode"
@@ -280,7 +304,15 @@ export default function LoginPage() {
                 style={authStyles.showButton}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Text style={authStyles.showButtonText}>Show</Text>
+                <Text
+                  style={
+                    showPassword
+                      ? authStyles.showButtonTextGrey
+                      : authStyles.showButtonText
+                  }
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </Text>
               </TouchableOpacity>
             </Animated.View>
             {passwordError && (

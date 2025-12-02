@@ -19,6 +19,7 @@ import { driverAPI, PasswordResetData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
 import SIGNUP_LOGO from '../../../../assets/signup-logo.png';
+import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import {
   validatePassword,
@@ -53,6 +54,10 @@ export default function ResetPasswordPage() {
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
 
+  // Focus states
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+
   const passwordBorderAnim = useRef(new Animated.Value(0)).current;
   const confirmPasswordBorderAnim = useRef(new Animated.Value(0)).current;
 
@@ -66,42 +71,63 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     Animated.timing(passwordBorderAnim, {
-      toValue: password ? 1 : 0,
+      toValue: passwordFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [password]);
+  }, [passwordFocused]);
 
   useEffect(() => {
     Animated.timing(confirmPasswordBorderAnim, {
-      toValue: confirmPassword ? 1 : 0,
+      toValue: confirmPasswordFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [confirmPassword]);
+  }, [confirmPasswordFocused]);
+
+  const passwordBorderWidth = passwordBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
+  });
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
+  });
+
+  const confirmPasswordBorderWidth = confirmPasswordBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
   });
 
   const confirmPasswordBorderColor = confirmPasswordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
   });
 
   const handlePasswordChange = (text: string) => {
     setPassword(text);
     setPasswordError(null);
-    // Clear confirm password error if passwords match
-    if (confirmPassword && text === confirmPassword) {
+    // Live validation: check if confirm password matches
+    if (confirmPassword) {
+      const matchError = validatePasswordMatch(text, confirmPassword);
+      setConfirmPasswordError(matchError);
+    } else {
+      // Clear error if confirm password is empty
       setConfirmPasswordError(null);
     }
   };
 
   const handleConfirmPasswordChange = (text: string) => {
     setConfirmPassword(text);
-    setConfirmPasswordError(null);
+    // Live validation: check if passwords match
+    if (text) {
+      const matchError = validatePasswordMatch(password, text);
+      setConfirmPasswordError(matchError);
+    } else {
+      // Clear error if field is empty
+      setConfirmPasswordError(null);
+    }
   };
 
   // Check if password meets all requirements and passwords match
@@ -298,6 +324,7 @@ export default function ResetPasswordPage() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={authStyles.formCard}>
+          <BackButton />
           <View style={authStyles.logoContainer}>
             <Image source={SIGNUP_LOGO} style={authStyles.logoImage} />
           </View>
@@ -315,6 +342,7 @@ export default function ResetPasswordPage() {
                   borderColor: passwordError
                     ? ERROR_COLOR
                     : passwordBorderColor,
+                  borderWidth: passwordBorderWidth,
                 },
               ]}
             >
@@ -324,6 +352,8 @@ export default function ResetPasswordPage() {
                 placeholderTextColor="#989898"
                 value={password}
                 onChangeText={handlePasswordChange}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 secureTextEntry={!showPassword}
                 autoComplete="off"
                 textContentType="oneTimeCode"
@@ -336,7 +366,15 @@ export default function ResetPasswordPage() {
                 style={authStyles.showButton}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Text style={authStyles.showButtonText}>Show</Text>
+                <Text
+                  style={
+                    showPassword
+                      ? authStyles.showButtonTextGrey
+                      : authStyles.showButtonText
+                  }
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </Text>
               </TouchableOpacity>
             </Animated.View>
             <View style={authStyles.passwordRequirements}>
@@ -406,6 +444,7 @@ export default function ResetPasswordPage() {
                   borderColor: confirmPasswordError
                     ? ERROR_COLOR
                     : confirmPasswordBorderColor,
+                  borderWidth: confirmPasswordBorderWidth,
                 },
               ]}
             >
@@ -415,6 +454,8 @@ export default function ResetPasswordPage() {
                 placeholderTextColor="#989898"
                 value={confirmPassword}
                 onChangeText={handleConfirmPasswordChange}
+                onFocus={() => setConfirmPasswordFocused(true)}
+                onBlur={() => setConfirmPasswordFocused(false)}
                 secureTextEntry={!showConfirmPassword}
                 autoComplete="off"
                 textContentType="oneTimeCode"
@@ -427,7 +468,15 @@ export default function ResetPasswordPage() {
                 style={authStyles.showButton}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                <Text style={authStyles.showButtonText}>Show</Text>
+                <Text
+                  style={
+                    showConfirmPassword
+                      ? authStyles.showButtonTextGrey
+                      : authStyles.showButtonText
+                  }
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </Text>
               </TouchableOpacity>
             </Animated.View>
             {confirmPasswordError && (

@@ -19,6 +19,7 @@ import { DriverSignupData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
 import SIGNUP_LOGO from '../../../../assets/signup-logo.png';
+import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
 import {
@@ -58,6 +59,14 @@ export default function SignupPage() {
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
 
+  // Focus states
+  const [firstNameFocused, setFirstNameFocused] = useState(false);
+  const [lastNameFocused, setLastNameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [phoneFocused, setPhoneFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+
   const firstNameBorderAnim = useRef(new Animated.Value(0)).current;
   const lastNameBorderAnim = useRef(new Animated.Value(0)).current;
   const emailBorderAnim = useRef(new Animated.Value(0)).current;
@@ -69,80 +78,110 @@ export default function SignupPage() {
 
   useEffect(() => {
     Animated.timing(firstNameBorderAnim, {
-      toValue: first_name ? 1 : 0,
+      toValue: firstNameFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [first_name]);
+  }, [firstNameFocused]);
 
   useEffect(() => {
     Animated.timing(lastNameBorderAnim, {
-      toValue: last_name ? 1 : 0,
+      toValue: lastNameFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [last_name]);
+  }, [lastNameFocused]);
 
   useEffect(() => {
     Animated.timing(emailBorderAnim, {
-      toValue: email ? 1 : 0,
+      toValue: emailFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [email]);
+  }, [emailFocused]);
 
   useEffect(() => {
     Animated.timing(phoneBorderAnim, {
-      toValue: phone_number ? 1 : 0,
+      toValue: phoneFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [phone_number]);
+  }, [phoneFocused]);
 
   useEffect(() => {
     Animated.timing(passwordBorderAnim, {
-      toValue: password ? 1 : 0,
+      toValue: passwordFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [password]);
+  }, [passwordFocused]);
 
   useEffect(() => {
     Animated.timing(confirmPasswordBorderAnim, {
-      toValue: confirmPassword ? 1 : 0,
+      toValue: confirmPasswordFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [confirmPassword]);
+  }, [confirmPasswordFocused]);
+
+  const firstNameBorderWidth = firstNameBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
+  });
 
   const firstNameBorderColor = firstNameBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
+  });
+
+  const lastNameBorderWidth = lastNameBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
   });
 
   const lastNameBorderColor = lastNameBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
+  });
+
+  const emailBorderWidth = emailBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
   });
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
+  });
+
+  const phoneBorderWidth = phoneBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
   });
 
   const phoneBorderColor = phoneBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
+  });
+
+  const passwordBorderWidth = passwordBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
   });
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
+  });
+
+  const confirmPasswordBorderWidth = confirmPasswordBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
   });
 
   const confirmPasswordBorderColor = confirmPasswordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
   });
 
   const handleSignUp = async () => {
@@ -353,14 +392,26 @@ export default function SignupPage() {
   const handlePasswordChange = (text: string) => {
     setPassword(text);
     if (passwordError) setPasswordError(null);
-    if (confirmPasswordError && text === confirmPassword) {
+    // Live validation: check if confirm password matches
+    if (confirmPassword) {
+      const matchError = validatePasswordMatch(text, confirmPassword);
+      setConfirmPasswordError(matchError);
+    } else {
+      // Clear error if confirm password is empty
       setConfirmPasswordError(null);
     }
   };
 
   const handleConfirmPasswordChange = (text: string) => {
     setConfirmPassword(text);
-    if (confirmPasswordError) setConfirmPasswordError(null);
+    // Live validation: check if passwords match
+    if (text) {
+      const matchError = validatePasswordMatch(password, text);
+      setConfirmPasswordError(matchError);
+    } else {
+      // Clear error if field is empty
+      setConfirmPasswordError(null);
+    }
   };
 
   // Check if all password requirements are met
@@ -389,6 +440,7 @@ export default function SignupPage() {
         style={authStyles.scrollViewFlex}
       >
         <View style={authStyles.formCard}>
+          <BackButton />
           {/* Logo */}
           <View style={authStyles.logoContainer}>
             <Image source={SIGNUP_LOGO} style={authStyles.logoImage} />
@@ -409,6 +461,7 @@ export default function SignupPage() {
                     borderColor: firstNameError
                       ? ERROR_COLOR
                       : firstNameBorderColor,
+                    borderWidth: firstNameBorderWidth,
                   },
                 ]}
               >
@@ -418,6 +471,8 @@ export default function SignupPage() {
                   placeholderTextColor="#989898"
                   value={first_name}
                   onChangeText={handleFirstNameChange}
+                  onFocus={() => setFirstNameFocused(true)}
+                  onBlur={() => setFirstNameFocused(false)}
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
@@ -436,6 +491,7 @@ export default function SignupPage() {
                     borderColor: lastNameError
                       ? ERROR_COLOR
                       : lastNameBorderColor,
+                    borderWidth: lastNameBorderWidth,
                   },
                 ]}
               >
@@ -445,6 +501,8 @@ export default function SignupPage() {
                   placeholderTextColor="#989898"
                   value={last_name}
                   onChangeText={handleLastNameChange}
+                  onFocus={() => setLastNameFocused(true)}
+                  onBlur={() => setLastNameFocused(false)}
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
@@ -461,7 +519,10 @@ export default function SignupPage() {
             <Animated.View
               style={[
                 authStyles.inputWrapper,
-                { borderColor: emailError ? ERROR_COLOR : emailBorderColor },
+                {
+                  borderColor: emailError ? ERROR_COLOR : emailBorderColor,
+                  borderWidth: emailBorderWidth,
+                },
               ]}
             >
               <TextInput
@@ -470,6 +531,8 @@ export default function SignupPage() {
                 placeholderTextColor="#989898"
                 value={email}
                 onChangeText={handleEmailChange}
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="off"
@@ -487,7 +550,10 @@ export default function SignupPage() {
             <Animated.View
               style={[
                 authStyles.inputWrapper,
-                { borderColor: phoneError ? ERROR_COLOR : phoneBorderColor },
+                {
+                  borderColor: phoneError ? ERROR_COLOR : phoneBorderColor,
+                  borderWidth: phoneBorderWidth,
+                },
               ]}
             >
               <TextInput
@@ -496,6 +562,8 @@ export default function SignupPage() {
                 placeholderTextColor="#989898"
                 value={phone_number}
                 onChangeText={handlePhoneChange}
+                onFocus={() => setPhoneFocused(true)}
+                onBlur={() => setPhoneFocused(false)}
                 keyboardType="phone-pad"
                 autoComplete="off"
                 textContentType="none"
@@ -516,6 +584,7 @@ export default function SignupPage() {
                   borderColor: passwordError
                     ? ERROR_COLOR
                     : passwordBorderColor,
+                  borderWidth: passwordBorderWidth,
                 },
               ]}
             >
@@ -525,6 +594,8 @@ export default function SignupPage() {
                 placeholderTextColor="#989898"
                 value={password}
                 onChangeText={handlePasswordChange}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 secureTextEntry={!showPassword}
                 autoComplete="off"
                 textContentType="oneTimeCode"
@@ -537,7 +608,15 @@ export default function SignupPage() {
                 style={authStyles.showButton}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Text style={authStyles.showButtonText}>Show</Text>
+                <Text
+                  style={
+                    showPassword
+                      ? authStyles.showButtonTextGrey
+                      : authStyles.showButtonText
+                  }
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </Text>
               </TouchableOpacity>
             </Animated.View>
             <View style={authStyles.passwordRequirements}>
@@ -600,6 +679,7 @@ export default function SignupPage() {
                   borderColor: confirmPasswordError
                     ? ERROR_COLOR
                     : confirmPasswordBorderColor,
+                  borderWidth: confirmPasswordBorderWidth,
                 },
               ]}
             >
@@ -609,6 +689,8 @@ export default function SignupPage() {
                 placeholderTextColor="#989898"
                 value={confirmPassword}
                 onChangeText={handleConfirmPasswordChange}
+                onFocus={() => setConfirmPasswordFocused(true)}
+                onBlur={() => setConfirmPasswordFocused(false)}
                 secureTextEntry={!showConfirmPassword}
                 autoComplete="off"
                 textContentType="oneTimeCode"
@@ -621,7 +703,15 @@ export default function SignupPage() {
                 style={authStyles.showButton}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                <Text style={authStyles.showButtonText}>Show</Text>
+                <Text
+                  style={
+                    showConfirmPassword
+                      ? authStyles.showButtonTextGrey
+                      : authStyles.showButtonText
+                  }
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </Text>
               </TouchableOpacity>
             </Animated.View>
             {confirmPasswordError && (

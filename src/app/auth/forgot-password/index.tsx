@@ -18,6 +18,7 @@ import { router } from 'expo-router';
 import { driverAPI } from '../../../../api/config';
 // Assets
 import LOGIN_LOGO from '../../../../assets/login-logo.png';
+import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { validateEmail } from '../../../utils/validation';
 
@@ -38,19 +39,27 @@ export default function ForgotPasswordPage() {
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
 
+  // Focus state
+  const [emailFocused, setEmailFocused] = useState(false);
+
   const emailBorderAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(emailBorderAnim, {
-      toValue: email ? 1 : 0,
+      toValue: emailFocused ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [email]);
+  }, [emailFocused]);
+
+  const emailBorderWidth = emailBorderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.8, 1.5],
+  });
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#a9a9a9'],
+    outputRange: ['#a9a9a9', '#58ad85'],
   });
 
   const handleEmailChange = (text: string) => {
@@ -168,6 +177,7 @@ export default function ForgotPasswordPage() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={authStyles.formCard}>
+          <BackButton />
           <View style={authStyles.logoContainer}>
             <Image source={LOGIN_LOGO} style={authStyles.logoImage} />
           </View>
@@ -184,6 +194,7 @@ export default function ForgotPasswordPage() {
                 authStyles.inputWrapper,
                 {
                   borderColor: emailError ? ERROR_COLOR : emailBorderColor,
+                  borderWidth: emailBorderWidth,
                 },
               ]}
             >
@@ -193,6 +204,8 @@ export default function ForgotPasswordPage() {
                 placeholderTextColor="#989898"
                 value={email}
                 onChangeText={handleEmailChange}
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"

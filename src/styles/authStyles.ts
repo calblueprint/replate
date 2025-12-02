@@ -106,6 +106,11 @@ export const authStyles = StyleSheet.create({
     color: '#000',
     fontSize: 14,
   },
+  showButtonTextGrey: {
+    fontFamily: REGULAR,
+    color: '#898989',
+    fontSize: 14,
+  },
   nameRow: {
     flexDirection: 'row',
     gap: 12,

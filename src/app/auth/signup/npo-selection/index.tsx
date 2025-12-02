@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { DriverSignupData } from '../../../../../api/config';
+import BackButton from '../../../../components/BackButton';
 import Button from '../../../../components/Button/Button';
 import { authStyles } from '../../../../styles/authStyles';
 import { useAuth } from '../../../../utils/AuthContext';
@@ -109,33 +110,7 @@ export default function NpoSelectionPage() {
           >
             <View>
               {/* Back Button */}
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 20,
-                    marginRight: 8,
-                    transform: [{ rotate: '90deg' }],
-                  }}
-                >
-                  ▼
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontFamily: 'Lato_400Regular',
-                    color: '#525454',
-                  }}
-                >
-                  Back
-                </Text>
-              </TouchableOpacity>
+              <BackButton />
 
               {/* Title */}
               <Text
