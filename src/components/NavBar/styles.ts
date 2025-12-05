@@ -29,7 +29,7 @@ export const containerStyles = StyleSheet.create<ContainerStyles>({
     backgroundColor: '#E5E7EB',
   },
   card: {
-    paddingTop: 12,
+    height: 84,
     paddingBottom: 18,
     paddingHorizontal: 40,
 

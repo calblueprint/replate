@@ -8,19 +8,19 @@ const MOCK_TASKS = [
     id: 1,
     location: 'Rockridge Cafe',
     address: '5492 College Ave, Oakland',
-    time: '09:00 - 10:00 AM',
+    time: '09:00 - 11:00 AM',
   },
   {
     id: 2,
     location: 'Strada Cafe',
     address: '2430 Bancroft Way, Berkeley',
-    time: '10:30 - 11:00 AM',
+    time: '12:00 - 02:00 PM',
   },
   {
     id: 3,
     location: 'Chipotle',
     address: '2136 Oxford St, Berkeley',
-    time: '12:00 - 12:30 PM',
+    time: '09:00 - 11:00 AM',
   },
 ];
 
@@ -28,7 +28,11 @@ export default function MyTasksPage() {
   const router = useRouter();
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 140 }}
+      showsVerticalScrollIndicator={false}
+    >
       {/* HEADER SECTION */}
       <View style={styles.headerContainer}>
         <View style={styles.headerTopRow}>
