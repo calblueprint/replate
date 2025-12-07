@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   greeting: {
-    color: '#427b60',
+    color: '#427B60',
     textAlign: 'left',
     fontFamily: 'LatoBold',
     fontSize: 27,
@@ -147,6 +147,46 @@ const styles = StyleSheet.create({
   },
   buttonFilledText: {
     color: '#FFFFFF',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    marginTop: 70,
+  },
+  emptyIcon: {
+    width: 115,
+    height: 115,
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 15,
+    fontFamily: 'LatoLight',
+    color: '#8F8F8F',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  emptyButton: {
+    height: 41,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    backgroundColor: '#58AD85',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    shadowColor: '#1C252C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  emptyButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
+    fontFamily: 'LatoBold',
+    textAlign: 'center',
   },
 });
 

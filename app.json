@@ -28,6 +28,5 @@
     "plugins": ["expo-router", "expo-font"],
     "assetBundlePatterns": ["**/*"],
     "fonts": ["./assets/fonts/**/*"]
-
   }
 }
