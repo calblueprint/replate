@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
+import replateIcon from '/assets/REPWATEEE.png';
+import { iconStyles } from '@/components/NavBar/styles';
 import { getPartners, updateDriverPartner } from '~/api/config';
 import { styles } from './styles';
 
@@ -38,6 +40,14 @@ export default function OnboardingFlow() {
           <Text style={styles.backIcon}>‹</Text>
           <Text style={styles.backText}>Back</Text>
         </Pressable>
+        <View style={styles.imageContainer}>
+          <Image
+            source={replateIcon}
+            style={[iconStyles.logo]}
+            resizeMode="contain"
+          />
+        </View>
+
         <Text style={styles.title}>Which NPO are you partnered with?</Text>
 
         <DropDownPicker
@@ -48,11 +58,16 @@ export default function OnboardingFlow() {
           setValue={setSelectedNPOId}
           setItems={setItems}
           placeholder="Select an NPO"
-          style={styles.dropdownStyle}
+          style={[
+            styles.dropdownStyle,
+            open && styles.dropdownOpenStyle, // apply green outline when open
+          ]}
           placeholderStyle={styles.placeholderStyle}
           dropDownContainerStyle={styles.dropdownListStyle}
+          listItemContainerStyle={styles.itemContainerStyle}
           selectedItemContainerStyle={styles.selectedItemContainer}
           showTickIcon={false}
+          textStyle={styles.textStyle}
           zIndex={1000}
         />
       </View>
