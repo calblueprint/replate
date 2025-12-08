@@ -11,24 +11,24 @@ type Task = {
   time: string;
 };
 const MOCK_TASKS: Task[] = [
-  // {
-  //   id: 1,
-  //   location: 'Rockridge Cafe',
-  //   address: '5492 College Ave, Oakland',
-  //   time: '09:00 - 11:00 AM',
-  // },
-  // {
-  //   id: 2,
-  //   location: 'Strada Cafe',
-  //   address: '2430 Bancroft Way, Berkeley',
-  //   time: '12:00 - 02:00 PM',
-  // },
-  // {
-  //   id: 3,
-  //   location: 'Chipotle',
-  //   address: '2136 Oxford St, Berkeley',
-  //   time: '09:00 - 11:00 AM',
-  // },
+  {
+    id: 1,
+    location: 'Rockridge Cafe',
+    address: '5492 College Ave, Oakland',
+    time: '09:00 - 11:00 AM',
+  },
+  {
+    id: 2,
+    location: 'Strada Cafe',
+    address: '2430 Bancroft Way, Berkeley',
+    time: '12:00 - 02:00 PM',
+  },
+  {
+    id: 3,
+    location: 'Chipotle',
+    address: '2136 Oxford St, Berkeley',
+    time: '09:00 - 11:00 AM',
+  },
 ];
 
 export default function MyTasksPage() {
