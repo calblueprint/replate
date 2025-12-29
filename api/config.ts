@@ -1,6 +1,8 @@
+import { Alert } from 'react-native';
+
 // API Configuration for Rails Backend
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.40.74.0:3000';
 
 export { BASE_URL };
 
@@ -8,6 +10,7 @@ export { BASE_URL };
 export const API_ENDPOINTS = {
   LOGIN: '/api/login',
   DRIVERS: '/api/drivers',
+  PARTNERS: '/api/partners',
 } as const;
 
 // Types for driver auth
@@ -65,3 +68,47 @@ export const driverAPI = {
     return response.json();
   },
 };
+
+export const getPartners = async () => {
+  const response = await fetch(`${BASE_URL}${API_ENDPOINTS.PARTNERS}`);
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to fetch partners: ${text}`);
+  }
+
+  const json = await response.json();
+  return json;
+};
+
+export async function updateDriverPartner(selectedNPOId: number) {
+  try {
+    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}/1`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        driver: { partner_id: selectedNPOId },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Failed to update driver:', errorData);
+      Alert.alert('Error', errorData.error || 'Unknown error');
+      return;
+    }
+
+    const data = await response.json();
+    Alert.alert(
+      'Success',
+      `Driver updated. Partner ID: ${data.driver.partner_id}`,
+    );
+    return data.driver;
+  } catch (err) {
+    console.error('Network or server error:', err);
+    Alert.alert('Network error', 'Unable to update driver.');
+  }
+}
