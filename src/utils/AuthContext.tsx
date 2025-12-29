@@ -45,7 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedDriver) {
           setDriver(JSON.parse(storedDriver));
         }
-      } catch {
+      } catch (error) {
+        console.error('AuthContext: failed to load stored driver', error);
       } finally {
         setIsLoading(false);
       }
