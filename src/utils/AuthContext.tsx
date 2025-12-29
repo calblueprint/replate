@@ -40,22 +40,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadStoredDriver = async () => {
       try {
-        console.log('Loading stored driver...');
         const storedDriver = await AsyncStorage.getItem('driver');
-        console.log('Stored driver:', storedDriver);
 
         if (storedDriver) {
           const parsedDriver = JSON.parse(storedDriver);
-          console.log('Setting driver from storage:', parsedDriver);
           setDriver(parsedDriver);
         } else {
-          console.log('No stored driver found');
         }
       } catch (error) {
-        console.error('Failed to load stored driver:', error);
       } finally {
         setIsLoading(false);
-        console.log('Finished loading, isLoading set to false');
       }
     };
 
@@ -67,7 +61,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDriver(driverData);
 
     if (staySignedIn) {
-      console.log('Saving driver to storage:', driverData);
       await AsyncStorage.setItem('driver', JSON.stringify(driverData));
     }
   };
@@ -77,7 +70,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDriver(newDriver);
 
     if (staySignedIn) {
-      console.log('Saving driver to storage:', newDriver);
       await AsyncStorage.setItem('driver', JSON.stringify(newDriver));
     }
   };

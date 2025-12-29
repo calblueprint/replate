@@ -26,7 +26,6 @@ export default function LoginPage() {
   const handleLogin = async () => {
     try {
       setIsLoading(true);
-      console.log('Logging in with:', { email, password });
 
       const loginData: DriverLoginData = {
         email,
@@ -34,12 +33,8 @@ export default function LoginPage() {
       };
 
       await login(loginData, staySignedIn);
-      console.log('Login successful');
-      Alert.alert('Success', 'Welcome back!', [
-        { text: 'OK', onPress: () => router.push('/dashboard') },
-      ]);
+      Alert.alert('Success', 'Welcome back!', [{ text: 'OK' }]);
     } catch (error) {
-      console.error('Login error:', error);
       Alert.alert(
         'Login Failed',
         error instanceof Error
@@ -59,7 +54,7 @@ export default function LoginPage() {
         <Text style={authStyles.subtitle}>Please input your details</Text>
         <TextInput
           style={authStyles.input}
-          placeholder="youremailaddress@address.com"
+          placeholder="Email@gmail.com"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"

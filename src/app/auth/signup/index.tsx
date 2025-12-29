@@ -28,7 +28,6 @@ export default function SignupPage() {
   const handleSignUp = async () => {
     try {
       setIsLoading(true);
-      console.log('Creating driver account...');
 
       const signupData: DriverSignupData = {
         email,
@@ -40,12 +39,10 @@ export default function SignupPage() {
       };
 
       await signup(signupData);
-      console.log('Driver created successfully');
       Alert.alert('Success', 'Account created successfully!', [
         { text: 'OK', onPress: () => router.push('/dashboard') },
       ]);
     } catch (error) {
-      console.error('Signup error:', error);
       Alert.alert(
         'Signup Failed',
         error instanceof Error
