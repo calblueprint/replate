@@ -1,8 +1,8 @@
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { Stack } from 'expo-router';
-import { AuthProvider } from '../utils/AuthContext';
 import { NavBar } from '../components/NavBar';
+import { AuthProvider } from '../utils/AuthContext';
 
 export default function RootLayout() {
   return (
