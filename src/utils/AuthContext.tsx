@@ -43,11 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedDriver = await AsyncStorage.getItem('driver');
 
         if (storedDriver) {
-          const parsedDriver = JSON.parse(storedDriver);
-          setDriver(parsedDriver);
-        } else {
+          setDriver(JSON.parse(storedDriver));
         }
-      } catch (error) {
+      } catch {
       } finally {
         setIsLoading(false);
       }
