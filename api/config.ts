@@ -21,9 +21,6 @@ export interface DriverSignupData {
   first_name: string;
   last_name: string;
   phone: string;
-  zone_id: number;
-  home_lat: number;
-  home_lon: number;
 }
 
 export interface DriverLoginData {

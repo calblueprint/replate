@@ -9,37 +9,40 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { driverAPI, DriverLoginData } from '../../../../api/config';
+import { DriverLoginData } from '../../../../api/config';
 import Button from '../../../components/Button/Button';
 import { authStyles } from '../../../styles/authStyles';
+import { useAuth } from '../../../utils/AuthContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [staySignedIn, setStaySignedIn] = useState(false);
+
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     try {
-      console.log('Logging in with:', { email, password });
+      setIsLoading(true);
 
       const loginData: DriverLoginData = {
         email,
         password,
       };
 
-      const driver = await driverAPI.login(loginData);
-      console.log('Login successful:', driver);
-      Alert.alert('Success', `Welcome back, ${driver.first_name}!`, [
-        { text: 'OK', onPress: () => router.push('/') },
-      ]);
+      await login(loginData, staySignedIn);
+      Alert.alert('Success', 'Welcome back!', [{ text: 'OK' }]);
     } catch (error) {
-      console.error('Login error:', error);
       Alert.alert(
         'Login Failed',
         error instanceof Error
           ? error.message
           : 'Invalid email or password. Please try again.',
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -51,7 +54,7 @@ export default function LoginPage() {
         <Text style={authStyles.subtitle}>Please input your details</Text>
         <TextInput
           style={authStyles.input}
-          placeholder="youremailaddress@address.com"
+          placeholder="Email@gmail.com"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -75,10 +78,38 @@ export default function LoginPage() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 20,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => setStaySignedIn(!staySignedIn)}
+            style={{
+              width: 20,
+              height: 20,
+              borderWidth: 2,
+              borderColor: '#333',
+              backgroundColor: staySignedIn ? '#333' : 'transparent',
+              marginRight: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {staySignedIn && (
+              <Text style={{ color: 'white', fontSize: 12 }}>✓</Text>
+            )}
+          </TouchableOpacity>
+          <Text style={authStyles.linkText}>Stay signed in</Text>
+        </View>
+
         <View style={authStyles.buttonContainer}>
           <Button
-            text="Log in"
-            disabled={!email || !password}
+            text={isLoading ? 'Logging in...' : 'Log in'}
+            disabled={!email || !password || isLoading}
             onPress={handleLogin}
           />
         </View>
