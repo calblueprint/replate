@@ -3,7 +3,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 // Landing page image
-import LANDING_IMAGE from '../../assets/landing-image.png';
+import REPLATE_IMAGE from '../../assets/replate-logo.png';
 import colors from '../styles/colors';
 import { typography } from '../styles/typography';
 
@@ -25,7 +25,7 @@ export default function LandingPage() {
         <View style={styles.topSection}>
           <View style={styles.imageContainer}>
             <Image
-              source={LANDING_IMAGE}
+              source={REPLATE_IMAGE}
               style={styles.image}
               resizeMode="contain"
             />

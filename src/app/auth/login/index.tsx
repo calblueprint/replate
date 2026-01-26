@@ -17,7 +17,7 @@ import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
 // Assets
-import LOGIN_LOGO from '../../../../assets/login-logo.png';
+import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
@@ -232,7 +232,7 @@ export default function LoginPage() {
           <BackButton />
           {/* Logo */}
           <View style={authStyles.logoContainer}>
-            <Image source={LOGIN_LOGO} style={authStyles.logoImage} />
+            <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
           </View>
 
           <Text style={authStyles.titleCentered}>Welcome!</Text>

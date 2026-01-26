@@ -17,7 +17,7 @@ import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { driverAPI } from '../../../../api/config';
 // Assets
-import LOGIN_LOGO from '../../../../assets/login-logo.png';
+import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { validateEmail } from '../../../utils/validation';
@@ -128,7 +128,7 @@ export default function ForgotPasswordPage() {
         >
           <View style={authStyles.formCard}>
             <View style={authStyles.logoContainer}>
-              <Image source={LOGIN_LOGO} style={authStyles.logoImage} />
+              <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
             </View>
             <Text style={authStyles.titleCentered}>Check your email</Text>
             <Text style={authStyles.subtitleCentered}>
@@ -179,7 +179,7 @@ export default function ForgotPasswordPage() {
         <View style={authStyles.formCard}>
           <BackButton />
           <View style={authStyles.logoContainer}>
-            <Image source={LOGIN_LOGO} style={authStyles.logoImage} />
+            <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
           </View>
           <Text style={authStyles.titleCentered}>Forgot Password?</Text>
           <Text style={authStyles.subtitleCentered}>

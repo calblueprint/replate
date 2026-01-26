@@ -18,7 +18,7 @@ import { router } from 'expo-router';
 import { DriverSignupData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
-import SIGNUP_LOGO from '../../../../assets/signup-logo.png';
+import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
@@ -443,7 +443,7 @@ export default function SignupPage() {
           <BackButton />
           {/* Logo */}
           <View style={authStyles.logoContainer}>
-            <Image source={SIGNUP_LOGO} style={authStyles.logoImage} />
+            <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
           </View>
 
           <Text style={authStyles.titleCentered}>Welcome!</Text>

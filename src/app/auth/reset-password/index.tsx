@@ -18,7 +18,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { driverAPI, PasswordResetData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
-import SIGNUP_LOGO from '../../../../assets/signup-logo.png';
+import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import {
@@ -247,7 +247,7 @@ export default function ResetPasswordPage() {
         >
           <View style={authStyles.formCard}>
             <View style={authStyles.logoContainer}>
-              <Image source={SIGNUP_LOGO} style={authStyles.logoImage} />
+              <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
             </View>
             <Text style={authStyles.titleCentered}>Password Reset!</Text>
             <Text style={authStyles.subtitleCentered}>
@@ -275,7 +275,7 @@ export default function ResetPasswordPage() {
         >
           <View style={authStyles.formCard}>
             <View style={authStyles.logoContainer}>
-              <Image source={SIGNUP_LOGO} style={authStyles.logoImage} />
+              <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
             </View>
             <Text style={authStyles.titleCentered}>Invalid Reset Link</Text>
             <Text style={authStyles.subtitleCentered}>
@@ -326,7 +326,7 @@ export default function ResetPasswordPage() {
         <View style={authStyles.formCard}>
           <BackButton />
           <View style={authStyles.logoContainer}>
-            <Image source={SIGNUP_LOGO} style={authStyles.logoImage} />
+            <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
           </View>
           <Text style={authStyles.titleCentered}>Reset Password</Text>
           <Text style={authStyles.subtitleCentered}>
