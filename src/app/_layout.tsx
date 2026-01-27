@@ -33,14 +33,12 @@ function StackLayout() {
         <Stack.Screen name="auth/signup" />
         <Stack.Screen name="auth/forgot-password" />
         <Stack.Screen name="auth/reset-password" />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        <Stack.Screen name="pickup-details" options={{ headerShown: false }} />
-        <Stack.Screen name="my-tasks" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="donation-details"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="pickup-details" />
+        <Stack.Screen name="my-tasks" />
+        <Stack.Screen name="donation-details/[id]" />
+        <Stack.Screen name="my-account" />
+        <Stack.Screen name="available-pick-ups" />
       </Stack>
       <Toast />
     </AuthProvider>

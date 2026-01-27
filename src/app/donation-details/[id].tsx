@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  StyleSheet,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -8,156 +8,125 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import RequiredInput from '@/components/RequiredInput/RequiredInput';
+import PhotoUpload from '../../components/PhotoUpload';
+import { styles } from './styles';
 
 const MOCK_NPOS = [
-  { id: 1, name: 'NPO 1' },
-  { id: 2, name: 'NPO 2' },
-  { id: 3, name: 'NPO 3' },
+  { label: 'Rescuing Leftover Cuisine (RLC)', value: 'RLC' },
+  { label: 'Denver Food Rescue (DFR)', value: 'DFR' },
+  { label: 'Hollywood Food Coalition (HFC)', value: 'HFC' },
 ];
 
 export default function DonationLayout() {
   const params = useLocalSearchParams<{ id?: string; location?: string }>();
   const location = params.location || 'Unknown';
-  const [selectedNPO, setSelectedNPO] = useState('');
   const [weight, setWeight] = useState('');
+  const [selectedNPO, setSelectedNPO] = useState('');
 
   const handleComplete = () => {
     Toast.show({
-      type: `success`,
-      text1: `Complete`,
+      type: 'success',
+      text1: 'Complete',
       text2: `Donation recorded for ${location}.`,
     });
   };
 
   const handleMissed = () => {
     Toast.show({
-      type: `info`,
-      text1: `Missed`,
+      type: 'info',
+      text1: 'Missed',
       text2: `Marked ${location} as missed.`,
     });
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backIcon}>{'←'}</Text>
+        </TouchableOpacity>
+      </View>
       <Stack.Screen
         options={{
-          headerTitle: 'Donation Details',
+          headerTitle: 'Enter Donation Data',
           headerTitleAlign: 'center',
           headerBackButtonDisplayMode: 'minimal',
           headerTintColor: 'black',
         }}
       />
 
-      <View style={styles.content}>
-        <Text style={styles.header}>{location} Pick-up</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.pickupTitle}>{location} Pickup</Text>
 
-        <Text style={styles.label}>
-          Enter Weight(lbs) & Description{' '}
-          <Text style={{ color: 'red' }}>*</Text>
-        </Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. 10.3 lbs"
-          value={weight}
-          onChangeText={setWeight}
-        />
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Enter Details</Text>
 
-        <Text style={styles.label}>Recipient</Text>
-        <View>
-          <Picker
-            selectedValue={selectedNPO}
-            onValueChange={value => setSelectedNPO(value)}
-            style={styles.picker}
-            itemStyle={styles.pickerItem}
-          >
-            <Picker.Item label="Select NPO Recipient" value="" />
-            {MOCK_NPOS.map(npo => (
-              <Picker.Item key={npo.id} label={npo.name} value={npo.name} />
-            ))}
-          </Picker>
+          {/* Due Date */}
+          <View style={styles.dueDateContainer}>
+            <Text style={styles.dueDateLabel}>Due Date</Text>
+            <Text style={styles.dueDateText}>Today, 10:00 AM</Text>
+            <TouchableOpacity style={styles.viewButton}>
+              <Text style={styles.viewButtonText}>View pick-up details</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Weight */}
+          <RequiredInput
+            label="Weight (lbs)"
+            placeholder="Enter weight"
+            value={weight}
+            onChangeText={text => setWeight(text.replace(/[^0-9.]/g, ''))}
+            required
+          />
+
+          {/* Recipient */}
+          <RequiredInput
+            label="Recipient"
+            placeholder="Select NPO Recipient"
+            value={selectedNPO}
+            onChangeText={setSelectedNPO}
+            required
+            isPicker
+            options={MOCK_NPOS}
+          />
+
+          {/* Image upload placeholder */}
+          <View style={styles.imageBox}>
+            <Text>Add Pick-up Image</Text>
+            <PhotoUpload onSelect={uri => console.log('Selected:', uri)} />
+          </View>
+
+          {/* Notes */}
+          <Text style={styles.notesLabel}>Notes</Text>
+          <TextInput
+            style={styles.notesInput}
+            multiline
+            numberOfLines={4}
+            placeholder="Optional notes"
+          />
         </View>
-      </View>
+      </ScrollView>
 
+      {/* FOOTER BUTTONS */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.outlineButton} onPress={handleMissed}>
-          <Text style={styles.outlineButtonText}>Mark as Missed</Text>
+        <TouchableOpacity style={styles.missedButton} onPress={handleMissed}>
+          <Text style={styles.missedText}>Missed</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.outlineButton} onPress={handleComplete}>
-          <Text style={styles.outlineButtonText}>Complete</Text>
+        <TouchableOpacity
+          style={styles.completeButton}
+          onPress={handleComplete}
+        >
+          <Text style={styles.completeText}>Complete</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 120,
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  label: {
-    fontWeight: '600',
-    marginTop: 10,
-    marginBottom: 5,
-    color: '#6E6E6E',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 12,
-    padding: 12,
-    backgroundColor: 'white',
-    marginBottom: 15,
-  },
-  picker: {
-    width: '100%',
-    height: '100%',
-    color: 'black',
-    fontSize: 16,
-  },
-  pickerItem: {
-    fontSize: 16,
-    color: 'black',
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 30,
-  },
-  outlineButton: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 4,
-    paddingVertical: 10,
-    alignItems: 'center',
-    backgroundColor: 'white',
-    marginHorizontal: 10,
-  },
-  outlineButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: 'black',
-  },
-});
