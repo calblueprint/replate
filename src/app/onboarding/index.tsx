@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
-import replateIcon from '/assets/REPWATEEE.png';
+import replateIcon from '/assets/replate-logo.png';
 import { iconStyles } from '@/components/NavBar/styles';
 import { getPartners, updateDriverPartner } from '~/api/config';
 import { useAuth } from '~/src/utils/AuthContext';
