@@ -16,14 +16,12 @@ import {
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
-
 // Assets
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
 import { validateEmail } from '../../../utils/validation';
-import Button from '../../../components/Button/Button';
 
 interface ApiErrorResponse {
   message?: string;

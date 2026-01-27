@@ -19,7 +19,6 @@ import { DriverSignupData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
-import Button from '../../../components/Button/Button';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
