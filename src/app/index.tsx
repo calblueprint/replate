@@ -1,6 +1,7 @@
 import { Text, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../utils/AuthContext';
+import LandingPage from './landing';
 
 export default function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -19,6 +20,6 @@ export default function App() {
     return <Redirect href="/dashboard" />;
   }
 
-  // If not logged in, go to login
-  return <Redirect href="/auth/login" />;
+  // If not logged in, show landing page
+  return <LandingPage />;
 }

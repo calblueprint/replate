@@ -1,6 +1,6 @@
 import { Alert, Pressable, Text } from 'react-native';
 import { Stack } from 'expo-router';
-import { styles } from '../available-pick-ups/styles';
+import { styles } from '../available-pick-ups/_styles/styles';
 
 export default function PickupDetailsLayout() {
   return (
