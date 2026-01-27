@@ -365,18 +365,24 @@ export const getPartners = async () => {
   return json;
 };
 
-export async function updateDriverPartner(selectedNPOId: number) {
+export async function updateDriverPartner(
+  driverId: number,
+  selectedNPOId: number,
+) {
   try {
-    const response = await fetch(`${BASE_URL}${API_ENDPOINTS.DRIVERS}/1`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+    const response = await fetch(
+      `${BASE_URL}${API_ENDPOINTS.DRIVERS}/${driverId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          driver: { partner_id: selectedNPOId },
+        }),
       },
-      body: JSON.stringify({
-        driver: { partner_id: selectedNPOId },
-      }),
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
