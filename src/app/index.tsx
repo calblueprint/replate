@@ -17,7 +17,7 @@ export default function App() {
 
   // If logged in, go to dashboard
   if (isAuthenticated) {
-    return <Redirect href="/(tabs)/dashboard" />;
+    return <Redirect href="/dashboard" />;
   }
 
   // If not logged in, show landing page

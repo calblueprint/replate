@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useAuth } from '../../../utils/AuthContext';
+import { useAuth } from '../../utils/AuthContext';
 import { myAccountStyles } from './styles';
 
 export default function MyAccountPage() {
