@@ -37,3 +37,6 @@ yarn-error.*
 
 # cursor
 .cursor/
+
+# dev server PIDs and logs
+.pids/

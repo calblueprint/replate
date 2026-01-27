@@ -3,21 +3,25 @@ import colors from '../../styles/colors';
 
 export default StyleSheet.create({
   disabledStyle: {
-    borderRadius: 5,
-    backgroundColor: 'gray',
+    borderRadius: 6,
+    backgroundColor: '#9CA3AF',
   },
   buttonStyle: {
-    borderRadius: 5,
-    backgroundColor: colors.black,
+    borderRadius: 6,
+    backgroundColor: '#1E40AF',
   },
   titleStyle: {
-    paddingHorizontal: 24,
-    paddingVertical: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     color: colors.white,
+    fontFamily: 'Lato_700Bold',
+    fontSize: 15,
   },
   disabledTitleStyle: {
-    paddingHorizontal: 24,
-    paddingVertical: 5,
-    color: colors.black,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    color: colors.white,
+    fontFamily: 'Lato_700Bold',
+    fontSize: 15,
   },
 });

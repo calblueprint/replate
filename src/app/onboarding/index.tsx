@@ -5,9 +5,11 @@ import { router } from 'expo-router';
 import replateIcon from '/assets/REPWATEEE.png';
 import { iconStyles } from '@/components/NavBar/styles';
 import { getPartners, updateDriverPartner } from '~/api/config';
+import { useAuth } from '~/src/utils/AuthContext';
 import { styles } from './styles';
 
 export default function OnboardingFlow() {
+  const { driver } = useAuth();
   const [partners, setPartners] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedNPOId, setSelectedNPOId] = useState(0);
@@ -28,8 +30,10 @@ export default function OnboardingFlow() {
     setItems(partners.map(npo => ({ label: npo[1], value: npo[0] })));
   }, [partners]);
 
-  const handleUpdatePress = () => async () => {
-    await updateDriverPartner(selectedNPOId);
+  const handleUpdatePress = async () => {
+    if (!driver || selectedNPOId === 0) return;
+
+    await updateDriverPartner(driver.id, selectedNPOId);
     router.push('/my-tasks');
   };
 
@@ -77,7 +81,7 @@ export default function OnboardingFlow() {
           selectedNPOId === 0 ? styles.buttonDisabled : styles.buttonEnabled,
         ]}
         disabled={selectedNPOId === 0}
-        onPress={handleUpdatePress()}
+        onPress={() => void handleUpdatePress()}
       >
         <Text style={styles.buttonText}>Finish</Text>
       </Pressable>

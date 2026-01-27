@@ -2,7 +2,7 @@ import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { fmtTimeRange } from '@/utils/dateHelpers';
-import { styles } from './styles';
+import { styles } from './_styles/styles';
 
 export const MOCK_PICKUPS = [
   {
