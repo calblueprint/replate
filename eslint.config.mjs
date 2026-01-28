@@ -7,7 +7,7 @@ export default [
   js.configs.recommended,
   ...tsEslint.configs.recommended,
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
     plugins: {
       prettier: eslintPluginPrettier,
     },
@@ -18,6 +18,8 @@ export default [
       'prettier/prettier': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-shadow': 'error',
+      // Allow ES6 imports for image assets (React Native/Expo pattern)
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 ];

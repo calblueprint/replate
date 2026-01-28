@@ -15,6 +15,7 @@ type TextStyles = {
 };
 
 type IconStyles = {
+  logo: ImageStyle;
   icon: ImageStyle;
   iconActive: ImageStyle;
   iconInactive: ImageStyle;
@@ -76,5 +77,9 @@ export const iconStyles = StyleSheet.create<IconStyles>({
   },
   iconInactive: {
     tintColor: '#C7CFD6',
+  },
+  logo: {
+    width: 74,
+    height: 71,
   },
 });

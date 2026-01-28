@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { fmtTime } from '@/utils/dateHelpers';
 import { MOCK_PICKUPS } from '../available-pick-ups'; // re-use your mock data
-import { styles } from '../available-pick-ups/styles';
+import { styles } from '../available-pick-ups/_styles/styles';
 
 function Section({
   title,
