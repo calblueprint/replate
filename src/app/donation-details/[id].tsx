@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -9,8 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import dateIcon from 'assets/date.png';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
-import PhotoUpload from '../../components/PhotoUpload';
+import PhotoUpload from '../../components/PhotoUpload/PhotoUpload';
 import { styles } from './styles';
 
 const MOCK_NPOS = [
@@ -24,6 +28,7 @@ export default function DonationLayout() {
   const location = params.location || 'Unknown';
   const [weight, setWeight] = useState('');
   const [selectedNPO, setSelectedNPO] = useState('');
+  const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
 
   const handleComplete = () => {
     Toast.show({
@@ -50,6 +55,7 @@ export default function DonationLayout() {
         >
           <Text style={styles.backIcon}>{'←'}</Text>
         </TouchableOpacity>
+        <Text style={styles.pickupTitle}>{location} Pickup</Text>
       </View>
       <Stack.Screen
         options={{
@@ -59,61 +65,69 @@ export default function DonationLayout() {
           headerTintColor: 'black',
         }}
       />
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Text style={styles.pickupTitle}>{location} Pickup</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View>
+            <Text style={styles.sectionTitle}>Enter Details</Text>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Enter Details</Text>
+            {/* Due Date */}
+            <View style={styles.dueDateContainer}>
+              <View style={styles.dueDateRow}>
+                <Image
+                  source={dateIcon}
+                  style={styles.icon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.dueDateText}>Today, 10:00 AM</Text>
+              </View>
+              <TouchableOpacity style={styles.viewButton}>
+                <Text style={styles.viewButtonText}>View pick-up details</Text>
+              </TouchableOpacity>
+            </View>
 
-          {/* Due Date */}
-          <View style={styles.dueDateContainer}>
-            <Text style={styles.dueDateLabel}>Due Date</Text>
-            <Text style={styles.dueDateText}>Today, 10:00 AM</Text>
-            <TouchableOpacity style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>View pick-up details</Text>
-            </TouchableOpacity>
+            {/* Weight */}
+            <RequiredInput
+              label="Weight (lbs)"
+              placeholder="Enter weight"
+              value={weight}
+              onChangeText={text => setWeight(text.replace(/[^0-9.]/g, ''))}
+              required
+            />
+
+            {/* Recipient */}
+            <RequiredInput
+              label="Recipient"
+              placeholder="Select NPO Recipient"
+              value={selectedNPO}
+              onChangeText={setSelectedNPO}
+              required
+              isPicker
+              options={MOCK_NPOS}
+            />
+
+            {/* Image upload */}
+            <Text style={styles.imageText}>Add Pick-up Image</Text>
+            <View style={styles.section}>
+              <PhotoUpload onSelect={uri => console.log('Selected:', uri)} />
+
+              {/* Notes */}
+              <Text style={styles.notesLabel}>Notes</Text>
+              <TextInput
+                style={styles.notesInput}
+                multiline
+                numberOfLines={4}
+                placeholder="Optional notes"
+              />
+            </View>
           </View>
-
-          {/* Weight */}
-          <RequiredInput
-            label="Weight (lbs)"
-            placeholder="Enter weight"
-            value={weight}
-            onChangeText={text => setWeight(text.replace(/[^0-9.]/g, ''))}
-            required
-          />
-
-          {/* Recipient */}
-          <RequiredInput
-            label="Recipient"
-            placeholder="Select NPO Recipient"
-            value={selectedNPO}
-            onChangeText={setSelectedNPO}
-            required
-            isPicker
-            options={MOCK_NPOS}
-          />
-
-          {/* Image upload placeholder */}
-          <View style={styles.imageBox}>
-            <Text>Add Pick-up Image</Text>
-            <PhotoUpload onSelect={uri => console.log('Selected:', uri)} />
-          </View>
-
-          {/* Notes */}
-          <Text style={styles.notesLabel}>Notes</Text>
-          <TextInput
-            style={styles.notesInput}
-            multiline
-            numberOfLines={4}
-            placeholder="Optional notes"
-          />
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* FOOTER BUTTONS */}
       <View style={styles.footer}>
@@ -121,10 +135,14 @@ export default function DonationLayout() {
           <Text style={styles.missedText}>Missed</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.completeButton}
+          style={[
+            styles.completeButton,
+            !isFormValid && styles.completeButtonDisabled,
+          ]}
           onPress={handleComplete}
+          disabled={!isFormValid}
         >
-          <Text style={styles.completeText}>Complete</Text>
+          <Text style={[styles.completeText]}>Complete</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

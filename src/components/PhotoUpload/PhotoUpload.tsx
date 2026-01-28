@@ -1,13 +1,8 @@
 import { useState } from 'react';
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Image, TouchableOpacity, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import uploadIcon from 'assets/image.png';
+import { styles } from './styles';
 
 interface PhotoUploadProps {
   onSelect: (uri: string | null) => void;
@@ -92,36 +87,14 @@ export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
       activeOpacity={0.8}
     >
       {image ? (
-        <Image source={{ uri: image }} style={styles.image} />
+        <View style={styles.imageWrapper}>
+          <Image source={{ uri: image }} style={styles.image} />
+        </View>
       ) : (
         <View style={styles.placeholder}>
-          <Text style={styles.plus}>+</Text>
+          <Image source={uploadIcon} style={styles.icon} resizeMode="contain" />
         </View>
       )}
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-  },
-  placeholder: {
-    width: '90%',
-    height: 70,
-    borderRadius: 12,
-    backgroundColor: '#F2F2F2',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  plus: {
-    fontSize: 32,
-    color: '#999',
-    fontWeight: '300',
-  },
-  image: {
-    width: 120,
-    height: 120,
-    borderRadius: 12,
-  },
-});

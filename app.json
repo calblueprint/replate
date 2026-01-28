@@ -25,6 +25,8 @@
     "web": {
       "favicon": "./assets/bp-favicon.png"
     },
-    "plugins": ["expo-router", "expo-font"]
+    "plugins": ["expo-router", "expo-font"],
+    "assetBundlePatterns": ["**/*"],
+    "fonts": ["./assets/fonts/**/*"]
   }
 }
