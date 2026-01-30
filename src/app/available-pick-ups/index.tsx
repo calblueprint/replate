@@ -3,18 +3,8 @@ import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { styles } from './styles';
-
-type AppExtra = { EXPO_PUBLIC_BACKEND_URL?: string };
-
-const rawExtra: unknown = Constants.expoConfig?.extra;
-const extra: AppExtra =
-  rawExtra && typeof rawExtra === 'object' ? (rawExtra as AppExtra) : {};
-
-export const BACKEND_URL =
-  typeof extra.EXPO_PUBLIC_BACKEND_URL === 'string'
-    ? extra.EXPO_PUBLIC_BACKEND_URL
-    : '10.40.167.36';
+import { BASE_URL } from '~/api/config';
+import { styles } from './_styles/styles';
 
 export const MOCK_PICKUPS = [
   {
@@ -203,7 +193,7 @@ export default function AvailablePickupsPage() {
         if (savedTasks) {
           setRemote(JSON.parse(savedTasks));
         }
-        const res = await fetch(`${BACKEND_URL}/api/tasks`);
+        const res = await fetch(`${BASE_URL}/api/tasks`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: ApiTask[] = await res.json();
         const mapped = data.map(t => ({

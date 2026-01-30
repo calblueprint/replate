@@ -30,7 +30,7 @@ export default function RequiredInput({
     <View style={[styles.container, hasError && styles.errorBorder]}>
       <View style={styles.labelRow}>
         <Text style={styles.label}>{label}</Text>
-        {required && <Text style={styles.requiredText}>*required</Text>}
+        {required && <Text style={styles.requiredText}>*</Text>}
       </View>
 
       {isPicker ? (
@@ -45,16 +45,12 @@ export default function RequiredInput({
           style={[
             styles.input,
             focused && styles.focusBorder,
-            { borderColor: open ? '#77C29F' : '#E0E0E0' },
+            open && styles.dropdownInputOpen,
           ]}
-          dropDownContainerStyle={{
-            borderColor: '#E0E0E0',
-            borderRadius: 20,
-          }}
-          textStyle={{
-            fontSize: 16,
-            color: '#000',
-          }}
+          dropDownContainerStyle={styles.dropdownContainer}
+          textStyle={styles.dropdownText}
+          selectedItemContainerStyle={styles.selectedItemContainer}
+          selectedItemLabelStyle={styles.selectedItemLabel}
           onOpen={() => setFocused(true)}
           onClose={() => setFocused(false)}
         />

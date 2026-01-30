@@ -15,6 +15,7 @@ type TextStyles = {
 };
 
 type IconStyles = {
+  logo: ImageStyle;
   icon: ImageStyle;
   iconActive: ImageStyle;
   iconInactive: ImageStyle;
@@ -29,7 +30,7 @@ export const containerStyles = StyleSheet.create<ContainerStyles>({
     backgroundColor: '#E5E7EB',
   },
   card: {
-    paddingTop: 12,
+    height: 84,
     paddingBottom: 18,
     paddingHorizontal: 40,
 
@@ -76,5 +77,9 @@ export const iconStyles = StyleSheet.create<IconStyles>({
   },
   iconInactive: {
     tintColor: '#C7CFD6',
+  },
+  logo: {
+    width: 74,
+    height: 71,
   },
 });
