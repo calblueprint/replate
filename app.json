@@ -26,6 +26,9 @@
       "favicon": "./assets/bp-favicon.png"
     },
     "plugins": ["expo-router", "expo-font"],
+    "extra": {
+      "EXPO_PUBLIC_BACKEND_URL": "http://10.40.167.36:3000"
+    },
     "assetBundlePatterns": ["**/*"],
     "fonts": ["./assets/fonts/**/*"]
   }
