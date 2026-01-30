@@ -1,9 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { BASE_URL } from '~/api/config';
-
 import { fmtTime } from '@/utils/dateHelpers';
+import { BASE_URL } from '~/api/config';
 import { MOCK_PICKUPS } from '../available-pick-ups';
 import { styles } from '../available-pick-ups/_styles/styles';
 
