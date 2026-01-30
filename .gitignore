@@ -29,7 +29,14 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
 *.tsbuildinfo
+
+# cursor
+.cursor/
+
+# dev server PIDs and logs
+.pids/

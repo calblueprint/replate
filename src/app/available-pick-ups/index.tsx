@@ -1,18 +1,8 @@
 import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
-import Constants from 'expo-constants';
 import { router } from 'expo-router';
-
-type AppExtra = { EXPO_PUBLIC_BACKEND_URL?: string };
-
-const rawExtra: unknown = Constants.expoConfig?.extra;
-const extra: AppExtra =
-  rawExtra && typeof rawExtra === 'object' ? (rawExtra as AppExtra) : {};
-
-export const BACKEND_URL =
-  typeof extra.EXPO_PUBLIC_BACKEND_URL === 'string'
-    ? extra.EXPO_PUBLIC_BACKEND_URL
-    : '10.40.164.190:3000';
+import { styles } from './_styles/styles';
+import { BASE_URL } from '~/api/config';
 
 export const MOCK_PICKUPS = [
   {
@@ -23,8 +13,8 @@ export const MOCK_PICKUPS = [
   },
   {
     id: 2,
-    slot_start_time: '2025-10-13T13:00:00',
-    slot_end_time: '2025-10-13T15:00:00',
+    slot_start_time: '2025-11-02T13:00:00',
+    slot_end_time: '2025-11-02T15:00:00',
     pickup_location: 'Rockridge Cafe',
   },
   {
@@ -120,7 +110,7 @@ function CalendarStrip({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 6 }}
+      contentContainerStyle={styles.calendarStripContent}
     >
       {days.map(iso => {
         const d = dateFromISO(iso);
@@ -135,46 +125,42 @@ function CalendarStrip({
           <Pressable
             key={iso}
             onPress={() => onSelect(iso)}
-            style={({ pressed }) => ({
-              width: 56,
-              height: 72,
-              borderRadius: 12,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderWidth: 1,
-              borderColor: isSelected ? '#000' : '#d1d5db',
-              backgroundColor: isSelected ? '#000' : '#f3f4f6',
-              marginRight: 8, // spacing between chips
-              opacity: pressed ? 0.7 : 1,
-            })}
+            style={({ pressed }) => [
+              styles.dateCard,
+              isSelected ? styles.selectedCard : styles.unselectedCard,
+              pressed && styles.pressedCard,
+            ]}
           >
             <Text
-              style={{ fontSize: 10, color: isSelected ? 'white' : 'black' }}
+              style={[
+                styles.dateText,
+                isSelected ? styles.selectedText : styles.unselectedText,
+              ]}
             >
               {month}
             </Text>
             <Text
-              style={{
-                fontSize: 16,
-                fontWeight: '700',
-                color: isSelected ? 'white' : 'black',
-              }}
+              style={[
+                styles.headerText,
+                isSelected ? styles.selectedText : styles.unselectedText,
+              ]}
             >
               {day}
             </Text>
             <Text
-              style={{ fontSize: 10, color: isSelected ? 'white' : 'black' }}
+              style={[
+                styles.dateText,
+                isSelected ? styles.selectedText : styles.unselectedText,
+              ]}
             >
               {dow}
             </Text>
             {isToday && (
               <Text
-                style={{
-                  marginTop: 2,
-                  fontSize: 9,
-                  fontWeight: '700',
-                  color: isSelected ? 'white' : 'black',
-                }}
+                style={[
+                  styles.todayText,
+                  isSelected ? styles.unselectedText : styles.selectedText,
+                ]}
               >
                 Today
               </Text>
@@ -195,7 +181,7 @@ export default function AvailablePickupsPage() {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/tasks`);
+        const res = await fetch(`${BASE_URL}/api/tasks`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: ApiTask[] = await res.json();
         const mapped = data.map(t => ({
@@ -213,8 +199,8 @@ export default function AvailablePickupsPage() {
   const days = React.useMemo(() => {
     const out: string[] = [];
     const start = new Date();
-    start.setDate(start.getDate() - 1);
-    for (let i = 0; i < 5; i++) {
+    start.setDate(start.getDate());
+    for (let i = 0; i < 2; i++) {
       const d = new Date(start);
       d.setDate(start.getDate() + i);
       out.push(d.toISOString().slice(0, 10));
@@ -232,11 +218,7 @@ export default function AvailablePickupsPage() {
     <FlatList
       data={filtered}
       keyExtractor={item => String(item.id)}
-      contentContainerStyle={{
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-        paddingTop: 8,
-      }}
+      contentContainerStyle={styles.contentContainer}
       ListHeaderComponent={
         <View>
           {error ? (
@@ -259,17 +241,7 @@ export default function AvailablePickupsPage() {
             selectedISO={selectedISO}
             onSelect={setSelectedISO}
           />
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: '700',
-              marginTop: 40,
-              marginBottom: 12,
-              paddingHorizontal: 4,
-            }}
-          >
-            Available Pickups
-          </Text>
+          <Text style={styles.AvailablePickupstext}>Available Pickups</Text>
         </View>
       }
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
