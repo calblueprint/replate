@@ -1,9 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { fmtTime } from '@/utils/dateHelpers';
 import { BASE_URL } from '~/api/config';
-import { MOCK_PICKUPS } from '../available-pick-ups';
 import { styles } from '../available-pick-ups/_styles/styles';
 
 function Section({
@@ -60,7 +58,7 @@ export default function PickupDetails() {
     (async () => {
       try {
         const token = Array.isArray(id) ? id[0] : id; // for arrays
-        const url = `${BACKEND_URL}/api/tasks/${encodeURIComponent(token ?? '')}`;
+        const url = `${BASE_URL}/api/tasks/${encodeURIComponent(token ?? '')}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const raw = await res.json();
