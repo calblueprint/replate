@@ -1,8 +1,8 @@
 import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { styles } from './_styles/styles';
 import { BASE_URL } from '~/api/config';
+import { styles } from './_styles/styles';
 
 export const MOCK_PICKUPS = [
   {

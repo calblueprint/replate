@@ -49,13 +49,11 @@ function StackLayout() {
 }
 
 export default function RootLayout() {
-  /* eslint-disable @typescript-eslint/no-require-imports */
   const [fontsLoaded] = useFonts({
     Lato: require('../../assets/fonts/Lato/Lato-Regular.ttf'),
     LatoBold: require('../../assets/fonts/Lato/Lato-Bold.ttf'),
     LatoLight: require('../../assets/fonts/Lato/Lato-Light.ttf'),
   });
-  /* eslint-enable @typescript-eslint/no-require-imports */
 
   if (!fontsLoaded) {
     return null;
