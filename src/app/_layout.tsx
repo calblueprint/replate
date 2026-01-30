@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Lato_400Regular, Lato_700Bold } from '@expo-google-fonts/lato';
+import { NavBar } from '@/components/NavBar';
 import { AuthProvider } from '../utils/AuthContext';
 import { ProfileProvider } from '../utils/ProfileContext';
 
@@ -42,6 +43,7 @@ function StackLayout() {
           <Stack.Screen name="my-account" />
           <Stack.Screen name="available-pick-ups" />
         </Stack>
+        <NavBar />
         <Toast />
       </ProfileProvider>
     </AuthProvider>

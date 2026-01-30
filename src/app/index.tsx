@@ -21,5 +21,5 @@ export default function App() {
   }
 
   // If not logged in, show landing page
-  return <LandingPage />;
+  return <Redirect href="/landing" />;
 }

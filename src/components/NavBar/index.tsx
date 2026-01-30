@@ -18,6 +18,14 @@ export function NavBar() {
     return null;
   }
 
+  if (pathname.startsWith('/landing')) {
+    return null;
+  }
+
+  if (pathname.startsWith('/auth')) {
+    return null;
+  }
+
   const isActive = (route: string) => pathname.startsWith(route);
 
   return (
