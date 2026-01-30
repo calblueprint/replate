@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { fmtTimeRange } from '@/utils/dateHelpers';
+import { BASE_URL } from '~/api/config';
 import { styles } from './_styles/styles';
 
 export const MOCK_PICKUPS = [
@@ -30,6 +30,67 @@ export const MOCK_PICKUPS = [
     pickup_location: 'Kingman Hall',
   },
 ];
+
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === 'string') return e;
+  try {
+    return JSON.stringify(e);
+  } catch {
+    return 'Unknown error';
+  }
+}
+
+// This is a bunch of helpers to fix formatting from backend, will clean up
+function parseBackendUtc(ts?: string | null): Date | null {
+  if (!ts) return null;
+  const iso = ts.replace(' ', 'T').replace(' UTC', 'Z');
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtHour(d: Date): string {
+  const h = d.getHours(); // local hours
+  const hr12 = h % 12 || 12; // 0→12
+  return String(hr12) + ':00';
+}
+
+function ampm(d: Date): 'am' | 'pm' {
+  return d.getHours() < 12 ? 'am' : 'pm';
+}
+
+function fmtShortHourRange(
+  startStr?: string | null,
+  endStr?: string | null,
+  opts?: { showAmPm?: boolean },
+) {
+  const s = parseBackendUtc(startStr);
+  const e = parseBackendUtc(endStr);
+  if (!s || !e) return 'Time TBD';
+
+  const base = `${fmtHour(s)}–${fmtHour(e)}`;
+  if (opts?.showAmPm) {
+    return ampm(s) === ampm(e)
+      ? `${base} ${ampm(s)}`
+      : `${fmtHour(s)} ${ampm(s)}–${fmtHour(e)} ${ampm(e)}`;
+  }
+  return base;
+}
+
+type ApiTask = {
+  id: number;
+  pickup_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  location_name: string | null;
+};
+
+type UiPickup = {
+  id: number;
+  slot_start_time: string | null;
+  slot_end_time: string | null;
+  pickup_location: string;
+};
 
 //makes calendar
 function CalendarStrip({
@@ -114,6 +175,27 @@ function CalendarStrip({
 export default function AvailablePickupsPage() {
   const todayISO = new Date().toISOString().slice(0, 10);
   const [selectedISO, setSelectedISO] = React.useState(todayISO);
+  const [remote, setRemote] = React.useState<UiPickup[] | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/tasks`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: ApiTask[] = await res.json();
+        const mapped = data.map(t => ({
+          id: t.id,
+          slot_start_time: t.start_time,
+          slot_end_time: t.end_time,
+          pickup_location: t.location_name ?? 'Unknown location',
+        }));
+        setRemote(mapped);
+      } catch (e: unknown) {
+        setError(getErrorMessage(e));
+      }
+    })();
+  }, []);
   const days = React.useMemo(() => {
     const out: string[] = [];
     const start = new Date();
@@ -126,10 +208,10 @@ export default function AvailablePickupsPage() {
     return out;
   }, []);
 
+  const source = remote ?? MOCK_PICKUPS; // fallback to mocks if fetch not ready
   const filtered = React.useMemo(
-    () =>
-      MOCK_PICKUPS.filter(p => p.slot_start_time.slice(0, 10) === selectedISO),
-    [selectedISO],
+    () => source.filter(p => p.slot_start_time?.slice(0, 10) === selectedISO),
+    [source, selectedISO],
   );
 
   return (
@@ -139,6 +221,20 @@ export default function AvailablePickupsPage() {
       contentContainerStyle={styles.contentContainer}
       ListHeaderComponent={
         <View>
+          {error ? (
+            <View
+              style={{
+                padding: 16,
+                backgroundColor: '#fee2e2',
+                borderRadius: 8,
+                marginTop: 16,
+              }}
+            >
+              <Text style={{ color: '#991b1b' }}>
+                Failed to load tasks: {error}
+              </Text>
+            </View>
+          ) : null}
           <CalendarStrip
             days={days}
             todayISO={todayISO}
@@ -162,7 +258,9 @@ export default function AvailablePickupsPage() {
           })}
         >
           <Text style={{ fontWeight: '700', marginBottom: 6 }}>
-            {fmtTimeRange(item.slot_start_time, item.slot_end_time)}
+            {fmtShortHourRange(item.slot_start_time, item.slot_end_time, {
+              showAmPm: true,
+            })}
           </Text>
           <Text>{item.pickup_location}</Text>
         </Pressable>
