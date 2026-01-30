@@ -1,9 +1,21 @@
 import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '~/api/config';
 import { styles } from './_styles/styles';
+
+type AppExtra = { EXPO_PUBLIC_BACKEND_URL?: string };
+
+const rawExtra: unknown = Constants.expoConfig?.extra;
+const extra: AppExtra =
+  rawExtra && typeof rawExtra === 'object' ? (rawExtra as AppExtra) : {};
+
+export const BACKEND_URL =
+  typeof extra.EXPO_PUBLIC_BACKEND_URL === 'string'
+    ? extra.EXPO_PUBLIC_BACKEND_URL
+    : '192.168.102.21';
 
 export const MOCK_PICKUPS = [
   {
@@ -37,17 +49,6 @@ export const MOCK_PICKUPS = [
 ];
 
 // datetime helpers
-const fmtTimeRange = (startISO?: string | null, endISO?: string | null) => {
-  if (!startISO || !endISO) return 'Time TBD';
-  const s = new Date(startISO);
-  const e = new Date(endISO);
-  if (isNaN(s.getTime()) || isNaN(e.getTime())) return 'Time TBD';
-  const to12h = (d: Date) =>
-    d
-      .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-      .toLowerCase();
-  return `${to12h(s)} - ${to12h(e)}`;
-};
 
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
