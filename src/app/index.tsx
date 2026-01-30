@@ -1,7 +1,6 @@
 import { Text, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../utils/AuthContext';
-import LandingPage from './landing';
 
 export default function App() {
   const { isAuthenticated, isLoading } = useAuth();
