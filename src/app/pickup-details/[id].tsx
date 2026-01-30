@@ -24,7 +24,7 @@ type TaskDetails = {
   pickup_date: string; // "2025-11-07"
   start_time: string | null; // "2025-11-07 14:00:00 UTC"
   end_time: string | null; // "2025-11-07 15:00:00 UTC"
-  location_name: string | null; // "DEV DEMO — ..."
+  location_name: string | null;
   address?: {
     number?: string | null;
     street?: string | null;

@@ -1,9 +1,21 @@
 import React from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '~/api/config';
 import { styles } from './_styles/styles';
+
+type AppExtra = { EXPO_PUBLIC_BACKEND_URL?: string };
+
+const rawExtra: unknown = Constants.expoConfig?.extra;
+const extra: AppExtra =
+  rawExtra && typeof rawExtra === 'object' ? (rawExtra as AppExtra) : {};
+
+export const BACKEND_URL =
+  typeof extra.EXPO_PUBLIC_BACKEND_URL === 'string'
+    ? extra.EXPO_PUBLIC_BACKEND_URL
+    : '192.168.102.21';
 
 export const MOCK_PICKUPS = [
   {
@@ -35,6 +47,8 @@ export const MOCK_PICKUPS = [
     pickup_location: 'Kingman Hall',
   },
 ];
+
+// datetime helpers
 
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
@@ -240,14 +254,7 @@ export default function AvailablePickupsPage() {
       ListHeaderComponent={
         <View>
           {error ? (
-            <View
-              style={{
-                padding: 16,
-                backgroundColor: '#fee2e2',
-                borderRadius: 8,
-                marginTop: 16,
-              }}
-            >
+            <View style={styles.error}>
               <Text style={{ color: '#991b1b' }}>
                 Failed to load tasks: {error}
               </Text>
@@ -266,21 +273,12 @@ export default function AvailablePickupsPage() {
       renderItem={({ item }) => (
         <Pressable
           onPress={() => {
-            console.log('task id', item.id);
-            console.log('Navigating with encrypted_id:', item.encrypted_id);
             router.push({
               pathname: '/pickup-details/[id]',
               params: { id: item.encrypted_id },
             });
           }}
-          style={({ pressed }) => ({
-            padding: 16,
-            borderWidth: 1,
-            borderColor: '#d1d5db',
-            borderRadius: 16,
-            backgroundColor: '#eee',
-            opacity: pressed ? 0.6 : 1,
-          })}
+          style={({ pressed }) => [styles.card, pressed && styles.pressedCard]}
         >
           <Text style={{ fontWeight: '700', marginBottom: 6 }}>
             {fmtShortHourRange(item.slot_start_time, item.slot_end_time, {
@@ -291,7 +289,7 @@ export default function AvailablePickupsPage() {
         </Pressable>
       )}
       ListEmptyComponent={
-        <Text style={{ padding: 16 }}>No pickups for this date.</Text>
+        <Text style={styles.claimPickupText}>No pickups for this date.</Text>
       }
     />
   );
