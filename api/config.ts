@@ -2,7 +2,7 @@ import { Alert } from 'react-native';
 
 // API Configuration for Rails Backend
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.206.10.153:3000';
 
 export { BASE_URL };
 
@@ -354,6 +354,10 @@ export const driverAPI = {
 };
 
 export const getPartners = async () => {
+  console.log(
+    'FETCHING PARTNERS FROM:',
+    `${BASE_URL}${API_ENDPOINTS.PARTNERS}`,
+  );
   const response = await fetch(`${BASE_URL}${API_ENDPOINTS.PARTNERS}`);
 
   if (!response.ok) {
@@ -384,19 +388,39 @@ export async function updateDriverPartner(
       },
     );
 
+    let responseData: any = null;
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      responseData = await response.json();
+    } else {
+      responseData = await response.text();
+    }
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Failed to update driver:', errorData);
-      Alert.alert('Error', errorData.error || 'Unknown error');
+      console.error('Failed to update driver:', responseData);
+      const msg =
+        responseData?.error ||
+        responseData?.message ||
+        (typeof responseData === 'string' ? responseData : 'Unknown error');
+      Alert.alert('Error', msg);
       return;
     }
 
-    const data = await response.json();
+    console.log('updateDriverPartner success response:', responseData);
+
+    // supports both { driver: {...} } and {...}
+    const driverObj = responseData?.driver ?? responseData;
+    const partnerId = driverObj?.partner_id;
+
     Alert.alert(
       'Success',
-      `Driver updated. Partner ID: ${data.driver.partner_id}`,
+      partnerId != null
+        ? `Driver updated. Partner ID: ${partnerId}`
+        : 'Driver updated.',
     );
-    return data.driver;
+
+    return driverObj;
   } catch (err) {
     console.error('Network or server error:', err);
     Alert.alert('Network error', 'Unable to update driver.');
