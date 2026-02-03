@@ -369,10 +369,20 @@ export const getPartners = async () => {
   return json;
 };
 
+interface UpdateDriverResponse {
+  id: number;
+  email: string;
+  partner_id: number | null;
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 export async function updateDriverPartner(
   driverId: number,
   selectedNPOId: number,
-) {
+): Promise<UpdateDriverResponse | null> {
   try {
     const response = await fetch(
       `${BASE_URL}${API_ENDPOINTS.DRIVERS}/${driverId}`,
@@ -388,35 +398,35 @@ export async function updateDriverPartner(
       },
     );
 
-    let responseData: any = null;
-    const contentType = response.headers.get('content-type') || '';
+    const contentType = response.headers.get('content-type') ?? '';
 
-    if (contentType.includes('application/json')) {
-      responseData = await response.json();
-    } else {
-      responseData = await response.text();
-    }
+    const responseData: unknown = contentType.includes('application/json')
+      ? await response.json()
+      : await response.text();
 
     if (!response.ok) {
-      console.error('Failed to update driver:', responseData);
       const msg =
-        responseData?.error ||
-        responseData?.message ||
-        (typeof responseData === 'string' ? responseData : 'Unknown error');
+        isObject(responseData) && typeof responseData.message === 'string'
+          ? responseData.message
+          : typeof responseData === 'string'
+            ? responseData
+            : 'Unknown error';
+
+      console.error('Failed to update driver:', responseData);
       Alert.alert('Error', msg);
-      return;
+      return null;
     }
 
-    console.log('updateDriverPartner success response:', responseData);
-
     // supports both { driver: {...} } and {...}
-    const driverObj = responseData?.driver ?? responseData;
-    const partnerId = driverObj?.partner_id;
+    const driverObj =
+      isObject(responseData) && 'driver' in responseData
+        ? (responseData.driver as UpdateDriverResponse)
+        : (responseData as UpdateDriverResponse);
 
     Alert.alert(
       'Success',
-      partnerId != null
-        ? `Driver updated. Partner ID: ${partnerId}`
+      driverObj.partner_id != null
+        ? `Driver updated. Partner ID: ${driverObj.partner_id}`
         : 'Driver updated.',
     );
 
@@ -424,5 +434,6 @@ export async function updateDriverPartner(
   } catch (err) {
     console.error('Network or server error:', err);
     Alert.alert('Network error', 'Unable to update driver.');
+    return null;
   }
 }
