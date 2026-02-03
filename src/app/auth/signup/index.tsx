@@ -235,15 +235,8 @@ export default function SignupPage() {
       };
 
       await signup(signupData);
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Account created successfully!',
-        position: 'top',
-        visibilityTime: 2000,
-      });
       setTimeout(() => {
-        router.push('/(tabs)/dashboard');
+        router.push('/onboarding');
       }, 500);
     } catch (error: unknown) {
       // Handle backend errors

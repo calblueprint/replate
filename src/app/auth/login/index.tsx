@@ -115,15 +115,8 @@ export default function LoginPage() {
       };
 
       await login(loginData, false);
-      Toast.show({
-        type: 'success',
-        text1: 'Welcome back!',
-        text2: 'Login successful',
-        position: 'top',
-        visibilityTime: 2000,
-      });
       setTimeout(() => {
-        router.push('/(tabs)/dashboard');
+        router.push('/my-tasks');
       }, 500);
     } catch (error: unknown) {
       // Handle backend errors
