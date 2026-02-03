@@ -40,10 +40,6 @@ export default function OnboardingFlow() {
   return (
     <View style={styles.container}>
       <View>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backIcon}>‹</Text>
-          <Text style={styles.backText}>Back</Text>
-        </Pressable>
         <View style={styles.imageContainer}>
           <Image
             source={replateIcon}
