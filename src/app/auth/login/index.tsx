@@ -314,7 +314,7 @@ export default function LoginPage() {
           </View>
 
           <TouchableOpacity
-            onPress={() => router.push('/auth/forgot-password')}
+            onPress={() => router.replace('/auth/forgot-password')}
             style={authStyles.forgotPasswordLink}
           >
             <Text
