@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import elementIcon from 'assets/elements.png';
+import { useAuth } from '../../utils/AuthContext';
 import styles from './styles';
 
 type Task = {
@@ -33,6 +34,7 @@ const MOCK_TASKS: Task[] = [
 
 export default function MyTasksPage() {
   const router = useRouter();
+  const { driver } = useAuth();
   const tasks = MOCK_TASKS;
   const hasTasks = tasks.length > 0;
   const today = new Date().toLocaleDateString('en-US', {
@@ -55,8 +57,9 @@ export default function MyTasksPage() {
             <Text style={styles.avatarLetter}>E</Text>
           </View>
         </View>
-
-        <Text style={styles.greeting}>Welcome Back, Eric</Text>
+        <Text style={styles.greeting}>
+          Welcome Back, {driver?.first_name || ''}
+        </Text>
         <Text style={styles.subtext}>
           You have <Text style={styles.bold}>{tasks.length} tasks</Text> in
           progress today

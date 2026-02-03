@@ -23,7 +23,7 @@ export default function BackButton({ style, onPress }: BackButtonProps) {
         router.back();
       } else {
         // Fallback if can't go back, try to replace with index
-        router.replace('/');
+        router.replace('/landing');
       }
     }
   };

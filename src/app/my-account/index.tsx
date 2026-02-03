@@ -3,10 +3,12 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuth } from '../../utils/AuthContext';
+import { useProfile } from '../../utils/ProfileContext';
 import { myAccountStyles } from './styles';
 
 export default function MyAccountPage() {
   const { driver, logout } = useAuth();
+  const { profile } = useProfile();
 
   const handleLogout = () => {
     logout();
@@ -80,7 +82,7 @@ export default function MyAccountPage() {
           <Text style={myAccountStyles.fieldLabel}>NPO</Text>
           <View style={myAccountStyles.fieldBox}>
             <Text style={myAccountStyles.fieldTextDark}>
-              Denver Food Rescue (DFR)
+              {profile?.partner_id}
             </Text>
           </View>
         </View>
