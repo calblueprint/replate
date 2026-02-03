@@ -346,7 +346,7 @@ export default function LoginPage() {
             Need an account?{' '}
             <Text
               style={authStyles.linkSignup}
-              onPress={() => router.push('/auth/signup')}
+              onPress={() => router.replace('/auth/signup')}
             >
               Sign up
             </Text>

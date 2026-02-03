@@ -236,7 +236,7 @@ export default function SignupPage() {
 
       await signup(signupData);
       setTimeout(() => {
-        router.push('/onboarding');
+        router.replace('/onboarding');
       }, 500);
     } catch (error: unknown) {
       // Handle backend errors
@@ -623,6 +623,10 @@ export default function SignupPage() {
                   met: /[A-Z]/.test(password),
                 },
                 {
+                  text: '1 lowercase letter number',
+                  met: /[a-z]/.test(password),
+                },
+                {
                   text: '1 special character',
                   met: /[!@#$%^&*(),.?":{}|<>]/.test(password),
                 },
@@ -753,7 +757,7 @@ export default function SignupPage() {
             Already have an account?{' '}
             <Text
               style={authStyles.linkSignup}
-              onPress={() => router.push('/auth/login')}
+              onPress={() => router.replace('/auth/login')}
             >
               Sign in
             </Text>
