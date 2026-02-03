@@ -11,26 +11,7 @@ type Task = {
   address: string;
   time: string;
 };
-const MOCK_TASKS: Task[] = [
-  {
-    id: 1,
-    location: 'Rockridge Cafe',
-    address: '5492 College Ave, Oakland',
-    time: '09:00 - 11:00 AM',
-  },
-  {
-    id: 2,
-    location: 'Strada Cafe',
-    address: '2430 Bancroft Way, Berkeley',
-    time: '12:00 - 02:00 PM',
-  },
-  {
-    id: 3,
-    location: 'Chipotle',
-    address: '2136 Oxford St, Berkeley',
-    time: '09:00 - 11:00 AM',
-  },
-];
+const MOCK_TASKS: Task[] = [];
 
 export default function MyTasksPage() {
   const router = useRouter();
@@ -54,7 +35,7 @@ export default function MyTasksPage() {
         <View style={styles.headerTopRow}>
           <Text style={styles.date}>{today}</Text>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarLetter}>E</Text>
+            <Text style={styles.avatarLetter}>{driver?.first_name[0]}</Text>
           </View>
         </View>
         <Text style={styles.greeting}>
