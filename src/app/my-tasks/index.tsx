@@ -11,7 +11,26 @@ type Task = {
   address: string;
   time: string;
 };
-const MOCK_TASKS: Task[] = [];
+const MOCK_TASKS: Task[] = [
+  {
+    id: 1,
+    location: 'Rockridge Cafe',
+    address: '5492 College Ave, Oakland',
+    time: '09:00 - 11:00 AM',
+  },
+  {
+    id: 2,
+    location: 'Strada Cafe',
+    address: '2430 Bancroft Way, Berkeley',
+    time: '12:00 - 02:00 PM',
+  },
+  {
+    id: 3,
+    location: 'Chipotle',
+    address: '2136 Oxford St, Berkeley',
+    time: '09:00 - 11:00 AM',
+  },
+];
 
 export default function MyTasksPage() {
   const router = useRouter();
@@ -66,7 +85,7 @@ export default function MyTasksPage() {
                     <TouchableOpacity
                       style={[styles.button, styles.buttonOutline]}
                       onPress={() =>
-                        router.push(
+                        router.replace(
                           `/pickup-details/${task.id}?location=${task.location}`,
                         )
                       }
@@ -81,7 +100,7 @@ export default function MyTasksPage() {
                     <TouchableOpacity
                       style={[styles.button, styles.buttonFilled]}
                       onPress={() =>
-                        router.push(
+                        router.replace(
                           `/donation-details/${task.id}?location=${task.location}`,
                         )
                       }
@@ -109,7 +128,7 @@ export default function MyTasksPage() {
 
             <TouchableOpacity
               style={styles.emptyButton}
-              onPress={() => router.push('/available-pick-ups')}
+              onPress={() => router.replace('/available-pick-ups')}
             >
               <Text style={styles.emptyButtonText}>Add Task</Text>
             </TouchableOpacity>

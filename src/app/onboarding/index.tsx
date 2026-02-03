@@ -34,7 +34,7 @@ export default function OnboardingFlow() {
     if (!driver || selectedNPOId === 0) return;
 
     await updateDriverPartner(driver.id, selectedNPOId);
-    router.push('/my-tasks');
+    router.replace('/my-tasks');
   };
 
   return (

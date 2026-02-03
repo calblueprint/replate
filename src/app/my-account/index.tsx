@@ -12,7 +12,7 @@ export default function MyAccountPage() {
 
   const handleLogout = () => {
     logout();
-    router.push('/auth/login');
+    router.replace('/landing');
   };
 
   // Get initials for avatar
