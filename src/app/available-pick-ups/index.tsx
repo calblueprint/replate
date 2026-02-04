@@ -1,8 +1,10 @@
 import React from 'react';
-import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import clockIcon from 'assets/date.png';
+import replateLogo from 'assets/replate-logo.png';
 import { BASE_URL } from '~/api/config';
 import { styles } from './_styles/styles';
 
@@ -74,8 +76,8 @@ function fmtHour(d: Date): string {
   return String(hr12) + ':00';
 }
 
-function ampm(d: Date): 'am' | 'pm' {
-  return d.getHours() < 12 ? 'am' : 'pm';
+function ampm(d: Date): 'AM' | 'PM' {
+  return d.getHours() < 12 ? 'AM' : 'PM';
 }
 
 function fmtShortHourRange(
@@ -87,13 +89,21 @@ function fmtShortHourRange(
   const e = parseBackendUtc(endStr);
   if (!s || !e) return 'Time TBD';
 
-  const base = `${fmtHour(s)}–${fmtHour(e)}`;
+  const base = `${fmtHour(s)} – ${fmtHour(e)}`;
   if (opts?.showAmPm) {
     return ampm(s) === ampm(e)
       ? `${base} ${ampm(s)}`
-      : `${fmtHour(s)} ${ampm(s)}–${fmtHour(e)} ${ampm(e)}`;
+      : `${fmtHour(s)} ${ampm(s)} – ${fmtHour(e)} ${ampm(e)}`;
   }
   return base;
+}
+
+function fmtDateHeader(isoYYYYMMDD: string) {
+  const d = new Date(isoYYYYMMDD + 'T00:00:00');
+  const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
+  const day = d.getDate();
+  const month = d.toLocaleDateString('en-US', { month: 'long' });
+  return `${weekday}, ${day} ${month}`;
 }
 
 type ApiTask = {
@@ -113,89 +123,76 @@ type UiPickup = {
   pickup_location: string;
 };
 
-//makes calendar
-function CalendarStrip({
-  days,
-  todayISO,
-  selectedISO,
-  onSelect,
+//today tomorrow slider
+function SegmentedTwo({
+  leftLabel,
+  rightLabel,
+  value,
+  onChange,
 }: {
-  days: string[];
-  todayISO: string;
-  selectedISO: string;
-  onSelect: (iso: string) => void;
+  leftLabel: string;
+  rightLabel: string;
+  value: 'left' | 'right';
+  onChange: (v: 'left' | 'right') => void;
 }) {
-  const dateFromISO = (iso: string) => new Date(`${iso}T00:00:00`);
-
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.calendarStripContent}
-    >
-      {days.map(iso => {
-        const d = dateFromISO(iso);
-        const isToday = iso === todayISO;
-        const isSelected = iso === selectedISO;
+    <View style={styles.segmentWrap}>
+      <Pressable
+        onPress={() => onChange('left')}
+        style={[
+          styles.segmentBtn,
+          value === 'left'
+            ? styles.segmentBtnActive
+            : styles.segmentBtnInactive,
+        ]}
+      >
+        <Text
+          style={[
+            styles.segmentText,
+            value === 'left'
+              ? styles.segmentTextActive
+              : styles.segmentTextInactive,
+          ]}
+        >
+          {leftLabel}
+        </Text>
+      </Pressable>
 
-        const month = d.toLocaleDateString(undefined, { month: 'short' }); // Oct
-        const day = d.toLocaleDateString(undefined, { day: '2-digit' });
-        const dow = d.toLocaleDateString(undefined, { weekday: 'short' }); // Mon
-
-        return (
-          <Pressable
-            key={iso}
-            onPress={() => onSelect(iso)}
-            style={({ pressed }) => [
-              styles.dateCard,
-              isSelected ? styles.selectedCard : styles.unselectedCard,
-              pressed && styles.pressedCard,
-            ]}
-          >
-            <Text
-              style={[
-                styles.dateText,
-                isSelected ? styles.selectedText : styles.unselectedText,
-              ]}
-            >
-              {month}
-            </Text>
-            <Text
-              style={[
-                styles.headerText,
-                isSelected ? styles.selectedText : styles.unselectedText,
-              ]}
-            >
-              {day}
-            </Text>
-            <Text
-              style={[
-                styles.dateText,
-                isSelected ? styles.selectedText : styles.unselectedText,
-              ]}
-            >
-              {dow}
-            </Text>
-            {isToday && (
-              <Text
-                style={[
-                  styles.todayText,
-                  isSelected ? styles.unselectedText : styles.selectedText,
-                ]}
-              >
-                Today
-              </Text>
-            )}
-          </Pressable>
-        );
-      })}
-    </ScrollView>
+      <Pressable
+        onPress={() => onChange('right')}
+        style={[
+          styles.segmentBtn,
+          value === 'right'
+            ? styles.segmentBtnActive
+            : styles.segmentBtnInactive,
+        ]}
+      >
+        <Text
+          style={[
+            styles.segmentText,
+            value === 'right'
+              ? styles.segmentTextActive
+              : styles.segmentTextInactive,
+          ]}
+        >
+          {rightLabel}
+        </Text>
+      </Pressable>
+    </View>
   );
 }
-
+//start of page layout
 export default function AvailablePickupsPage() {
   const todayISO = new Date().toISOString().slice(0, 10);
+  const tomorrowISO = React.useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  }, []);
+
+  const [tab, setTab] = React.useState<'left' | 'right'>('left');
   const [selectedISO, setSelectedISO] = React.useState(todayISO);
+
   const [remote, setRemote] = React.useState<UiPickup[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -228,17 +225,6 @@ export default function AvailablePickupsPage() {
       }
     })();
   }, []);
-  const days = React.useMemo(() => {
-    const out: string[] = [];
-    const start = new Date();
-    start.setDate(start.getDate());
-    for (let i = 0; i < 2; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      out.push(d.toISOString().slice(0, 10));
-    }
-    return out;
-  }, []);
 
   const source = remote ?? MOCK_PICKUPS; // fallback to mocks if fetch not ready
   const filtered = React.useMemo(
@@ -260,33 +246,65 @@ export default function AvailablePickupsPage() {
               </Text>
             </View>
           ) : null}
-          <CalendarStrip
-            days={days}
-            todayISO={todayISO}
-            selectedISO={selectedISO}
-            onSelect={setSelectedISO}
-          />
-          <Text style={styles.AvailablePickupstext}>Available Pickups</Text>
+          <View style={styles.header}>
+            <View style={styles.brandRow}>
+              <Text style={styles.replateTitle}>Replate</Text>
+              <Image style={styles.logo} source={replateLogo} />
+            </View>
+            <Text style={styles.availableTasksTitle}>
+              Available Tasks ({filtered.length})
+            </Text>
+            <SegmentedTwo
+              leftLabel="Today"
+              rightLabel="Tomorrow"
+              value={tab}
+              onChange={v => {
+                setTab(v);
+                setSelectedISO(v === 'left' ? todayISO : tomorrowISO);
+              }}
+            />
+          </View>
+          <Text style={styles.dateHeaderText}>
+            {fmtDateHeader(selectedISO)}
+          </Text>
         </View>
       }
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
       renderItem={({ item }) => (
-        <Pressable
-          onPress={() => {
-            router.push({
-              pathname: '/pickup-details/[id]',
-              params: { id: item.encrypted_id },
-            });
-          }}
-          style={({ pressed }) => [styles.card, pressed && styles.pressedCard]}
-        >
-          <Text style={{ fontWeight: '700', marginBottom: 6 }}>
-            {fmtShortHourRange(item.slot_start_time, item.slot_end_time, {
-              showAmPm: true,
-            })}
-          </Text>
-          <Text>{item.pickup_location}</Text>
-        </Pressable>
+        <View style={styles.pickupCard}>
+          <View style={styles.pickupCardTop}>
+            <Image source={clockIcon} style={styles.clockIcon} />
+            <Text style={styles.timeText}>
+              {fmtShortHourRange(item.slot_start_time, item.slot_end_time, {
+                showAmPm: true,
+              })}
+            </Text>
+          </View>
+
+          <View style={styles.pickupCardBottom}>
+            <View style={styles.pickupLeft}>
+              <Text style={styles.locationText}>{item.pickup_location}</Text>
+              {/* temp address */}
+              {/* <Text style={styles.addressText}>Temp Address</Text> */}
+            </View>
+
+            <Pressable
+              onPress={() => {
+                router.push({
+                  pathname: '/pickup-details/[id]',
+                  params: { id: item.encrypted_id },
+                });
+              }}
+              style={({ pressed }) => [
+                styles.detailsButton,
+                pressed && styles.detailsButtonPressed,
+              ]}
+            >
+              <Text style={styles.detailsButtonText}>Pick-up details</Text>
+              <Text style={styles.chevron}>›</Text>
+            </Pressable>
+          </View>
+        </View>
       )}
       ListEmptyComponent={
         <Text style={styles.claimPickupText}>No pickups for this date.</Text>
