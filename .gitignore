@@ -41,5 +41,13 @@ yarn-error.*
 # MCP server config (personal dev tools)
 .mcp.json
 
+# Claude AI configuration (local dev only)
+.claude/
+
+# Documentation files not needed in repo
+SECURITY.md
+SECURITY_FIXES_SUMMARY.md
+scripts/README.md
+
 # dev server PIDs and logs
 .pids/
