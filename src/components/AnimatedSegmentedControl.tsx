@@ -4,7 +4,6 @@ import {
   Dimensions,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import Colors from '@/styles/colors';

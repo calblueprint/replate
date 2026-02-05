@@ -48,7 +48,7 @@ export default function OnboardingFlow() {
       setIsUpdating(true);
       await updateDriverPartner(driver.id, selectedNPOId);
       router.replace('/(tabs)/my-tasks');
-    } catch (err) {
+    } catch {
       // Error is handled by updateDriverPartner with Alert
     } finally {
       setIsUpdating(false);

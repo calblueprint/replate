@@ -5,7 +5,6 @@ import {
   Image,
   Linking,
   Modal,
-  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -17,7 +16,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import checkIcon from 'assets/check-icon.png';
 import dateIcon from 'assets/date.png';
-import { ApiError, apiRequest, validateResponse } from '~/api/apiUtils';
+import { apiRequest, validateResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import { styles } from '../../styles/pages/pickup-details-styles';
 
@@ -153,7 +152,7 @@ export default function PickupDetails() {
         if (!cancelled) {
           setTask(taskData);
         }
-      } catch (e: unknown) {
+      } catch {
         if (!cancelled) {
           // Use mock data for development
           setTask(MOCK_TASK);
@@ -257,23 +256,6 @@ export default function PickupDetails() {
     Linking.openURL(mailUrl).catch(() => {
       Alert.alert('Error', 'Could not open email app');
     });
-  };
-
-  const handleClaimPickup = () => {
-    Alert.alert('Claim Pickup', 'Are you sure you want to claim this pickup?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Claim',
-        onPress: () => {
-          Toast.show({
-            type: 'success',
-            text1: 'Pickup Claimed',
-            text2: 'This pickup has been added to your tasks',
-          });
-          router.back();
-        },
-      },
-    ]);
   };
 
   if (isLoading) {

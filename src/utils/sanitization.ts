@@ -20,7 +20,7 @@ export function safeJsonParse<T = unknown>(
   try {
     const parsed = JSON.parse(jsonString);
     return parsed as T;
-  } catch (error) {
+  } catch {
     // JSON parsing failed, return fallback
     return fallback;
   }

@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { Dimensions, Image, View } from 'react-native';
+import React from 'react';
+import { Dimensions, Image } from 'react-native';
 import {
   GestureHandlerRootView,
   PanGestureHandler,
@@ -50,7 +50,9 @@ export default function TabLayout() {
     transform: [{ translateX: translateX.value }],
   }));
 
-  const handleSwipe = (event: any) => {
+  const handleSwipe = (event: {
+    nativeEvent: { state: number; translationX: number; velocityX: number };
+  }) => {
     if (event.nativeEvent.state === State.END) {
       const { translationX, velocityX } = event.nativeEvent;
       const currentIndex = getCurrentTabIndex();
@@ -124,7 +126,7 @@ export default function TabLayout() {
               name="my-tasks"
               options={{
                 title: 'Home',
-                tabBarIcon: ({ color, size }) => (
+                tabBarIcon: ({ color }) => (
                   <Image
                     source={homeIcon}
                     style={{
@@ -141,7 +143,7 @@ export default function TabLayout() {
               name="available-pick-ups"
               options={{
                 title: 'Tasks',
-                tabBarIcon: ({ color, size }) => (
+                tabBarIcon: ({ color }) => (
                   <Image
                     source={tasksIcon}
                     style={{
@@ -158,7 +160,7 @@ export default function TabLayout() {
               name="my-account"
               options={{
                 title: 'Profile',
-                tabBarIcon: ({ color, size }) => (
+                tabBarIcon: ({ color }) => (
                   <Image
                     source={profileIcon}
                     style={{

@@ -1,11 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  ActivityIndicator,
-  Animated,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, Animated, ViewStyle } from 'react-native';
 
 interface AnimatedLoaderProps {
   message?: string;

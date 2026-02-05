@@ -32,7 +32,7 @@ export default function BackButton({ style, onPress }: BackButtonProps) {
         try {
           // Try to go back if possible
           router.back();
-        } catch (error) {
+        } catch {
           // If back fails, try canGoBack check
           try {
             if (router.canGoBack()) {

@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const sanitized = sanitizeObject<DriverResponse>(parsed);
           setDriver(sanitized);
         }
-      } catch (error) {
+      } catch {
         // Failed to load stored driver, user will need to login again
         setDriver(null);
       } finally {

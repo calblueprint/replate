@@ -55,13 +55,13 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
           },
           validateResponse: response => {
             // Response can be either { driver: {...} } or {...}
-            const profile =
+            const profileData =
               typeof response === 'object' &&
               response !== null &&
               'driver' in response
                 ? response.driver
                 : response;
-            return validateResponse(profile, [
+            return validateResponse(profileData, [
               'id',
               'email',
               'first_name',

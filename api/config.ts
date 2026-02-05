@@ -1,9 +1,5 @@
 import { Alert } from 'react-native';
-import {
-  apiRequest,
-  ApiError as ApiUtilError,
-  validateResponse,
-} from './apiUtils';
+import { apiRequest, ApiError as ApiUtilError } from './apiUtils';
 import { ENV_CONFIG } from './envConfig';
 
 // API Configuration for Rails Backend
