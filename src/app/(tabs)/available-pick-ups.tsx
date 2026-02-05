@@ -396,7 +396,6 @@ export default function AvailablePickupsPage() {
                   });
                 }}
                 style={styles.detailsButton}
-                scaleValue={0.95}
               >
                 <Text style={styles.detailsButtonText}>Pick-up details</Text>
                 <Text style={styles.chevron}>›</Text>

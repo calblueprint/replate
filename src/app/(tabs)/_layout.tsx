@@ -34,9 +34,10 @@ export default function TabLayout() {
 
   const getCurrentTabIndex = () => {
     const currentPath = pathname;
-    const index = tabs.findIndex(tab =>
-      currentPath.includes(tab.split('/').pop()),
-    );
+    const index = tabs.findIndex(tab => {
+      const lastSegment = tab.split('/').pop();
+      return lastSegment ? currentPath.includes(lastSegment) : false;
+    });
     return index >= 0 ? index : 0;
   };
 

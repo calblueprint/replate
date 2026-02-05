@@ -46,7 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedDriver) {
           const parsed = safeJsonParse<DriverResponse>(storedDriver);
           // Sanitize the parsed data to prevent prototype pollution
-          const sanitized = sanitizeObject<DriverResponse>(parsed);
+          const sanitized = sanitizeObject(
+            parsed as unknown as Record<string, unknown>,
+          ) as unknown as DriverResponse;
           setDriver(sanitized);
         }
       } catch {

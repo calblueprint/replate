@@ -11,7 +11,7 @@ import { styles } from '../../styles/pages/onboarding-styles';
 
 export default function OnboardingFlow() {
   const { driver } = useAuth();
-  const [partners, setPartners] = useState([]);
+  const [partners, setPartners] = useState<Array<[number, string]>>([]);
   const [open, setOpen] = useState(false);
   const [selectedNPOId, setSelectedNPOId] = useState(0);
   const [items, setItems] = useState([{}]);
@@ -25,7 +25,7 @@ export default function OnboardingFlow() {
         setIsLoading(true);
         setError(null);
         const partnersList = await getPartners();
-        setPartners(partnersList);
+        setPartners(partnersList as Array<[number, string]>);
       } catch (err) {
         const errorMessage =
           err instanceof ApiError ? err.message : 'Failed to load partners';

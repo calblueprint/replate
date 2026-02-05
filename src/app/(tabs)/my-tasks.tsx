@@ -239,7 +239,6 @@ export default function MyTasksPage() {
                           `/pickup-details/${task.encrypted_id}?location=${task.location_name}`,
                         )
                       }
-                      scaleValue={0.97}
                     >
                       <Text
                         style={[styles.buttonText, styles.buttonOutlineText]}
@@ -255,7 +254,6 @@ export default function MyTasksPage() {
                           `/donation-details/${task.encrypted_id}?location=${task.location_name}`,
                         )
                       }
-                      scaleValue={0.97}
                     >
                       <Text
                         style={[styles.buttonText, styles.buttonFilledText]}
@@ -281,7 +279,6 @@ export default function MyTasksPage() {
             <TouchableOpacity
               style={styles.emptyButton}
               onPress={() => router.replace('/(tabs)/available-pick-ups')}
-              scaleValue={0.95}
             >
               <Text style={styles.emptyButtonText}>Add Task</Text>
             </TouchableOpacity>

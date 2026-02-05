@@ -37,10 +37,6 @@ export default function PickupDetailsLayout() {
         headerBackVisible: false, // Hide the default back button
         headerStyle: {
           backgroundColor: '#ffffff',
-          elevation: 0,
-          shadowOpacity: 0,
-          borderBottomWidth: 1,
-          borderBottomColor: '#E5E5E5',
         },
         headerTitleStyle: {
           fontFamily: 'LatoBold',

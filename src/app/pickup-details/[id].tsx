@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import checkIcon from 'assets/check-icon.png';
 import dateIcon from 'assets/date.png';
@@ -115,7 +115,6 @@ function formatPickupDate(dateStr: string): string {
 
 export default function PickupDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const [task, setTask] = useState<TaskDetails | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -274,7 +273,10 @@ export default function PickupDetails() {
         <Text style={styles.errorMessage}>{err}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.replace(router.pathname)}
+          onPress={() => {
+            setErr('');
+            setIsLoading(true);
+          }}
         >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
