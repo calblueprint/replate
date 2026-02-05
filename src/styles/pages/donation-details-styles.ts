@@ -12,15 +12,6 @@ export const styles = StyleSheet.create({
     paddingBottom: 120,
   },
 
-  pickupTitle: {
-    fontFamily: 'LatoBold',
-    fontSize: 18,
-    fontWeight: '700',
-    textAlign: 'center',
-    color: '#000',
-    marginLeft: 65,
-  },
-
   section: {
     borderColor: '#A9A9A980',
     borderWidth: 0.8,
@@ -42,7 +33,7 @@ export const styles = StyleSheet.create({
     color: '#3F8061',
     marginBottom: 24,
     fontFamily: 'Lato',
-    marginTop: 31,
+    marginTop: 24,
   },
 
   dueDateContainer: {
@@ -157,8 +148,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 12,
+    paddingTop: 16,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
   backButton: {
     width: 40,
@@ -169,18 +163,15 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: {
-    fontSize: 20,
-    color: '#525454',
-  },
   headerTitleContainer: {
     flex: 1,
     alignItems: 'center',
-    marginLeft: -40, // keeps title centered even with the back button
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#000',
+    fontFamily: 'LatoBold',
   },
 });

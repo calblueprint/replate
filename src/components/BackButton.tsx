@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 interface BackButtonProps {
@@ -15,15 +15,37 @@ interface BackButtonProps {
 }
 
 export default function BackButton({ style, onPress }: BackButtonProps) {
+  const segments = useSegments();
+
   const handlePress = () => {
     if (onPress) {
       onPress();
     } else {
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        // Fallback if can't go back, try to replace with index
+      // For auth screens, always go to landing without checking canGoBack
+      const isAuthScreen = segments[0] === 'auth';
+
+      if (isAuthScreen) {
+        // Always use replace for auth screens to avoid navigation stack issues
         router.replace('/landing');
+      } else {
+        // For other screens, wrap everything in try-catch
+        try {
+          // Try to go back if possible
+          router.back();
+        } catch (error) {
+          // If back fails, try canGoBack check
+          try {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/landing');
+            }
+          } catch (err) {
+            // If all else fails, just go to landing
+            console.log('Navigation error, going to landing:', err);
+            router.replace('/landing');
+          }
+        }
       }
     }
   };
@@ -60,7 +82,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    fontFamily: 'Lato_400Regular',
+    fontFamily: 'Lato',
     color: '#525454',
   },
 });

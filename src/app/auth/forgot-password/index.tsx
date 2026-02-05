@@ -20,7 +20,7 @@ import { driverAPI } from '../../../../api/config';
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
-import { validateEmail } from '../../../utils/validation';
+import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
 
 interface ApiErrorResponse {
   message?: string;
@@ -215,6 +215,7 @@ export default function ForgotPasswordPage() {
                   Keyboard.dismiss();
                   handleRequestReset();
                 }}
+                maxLength={INPUT_LIMITS.EMAIL_MAX}
               />
             </Animated.View>
             {emailError && (

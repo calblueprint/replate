@@ -22,6 +22,7 @@ import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import {
+  INPUT_LIMITS,
   validatePassword,
   validatePasswordMatch,
 } from '../../../utils/validation';
@@ -361,6 +362,7 @@ export default function ResetPasswordPage() {
                 passwordRules=""
                 blurOnSubmit={false}
                 onSubmitEditing={() => Keyboard.dismiss()}
+                maxLength={INPUT_LIMITS.PASSWORD_MAX}
               />
               <TouchableOpacity
                 style={authStyles.showButton}
@@ -463,6 +465,7 @@ export default function ResetPasswordPage() {
                 passwordRules=""
                 blurOnSubmit={false}
                 onSubmitEditing={() => Keyboard.dismiss()}
+                maxLength={INPUT_LIMITS.PASSWORD_MAX}
               />
               <TouchableOpacity
                 style={authStyles.showButton}

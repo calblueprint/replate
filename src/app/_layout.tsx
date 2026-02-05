@@ -4,8 +4,7 @@ import Toast from 'react-native-toast-message';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { Lato_400Regular, Lato_700Bold } from '@expo-google-fonts/lato';
-import { NavBar } from '@/components/NavBar';
+// NavBar removed - using tab navigation instead
 import { AuthProvider } from '../utils/AuthContext';
 import { ProfileProvider } from '../utils/ProfileContext';
 
@@ -13,8 +12,9 @@ void SplashScreen.preventAutoHideAsync();
 
 function StackLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Lato_400Regular,
-    Lato_700Bold,
+    Lato: require('../../assets/fonts/Lato/Lato-Regular.ttf'),
+    LatoBold: require('../../assets/fonts/Lato/Lato-Bold.ttf'),
+    LatoLight: require('../../assets/fonts/Lato/Lato-Light.ttf'),
   });
 
   useEffect(() => {
@@ -38,12 +38,10 @@ function StackLayout() {
           <Stack.Screen name="auth/reset-password" />
           <Stack.Screen name="onboarding" />
           <Stack.Screen name="pickup-details" />
-          <Stack.Screen name="my-tasks" />
-          <Stack.Screen name="donation-details/[id]" />
-          <Stack.Screen name="my-account" />
-          <Stack.Screen name="available-pick-ups" />
+          <Stack.Screen name="donation-details" />
+          <Stack.Screen name="landing" />
+          <Stack.Screen name="(tabs)" />
         </Stack>
-        <NavBar />
         <Toast />
       </ProfileProvider>
     </AuthProvider>
@@ -51,16 +49,6 @@ function StackLayout() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    Lato: require('../../assets/fonts/Lato/Lato-Regular.ttf'),
-    LatoBold: require('../../assets/fonts/Lato/Lato-Bold.ttf'),
-    LatoLight: require('../../assets/fonts/Lato/Lato-Light.ttf'),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <SafeAreaProvider>
       <StackLayout />

@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 15,
     color: '#525454',
+    fontFamily: 'Lato',
   },
   avatarCircle: {
     width: 38,
@@ -39,8 +40,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarLetter: {
+    fontSize: 16,
     color: '#3EA377',
     fontWeight: '600',
+    fontFamily: 'LatoBold',
   },
   greeting: {
     color: '#427B60',
@@ -87,8 +90,10 @@ const styles = StyleSheet.create({
   cardAccent: {
     width: 5,
     backgroundColor: '#71C79F',
-    height: 82,
-    marginTop: 30,
+    alignSelf: 'center',
+    height: '60%',
+    borderTopLeftRadius: 18,
+    borderBottomLeftRadius: 18,
   },
   cardContent: {
     flex: 1,
@@ -111,6 +116,7 @@ const styles = StyleSheet.create({
   cardTime: {
     color: '#000000',
     fontSize: 13,
+    lineHeight: 18,
     marginBottom: 16,
     fontFamily: 'Lato',
   },

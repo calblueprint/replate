@@ -1,4 +1,9 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
+import {
+  apiRequest,
+  ApiError as ApiUtilError,
+  validateResponse,
+} from '../../api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '../../api/config';
 
 // Extended driver profile interface to include NPO/partner information
@@ -40,7 +45,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
+      const data = await apiRequest<DriverProfile | { driver: DriverProfile }>(
         `${BASE_URL}${API_ENDPOINTS.DRIVERS}/${driverId}`,
         {
           method: 'GET',
@@ -48,20 +53,29 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
+          validateResponse: response => {
+            // Response can be either { driver: {...} } or {...}
+            const profile =
+              typeof response === 'object' &&
+              response !== null &&
+              'driver' in response
+                ? response.driver
+                : response;
+            return validateResponse(profile, [
+              'id',
+              'email',
+              'first_name',
+              'last_name',
+            ]);
+          },
         },
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch driver profile');
-      }
-
-      const data = await response.json();
-      setProfileState(data.driver || data);
+      setProfileState('driver' in data ? data.driver : data);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load profile';
+        err instanceof ApiUtilError ? err.message : 'Failed to load profile';
       setError(errorMessage);
-      console.error('Error refreshing profile:', err);
     } finally {
       setLoading(false);
     }

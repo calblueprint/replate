@@ -14,14 +14,14 @@ export default StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     color: colors.white,
-    fontFamily: 'Lato_700Bold',
+    fontFamily: 'LatoBold',
     fontSize: 15,
   },
   disabledTitleStyle: {
     paddingHorizontal: 20,
     paddingVertical: 12,
     color: colors.white,
-    fontFamily: 'Lato_700Bold',
+    fontFamily: 'LatoBold',
     fontSize: 15,
   },
 });

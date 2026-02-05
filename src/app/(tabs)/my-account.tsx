@@ -2,9 +2,9 @@ import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { myAccountStyles } from '../../styles/tabs/my-account-styles';
 import { useAuth } from '../../utils/AuthContext';
 import { useProfile } from '../../utils/ProfileContext';
-import { myAccountStyles } from './styles';
 
 export default function MyAccountPage() {
   const { driver, logout } = useAuth();

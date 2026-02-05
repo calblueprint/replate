@@ -16,7 +16,7 @@ export default function App() {
 
   // If logged in, go to dashboard
   if (isAuthenticated) {
-    return <Redirect href="/my-tasks" />;
+    return <Redirect href="/(tabs)/my-tasks" />;
   }
 
   // If not logged in, show landing page

@@ -34,7 +34,7 @@ export function NavBar() {
         {/* Home -> My Tasks */}
         <TouchableOpacity
           style={containerStyles.item}
-          onPress={() => router.push('/my-tasks')}
+          onPress={() => router.replace('/my-tasks')}
         >
           <Image
             source={homeIcon}
@@ -59,7 +59,7 @@ export function NavBar() {
         {/* Tasks -> Available Pick Ups */}
         <TouchableOpacity
           style={containerStyles.item}
-          onPress={() => router.push('/available-pick-ups')}
+          onPress={() => router.replace('/available-pick-ups')}
         >
           <Image
             source={tasksIcon}
@@ -84,7 +84,7 @@ export function NavBar() {
         {/* Profile -> My Account */}
         <TouchableOpacity
           style={containerStyles.item}
-          onPress={() => router.push('/my-account')}
+          onPress={() => router.replace('/my-account')}
         >
           <Image
             source={profileIcon}

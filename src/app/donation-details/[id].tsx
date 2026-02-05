@@ -12,10 +12,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import dateIcon from 'assets/date.png';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import PhotoUpload from '../../components/PhotoUpload/PhotoUpload';
-import { styles } from './styles';
+import { styles } from '../../styles/pages/donation-details-styles';
 
 const MOCK_NPOS = [
   { label: 'Rescuing Leftover Cuisine (RLC)', value: 'RLC' },
@@ -48,23 +49,29 @@ export default function DonationLayout() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/(tabs)/my-tasks');
+            }
+          }}
         >
-          <Text style={styles.backIcon}>{'←'}</Text>
+          <Ionicons name="chevron-back" size={24} color="#525454" />
         </TouchableOpacity>
-        <Text style={styles.pickupTitle}>{location} Pickup</Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Enter Donation Data</Text>
+        </View>
+        <View style={{ width: 40 }} />
       </View>
-      <Stack.Screen
-        options={{
-          headerTitle: 'Enter Donation Data',
-          headerTitleAlign: 'center',
-          headerBackButtonDisplayMode: 'minimal',
-          headerTintColor: 'black',
-        }}
-      />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -114,7 +121,7 @@ export default function DonationLayout() {
             {/* Image upload */}
             <Text style={styles.imageText}>Add Pick-up Image</Text>
             <View style={styles.section}>
-              <PhotoUpload onSelect={uri => console.log('Selected:', uri)} />
+              <PhotoUpload onSelect={() => {}} />
 
               {/* Notes */}
               <Text style={styles.notesLabel}>Notes</Text>

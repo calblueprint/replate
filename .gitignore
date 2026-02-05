@@ -38,5 +38,8 @@ yarn-error.*
 # cursor
 .cursor/
 
+# MCP server config (personal dev tools)
+.mcp.json
+
 # dev server PIDs and logs
 .pids/
