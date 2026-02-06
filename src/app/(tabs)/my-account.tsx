@@ -26,6 +26,9 @@ export default function MyAccountPage() {
     return 'U';
   };
 
+  console.log('profile:', profile);
+  console.log('driver:', driver);
+
   return (
     <SafeAreaView style={myAccountStyles.container}>
       <ScrollView
@@ -82,7 +85,7 @@ export default function MyAccountPage() {
           <Text style={myAccountStyles.fieldLabel}>NPO</Text>
           <View style={myAccountStyles.fieldBox}>
             <Text style={myAccountStyles.fieldTextDark}>
-              {profile?.partner_id}
+              {profile?.first_name}
             </Text>
           </View>
         </View>

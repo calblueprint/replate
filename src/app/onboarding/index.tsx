@@ -8,12 +8,14 @@ import { ApiError } from '~/api/apiUtils';
 import { getPartners, updateDriverPartner } from '~/api/config';
 import { useAuth } from '~/src/utils/AuthContext';
 import { styles } from '../../styles/pages/onboarding-styles';
+import { useProfile } from '../../utils/ProfileContext';
 
 export default function OnboardingFlow() {
   type PartnerTuple = [number, string];
   type PickerItem = { label: string; value: number };
 
   const { driver } = useAuth();
+  const { refreshProfile } = useProfile();
   const [partners, setPartners] = useState<PartnerTuple[]>([]);
   const [selectedNPOId, setSelectedNPOId] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -30,7 +32,6 @@ export default function OnboardingFlow() {
         setError(null);
 
         const partnersList = await getPartners();
-        console.log('partnersList:', partnersList);
 
         const safePartners: PartnerTuple[] = Array.isArray(partnersList)
           ? (partnersList as unknown[]).filter((x): x is PartnerTuple => {
@@ -43,7 +44,6 @@ export default function OnboardingFlow() {
           : [];
 
         setPartners(safePartners);
-        console.log('safePartners:', safePartners);
       } catch (err) {
         const errorMessage =
           err instanceof ApiError ? err.message : 'Failed to load partners';
@@ -64,7 +64,9 @@ export default function OnboardingFlow() {
 
     try {
       setIsUpdating(true);
-      await updateDriverPartner(driver.id, selectedNPOId);
+      const updated = await updateDriverPartner(driver.id, selectedNPOId);
+      if (!updated) return; // stay on page if it failed
+      await refreshProfile(driver.id);
       router.replace('/(tabs)/my-tasks');
     } finally {
       setIsUpdating(false);
