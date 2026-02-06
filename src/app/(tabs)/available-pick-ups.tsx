@@ -18,66 +18,11 @@ import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import { safeJsonParse } from '~/src/utils/sanitization';
 import { styles } from '../../styles/tabs/available-pick-ups-styles';
 
-export const MOCK_PICKUPS = [
-  // Today's tasks (Feb 4, 2026)
-  {
-    id: 1,
-    encrypted_id: 'mock-encrypted-id-1',
-    slot_start_time: '2026-02-04T09:00:00',
-    slot_end_time: '2026-02-04T10:00:00',
-    pickup_location: 'BP House',
-  },
-  {
-    id: 2,
-    encrypted_id: 'mock-encrypted-id-2',
-    slot_start_time: '2026-02-04T13:00:00',
-    slot_end_time: '2026-02-04T15:00:00',
-    pickup_location: 'Rockridge Cafe',
-  },
-  {
-    id: 3,
-    encrypted_id: 'mock-encrypted-id-3',
-    slot_start_time: '2026-02-04T15:00:00',
-    slot_end_time: '2026-02-04T18:00:00',
-    pickup_location: "Bongo's Burgers",
-  },
-  {
-    id: 4,
-    encrypted_id: 'mock-encrypted-id-4',
-    slot_start_time: '2026-02-04T16:00:00',
-    slot_end_time: '2026-02-04T19:00:00',
-    pickup_location: 'Kingman Hall',
-  },
-  // Tomorrow's tasks (Feb 5, 2026)
-  {
-    id: 5,
-    encrypted_id: 'mock-encrypted-id-5',
-    slot_start_time: '2026-02-05T08:00:00',
-    slot_end_time: '2026-02-05T10:00:00',
-    pickup_location: 'Golden Bear Cafe',
-  },
-  {
-    id: 6,
-    encrypted_id: 'mock-encrypted-id-6',
-    slot_start_time: '2026-02-05T11:00:00',
-    slot_end_time: '2026-02-05T13:00:00',
-    pickup_location: 'Crossroads Dining',
-  },
-  {
-    id: 7,
-    encrypted_id: 'mock-encrypted-id-7',
-    slot_start_time: '2026-02-05T14:00:00',
-    slot_end_time: '2026-02-05T16:00:00',
-    pickup_location: 'Cafe 3',
-  },
-  {
-    id: 8,
-    encrypted_id: 'mock-encrypted-id-8',
-    slot_start_time: '2026-02-05T17:00:00',
-    slot_end_time: '2026-02-05T19:00:00',
-    pickup_location: 'Foothill Dining',
-  },
-];
+function localISODate(d: Date) {
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
+}
 
 // datetime helpers
 
@@ -149,17 +94,19 @@ type ApiTask = {
 type UiPickup = {
   id: number;
   encrypted_id: string;
+  pickup_date: string;
   slot_start_time: string | null;
   slot_end_time: string | null;
   pickup_location: string;
 };
 
 export default function AvailablePickupsPage() {
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = localISODate(new Date());
+
   const tomorrowISO = React.useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
+    return localISODate(d);
   }, []);
 
   const [tab, setTab] = React.useState<'left' | 'right'>('left');
@@ -194,22 +141,14 @@ export default function AvailablePickupsPage() {
           },
         );
 
-        const mapped = data.map(t => {
-          // Construct full datetime strings from date and time
-          const dateStr = t.pickup_date; // Should be like "2026-02-04"
-          const startDateTime = t.start_time
-            ? `${dateStr}T${t.start_time}`
-            : null;
-          const endDateTime = t.end_time ? `${dateStr}T${t.end_time}` : null;
-
-          return {
-            id: t.id,
-            encrypted_id: t.encrypted_id,
-            slot_start_time: startDateTime,
-            slot_end_time: endDateTime,
-            pickup_location: t.location_name ?? 'Unknown location',
-          };
-        });
+        const mapped: UiPickup[] = data.map(t => ({
+          id: t.id,
+          encrypted_id: t.encrypted_id,
+          pickup_date: t.pickup_date,
+          slot_start_time: t.start_time,
+          slot_end_time: t.end_time,
+          pickup_location: t.location_name ?? 'Unknown location',
+        }));
 
         await AsyncStorage.setItem('tasks', JSON.stringify(mapped));
         setRemote(mapped);
@@ -246,15 +185,9 @@ export default function AvailablePickupsPage() {
   }, [fetchTasks]);
 
   // Use API data if available, otherwise use mock data
-  const source = remote && remote.length > 0 ? remote : MOCK_PICKUPS;
+  const source = remote ?? [];
   const filtered = React.useMemo(
-    () =>
-      source.filter(p => {
-        if (!p.slot_start_time) return false;
-        // Extract just the date part (YYYY-MM-DD) from the datetime
-        const taskDate = p.slot_start_time.slice(0, 10);
-        return taskDate === selectedISO;
-      }),
+    () => source.filter(p => p.pickup_date === selectedISO),
     [source, selectedISO],
   );
 
