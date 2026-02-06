@@ -12,16 +12,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import checkIcon from 'assets/check-icon.png';
 import dateIcon from 'assets/date.png';
+import { useAuth } from '@/utils/AuthContext';
 import { apiRequest, validateResponse } from '~/api/apiUtils';
-import { API_ENDPOINTS, BASE_URL } from '~/api/config';
+import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
 import { styles } from '../../styles/pages/pickup-details-styles';
 
 type TaskDetails = {
   id: number;
+  encrypted_id?: string;
   pickup_date: string;
   start_time: string | null;
   end_time: string | null;
@@ -64,6 +66,28 @@ const MOCK_TASK: TaskDetails = {
   tray_type: 'Sandwiches & Salad',
   tray_count: 15,
 };
+
+function toISODateTime(
+  date: string | null | undefined,
+  time: string | null | undefined,
+) {
+  if (!date || !time) return null;
+
+  // already ISO
+  if (time.includes('T')) return time;
+
+  // "13:00" → "2026-02-06T13:00:00"
+  if (/^\d{2}:\d{2}$/.test(time)) {
+    return `${date}T${time}:00`;
+  }
+
+  // "2026-02-06 13:00:00 UTC"
+  if (time.includes('UTC')) {
+    return time.replace(' ', 'T').replace(' UTC', 'Z');
+  }
+
+  return null;
+}
 
 function formatPhoneNumber(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
@@ -120,6 +144,36 @@ export default function PickupDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [isTaskAdded, setIsTaskAdded] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
+  const { driver } = useAuth();
+
+  const handleClaim = async () => {
+    const driverId = driver?.id;
+    const token = Array.isArray(id) ? id[0] : id;
+
+    console.log('CLAIM driver.id', driverId);
+    console.log('CLAIM token used', token);
+
+    try {
+      if (!driverId) throw new Error('No driver session');
+      if (!token) throw new Error('Missing task id');
+
+      await claimTask(token, driverId);
+
+      Toast.show({ type: 'success', text1: 'Pickup claimed!' });
+      router.replace('/(tabs)/my-tasks');
+    } catch (e: any) {
+      const message = e?.message ?? 'Unknown error';
+      const extra =
+        Array.isArray(e?.errors) && e.errors.length
+          ? ` • ${e.errors.join(', ')}`
+          : '';
+      Toast.show({
+        type: 'error',
+        text1: 'Could not claim pickup',
+        text2: `${message}${extra}`,
+      });
+    }
+  };
 
   React.useEffect(() => {
     let cancelled = false;
@@ -135,22 +189,48 @@ export default function PickupDetails() {
 
         const data = await apiRequest<TaskDetails | TaskDetails[]>(url, {
           method: 'GET',
-          validateResponse: response => {
-            if (Array.isArray(response)) {
-              return (
-                response.length > 0 &&
-                validateResponse(response[0], ['id', 'pickup_date'])
-              );
-            }
-            return validateResponse(response, ['id', 'pickup_date']);
+          validateResponse: r => {
+            if (!r || typeof r !== 'object') return false;
+            const obj = r as any;
+            return (
+              typeof obj.id === 'number' &&
+              (typeof obj.pickup_date === 'string' ||
+                typeof obj.scheduled_date === 'string')
+            );
           },
         });
 
-        const taskData: TaskDetails = Array.isArray(data) ? data[0] : data;
+        const raw: any = Array.isArray(data) ? data[0] : data;
 
-        if (!cancelled) {
-          setTask(taskData);
-        }
+        const pickupDate = raw.pickup_date ?? raw.scheduled_date ?? null;
+
+        const startISO = toISODateTime(
+          pickupDate,
+          raw.start_time ?? raw.activity_start_time ?? null,
+        );
+
+        const endISO = toISODateTime(
+          pickupDate,
+          raw.end_time ?? raw.activity_end_time ?? null,
+        );
+
+        const taskData: TaskDetails = {
+          id: raw.id,
+          encrypted_id: raw.encrypted_id,
+          pickup_date: pickupDate ?? '',
+          start_time: startISO,
+          end_time: endISO,
+          location_name: raw.location_name ?? null,
+          address: raw.address ?? null,
+          description: raw.description ?? null,
+          contact_name: raw.contact_name ?? null,
+          contact_phone: raw.contact_phone ?? null,
+          contact_email: raw.contact_email ?? null,
+          tray_type: raw.tray_type ?? null,
+          tray_count: raw.tray_count ?? null,
+        };
+
+        setTask(taskData);
       } catch {
         if (!cancelled) {
           // Use mock data for development
@@ -470,10 +550,7 @@ export default function PickupDetails() {
             <Text style={styles.progressButtonText}>Task in progress</Text>
           </View>
         ) : (
-          <TouchableOpacity
-            style={styles.claimButton}
-            onPress={handleAddToTasks}
-          >
+          <TouchableOpacity style={styles.claimButton} onPress={handleClaim}>
             <Text style={styles.claimButtonText}>
               Claim before{' '}
               {task.end_time

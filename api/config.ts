@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   RESET_PASSWORD: '/api/drivers/password',
   PARTNERS: '/api/partners',
   TASKS: '/api/tasks',
+  MY_TASKS: '/api/my_tasks',
 } as const;
 
 // Types for driver auth
@@ -412,4 +413,17 @@ export async function updateDriverPartner(
     Alert.alert('Error', errorMsg);
     return null;
   }
+}
+
+export async function claimTask(encryptedTaskId: string, driverId: number) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+
+  return apiRequest(`${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/claim`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ driver_id: driverId }),
+  });
 }

@@ -111,36 +111,35 @@ export default function MyTasksPage() {
     day: 'numeric',
   });
 
-  const fetchTasks = useCallback(async (isRefresh = false) => {
-    try {
-      if (!isRefresh) {
-        setIsLoading(true);
+  const fetchTasks = useCallback(
+    async (isRefresh = false) => {
+      if (!driver?.id) {
+        setTasks([]);
+        setIsLoading(false);
+        return;
       }
-      setError(null);
 
-      // Fetch driver's assigned tasks from API
-      const data = await apiRequest<Task[]>(
-        `${BASE_URL}${API_ENDPOINTS.TASKS}`,
-        {
-          method: 'GET',
-          validateResponse: response => validateArrayResponse(response),
-        },
-      );
+      try {
+        if (!isRefresh) setIsLoading(true);
+        setError(null);
 
-      // Filter for tasks assigned to this driver (you may need to adjust this logic based on your API)
-      // For now, we'll show all tasks
-      setTasks(data);
-    } catch (e: unknown) {
-      const errorMessage =
-        e instanceof ApiError ? e.message : 'Failed to load tasks';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-      if (isRefresh) {
-        setIsRefreshing(false);
+        const data = await apiRequest<Task[]>(
+          `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}`,
+          { method: 'GET', validateResponse: validateArrayResponse },
+        );
+
+        setTasks(data);
+      } catch (e: unknown) {
+        const errorMessage =
+          e instanceof ApiError ? e.message : 'Failed to load tasks';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+        if (isRefresh) setIsRefreshing(false);
       }
-    }
-  }, []);
+    },
+    [driver?.id],
+  );
 
   useEffect(() => {
     fetchTasks();
@@ -235,9 +234,13 @@ export default function MyTasksPage() {
                     <TouchableOpacity
                       style={[styles.button, styles.buttonOutline]}
                       onPress={() =>
-                        router.push(
-                          `/pickup-details/${task.encrypted_id}?location=${task.location_name}`,
-                        )
+                        router.push({
+                          pathname: '/pickup-details/[id]',
+                          params: {
+                            id: task.encrypted_id,
+                            location: task.location_name ?? '',
+                          },
+                        })
                       }
                     >
                       <Text
@@ -250,9 +253,13 @@ export default function MyTasksPage() {
                     <TouchableOpacity
                       style={[styles.button, styles.buttonFilled]}
                       onPress={() =>
-                        router.push(
-                          `/donation-details/${task.encrypted_id}?location=${task.location_name}`,
-                        )
+                        router.push({
+                          pathname: '/donation-details/[id]',
+                          params: {
+                            id: task.encrypted_id,
+                            location: task.location_name ?? '',
+                          },
+                        })
                       }
                     >
                       <Text

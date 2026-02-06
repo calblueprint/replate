@@ -149,6 +149,10 @@ export default function AvailablePickupsPage() {
           slot_end_time: t.end_time,
           pickup_location: t.location_name ?? 'Unknown location',
         }));
+        console.log(
+          'encrypted_ids:',
+          mapped.map(t => t.encrypted_id),
+        );
 
         await AsyncStorage.setItem('tasks', JSON.stringify(mapped));
         setRemote(mapped);
@@ -205,7 +209,7 @@ export default function AvailablePickupsPage() {
     <SafeAreaView style={styles.safeAreaContainer}>
       <FlatList
         data={filtered}
-        keyExtractor={item => String(item.id)}
+        keyExtractor={item => item.encrypted_id}
         contentContainerStyle={styles.contentContainer}
         refreshControl={
           <RefreshControl
