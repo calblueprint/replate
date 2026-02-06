@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { getPartners } from '../../../api/config';
 import { myAccountStyles } from '../../styles/tabs/my-account-styles';
 import { useAuth } from '../../utils/AuthContext';
 import { useProfile } from '../../utils/ProfileContext';
@@ -9,6 +10,21 @@ import { useProfile } from '../../utils/ProfileContext';
 export default function MyAccountPage() {
   const { driver, logout } = useAuth();
   const { profile } = useProfile();
+  const [partners, setPartners] = useState<[number, string][]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await getPartners();
+        setPartners(list as [number, string][]);
+      } catch (e) {
+        console.log('failed to load partners', e);
+      }
+    })();
+  }, []);
+
+  const partnerName =
+    partners.find(([id]) => id === profile?.partner_id)?.[1] ?? '—';
 
   const handleLogout = () => {
     logout();
@@ -25,9 +41,6 @@ export default function MyAccountPage() {
     }
     return 'U';
   };
-
-  console.log('profile:', profile);
-  console.log('driver:', driver);
 
   return (
     <SafeAreaView style={myAccountStyles.container}>
@@ -84,9 +97,7 @@ export default function MyAccountPage() {
         <View style={myAccountStyles.fieldContainerLast}>
           <Text style={myAccountStyles.fieldLabel}>NPO</Text>
           <View style={myAccountStyles.fieldBox}>
-            <Text style={myAccountStyles.fieldTextDark}>
-              {profile?.first_name}
-            </Text>
+            <Text style={myAccountStyles.fieldTextDark}>{partnerName}</Text>
           </View>
         </View>
 
