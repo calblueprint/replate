@@ -66,8 +66,8 @@ echo -e "${BLUE}Setting up Rails backend...${NC}"
 cd "$RAILS_DIR" || exit
 
 # Clear old test data and seed fresh data
-echo -e "${YELLOW}Clearing old test data...${NC}"
-bundle exec rails db:seed:clear_test 2>/dev/null || echo "  No clear_test task found"
+# echo -e "${YELLOW}Clearing old test data...${NC}"
+# bundle exec rails db:seed:clear_test 2>/dev/null || echo "  No clear_test task found"
 
 echo -e "${YELLOW}Seeding fresh test data with current dates...${NC}"
 bundle exec rails db:complete_seed
@@ -77,8 +77,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Start Rails server in background
-echo -e "${GREEN}Starting Rails server on http://localhost:3000${NC}"
-bundle exec rails server -d
+echo -e "${GREEN}Starting Rails server on http://10.43.52.219:3000${NC}"
+bundle exec rails server -b 0.0.0.0 -p 3000 -d
 
 # Give Rails a moment to start
 sleep 2
@@ -106,7 +106,7 @@ echo ""
 echo -e "${GREEN}✅ Development environment ready!${NC}"
 echo ""
 echo "📱 Mobile App: Scan QR code or press 'i' for iOS simulator"
-echo "🌐 Rails API: http://localhost:3000"
+echo "🌐 Rails API: http://10.43.52.219:3000"
 echo ""
 echo "🔑 Test Login:"
 echo "   Email: test@driver.com"

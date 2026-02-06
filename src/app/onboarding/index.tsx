@@ -10,22 +10,38 @@ import { useAuth } from '~/src/utils/AuthContext';
 import { styles } from '../../styles/pages/onboarding-styles';
 
 export default function OnboardingFlow() {
+  type PartnerTuple = [number, string];
+  type PickerItem = { label: string; value: number };
+
   const { driver } = useAuth();
-  const [partners, setPartners] = useState<Array<[number, string]>>([]);
+  const [partners, setPartners] = useState<PartnerTuple[]>([]);
+  const [selectedNPOId, setSelectedNPOId] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
-  const [selectedNPOId, setSelectedNPOId] = useState(0);
-  const [items, setItems] = useState([{}]);
+  const [items, setItems] = useState<PickerItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const disabled = selectedNPOId == null || isUpdating;
 
   useEffect(() => {
     (async () => {
       try {
         setIsLoading(true);
         setError(null);
+
         const partnersList = await getPartners();
-        setPartners(partnersList as Array<[number, string]>);
+
+        const safePartners: PartnerTuple[] = Array.isArray(partnersList)
+          ? (partnersList as unknown[]).filter((x): x is PartnerTuple => {
+              return (
+                Array.isArray(x) &&
+                typeof x[0] === 'number' &&
+                typeof x[1] === 'string'
+              );
+            })
+          : [];
+
+        setPartners(safePartners);
       } catch (err) {
         const errorMessage =
           err instanceof ApiError ? err.message : 'Failed to load partners';
@@ -38,18 +54,16 @@ export default function OnboardingFlow() {
   }, []);
 
   useEffect(() => {
-    setItems(partners.map(npo => ({ label: npo[1], value: npo[0] })));
+    setItems(partners.map(([id, name]) => ({ label: name, value: id })));
   }, [partners]);
 
   const handleUpdatePress = async () => {
-    if (!driver || selectedNPOId === 0) return;
+    if (!driver || selectedNPOId == null) return;
 
     try {
       setIsUpdating(true);
       await updateDriverPartner(driver.id, selectedNPOId);
       router.replace('/(tabs)/my-tasks');
-    } catch {
-      // Error is handled by updateDriverPartner with Alert
     } finally {
       setIsUpdating(false);
     }
@@ -121,14 +135,13 @@ export default function OnboardingFlow() {
           zIndex={1000}
         />
       </View>
+
       <Pressable
         style={[
           styles.buttonBase,
-          selectedNPOId === 0 || isUpdating
-            ? styles.buttonDisabled
-            : styles.buttonEnabled,
+          disabled ? styles.buttonDisabled : styles.buttonEnabled,
         ]}
-        disabled={selectedNPOId === 0 || isUpdating}
+        disabled={disabled}
         onPress={() => void handleUpdatePress()}
       >
         {isUpdating ? (
