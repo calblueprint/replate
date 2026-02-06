@@ -1,10 +1,17 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import {
   apiRequest,
   ApiError as ApiUtilError,
   validateResponse,
 } from '../../api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '../../api/config';
+import { useAuth } from './AuthContext';
 
 // Extended driver profile interface to include NPO/partner information
 export interface DriverProfile {
@@ -35,6 +42,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
   const [profile, setProfileState] = useState<DriverProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { driver } = useAuth();
 
   const setProfile = (newProfile: DriverProfile | null) => {
     setProfileState(newProfile);
@@ -85,6 +93,14 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     setProfileState(null);
     setError(null);
   };
+
+  useEffect(() => {
+    if (driver?.id) {
+      refreshProfile(driver.id);
+    } else {
+      clearProfile();
+    }
+  }, [driver?.id]);
 
   const value: ProfileContextType = {
     profile,
