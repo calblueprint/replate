@@ -182,13 +182,15 @@ export async function apiRequest<T = unknown>(
 
       // Sanitize response to prevent prototype pollution
       if (sanitize && typeof data === 'object' && data !== null) {
-        data = Array.isArray(data)
-          ? data.map(item =>
-              typeof item === 'object' && item !== null
-                ? sanitizeObject(item)
-                : item,
-            )
-          : sanitizeObject(data);
+        if (Array.isArray(data)) {
+          data = data.map(item =>
+            typeof item === 'object' && item !== null && !Array.isArray(item)
+              ? sanitizeObject(item)
+              : item,
+          );
+        } else {
+          data = sanitizeObject(data);
+        }
       }
 
       // Validate response structure if validator provided

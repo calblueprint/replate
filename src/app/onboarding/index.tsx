@@ -30,6 +30,7 @@ export default function OnboardingFlow() {
         setError(null);
 
         const partnersList = await getPartners();
+        console.log('partnersList:', partnersList);
 
         const safePartners: PartnerTuple[] = Array.isArray(partnersList)
           ? (partnersList as unknown[]).filter((x): x is PartnerTuple => {
@@ -42,6 +43,7 @@ export default function OnboardingFlow() {
           : [];
 
         setPartners(safePartners);
+        console.log('safePartners:', safePartners);
       } catch (err) {
         const errorMessage =
           err instanceof ApiError ? err.message : 'Failed to load partners';
@@ -119,13 +121,10 @@ export default function OnboardingFlow() {
           value={selectedNPOId}
           items={items}
           setOpen={setOpen}
-          setValue={setSelectedNPOId}
+          setValue={cb => setSelectedNPOId(cb(selectedNPOId))}
           setItems={setItems}
           placeholder="Select an NPO"
-          style={[
-            styles.dropdownStyle,
-            open && styles.dropdownOpenStyle, // apply green outline when open
-          ]}
+          style={[styles.dropdownStyle, open && styles.dropdownOpenStyle]}
           placeholderStyle={styles.placeholderStyle}
           dropDownContainerStyle={styles.dropdownListStyle}
           listItemContainerStyle={styles.itemContainerStyle}
