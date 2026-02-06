@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import checkIcon from 'assets/check-icon.png';
 import dateIcon from 'assets/date.png';
 import { useAuth } from '@/utils/AuthContext';
-import { apiRequest, validateResponse } from '~/api/apiUtils';
+import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
 import { styles } from '../../styles/pages/pickup-details-styles';
 
@@ -247,15 +247,6 @@ export default function PickupDetails() {
       cancelled = true;
     };
   }, [id]);
-
-  const handleAddToTasks = () => {
-    setIsTaskAdded(true);
-    Toast.show({
-      type: 'success',
-      text1: 'Added to My Tasks',
-      text2: 'You can view this pickup in your tasks',
-    });
-  };
 
   const handleUndoAdd = () => {
     setIsTaskAdded(false);
