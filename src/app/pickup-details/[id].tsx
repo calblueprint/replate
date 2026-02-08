@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import checkIcon from 'assets/check-icon.png';
 import dateIcon from 'assets/date.png';
 import { useAuth } from '@/utils/AuthContext';
@@ -24,6 +25,7 @@ import { styles } from '../../styles/pages/pickup-details-styles';
 type TaskDetails = {
   id: number;
   encrypted_id?: string;
+  driver_id?: number | null;
   pickup_date: string;
   start_time: string | null;
   end_time: string | null;
@@ -158,6 +160,7 @@ export default function PickupDetails() {
       if (!token) throw new Error('Missing task id');
 
       await claimTask(token, driverId);
+      await AsyncStorage.removeItem('tasks');
 
       Toast.show({ type: 'success', text1: 'Pickup claimed!' });
       router.replace('/(tabs)/my-tasks');
@@ -217,6 +220,7 @@ export default function PickupDetails() {
         const taskData: TaskDetails = {
           id: raw.id,
           encrypted_id: raw.encrypted_id,
+          driver_id: raw.driver_id ?? null,
           pickup_date: pickupDate ?? '',
           start_time: startISO,
           end_time: endISO,
@@ -530,33 +534,37 @@ export default function PickupDetails() {
 
       {/* Bottom Button */}
       <View style={styles.bottomContainer}>
-        {isTaskAdded ? (
-          <View style={styles.progressButton}>
-            <Ionicons
-              name="time-outline"
-              size={20}
-              color="#059669"
-              style={{ marginRight: 8 }}
-            />
-            <Text style={styles.progressButtonText}>Task in progress</Text>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.claimButton} onPress={handleClaim}>
-            <Text style={styles.claimButtonText}>
-              Claim before{' '}
-              {task.end_time
-                ? (() => {
-                    const [hours, minutes] = task.end_time
-                      .split(':')
-                      .map(n => parseInt(n, 10));
-                    const ampm = hours >= 12 ? 'pm' : 'am';
-                    const displayHours = hours % 12 || 12;
-                    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-                  })()
-                : '4:00 pm'}
-            </Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.bottomContainer}>
+          {task.driver_id ? (
+            <View style={styles.progressButton}>
+              <Ionicons
+                name="time-outline"
+                size={20}
+                color="#059669"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.progressButtonText}>Task in progress</Text>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.claimButton} onPress={handleClaim}>
+              <Text style={styles.claimButtonText}>
+                Claim{' '}
+                {task.end_time
+                  ? (() => {
+                      const [hours, minutes] = task.end_time
+                        .split(':')
+                        .map(n => parseInt(n, 10));
+                      const ampm = hours >= 12 ? 'pm' : 'am';
+                      const displayHours = hours % 12 || 12;
+                      return `${displayHours}:${minutes
+                        .toString()
+                        .padStart(2, '0')} ${ampm}`;
+                    })()
+                  : ''}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Map Options Modal */}
