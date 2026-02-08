@@ -13,6 +13,7 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clockIcon from 'assets/date.png';
 import replateLogo from 'assets/replate-logo.png';
+import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import { safeJsonParse } from '~/src/utils/sanitization';
@@ -126,29 +127,23 @@ export default function AvailablePickupsPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const { driver } = useAuth();
+  const driverId = driver?.id;
+
+  const remoteRef = React.useRef<UiPickup[] | null>(null);
+  React.useEffect(() => {
+    remoteRef.current = remote;
+  }, [remote]);
 
   const fetchTasks = React.useCallback(
     async (isRefresh = false) => {
       try {
-        if (!isRefresh) {
-          setIsLoading(true);
-        }
+        if (!isRefresh) setIsLoading(true);
         setError(null);
 
-        // Load cached data first
-        const savedTasks = await AsyncStorage.getItem('tasks');
-        if (savedTasks && !remote) {
-          const parsed = safeJsonParse<UiPickup[]>(savedTasks, []);
-          setRemote(parsed);
-        }
-
-        // Fetch fresh data from API
         const data = await apiRequest<ApiTask[]>(
-          `${BASE_URL}${API_ENDPOINTS.TASKS}`,
-          {
-            method: 'GET',
-            validateResponse: response => validateArrayResponse(response),
-          },
+          `${BASE_URL}${API_ENDPOINTS.TASKS}?driver_id=${driverId}`,
+          { method: 'GET', validateResponse: validateArrayResponse },
         );
 
         const mapped: UiPickup[] = data.map(t => ({
@@ -159,39 +154,27 @@ export default function AvailablePickupsPage() {
           slot_end_time: t.end_time,
           pickup_location: t.location_name ?? 'Unknown location',
         }));
-        console.log(
-          'encrypted_ids:',
-          mapped.map(t => t.encrypted_id),
-        );
 
         await AsyncStorage.setItem('tasks', JSON.stringify(mapped));
         setRemote(mapped);
-      } catch (e: unknown) {
-        const errorMessage =
-          e instanceof ApiError ? e.message : getErrorMessage(e);
-        setError(errorMessage);
+      } catch (e) {
+        setError(e instanceof ApiError ? e.message : getErrorMessage(e));
 
-        // If fetch fails and we don't have data, try to load from cache
-        if (!remote) {
-          const savedTasks = await AsyncStorage.getItem('tasks');
-          if (savedTasks) {
-            const parsed = safeJsonParse<UiPickup[]>(savedTasks, []);
-            setRemote(parsed);
-          }
-        }
+        // only show cache on error
+        const saved = await AsyncStorage.getItem('tasks');
+        if (saved) setRemote(safeJsonParse<UiPickup[]>(saved, []));
       } finally {
         setIsLoading(false);
-        if (isRefresh) {
-          setIsRefreshing(false);
-        }
+        if (isRefresh) setIsRefreshing(false);
       }
     },
-    [remote],
+    [driverId],
   );
 
   React.useEffect(() => {
+    if (!driverId) return;
     fetchTasks();
-  }, []);
+  }, [driverId, fetchTasks]);
 
   const handleRefresh = React.useCallback(() => {
     setIsRefreshing(true);
