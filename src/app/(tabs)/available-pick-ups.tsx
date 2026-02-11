@@ -56,14 +56,6 @@ function fmtHM12(h: number, m: number) {
   return `${hr12}:${String(m).padStart(2, '0')} ${ap}`;
 }
 
-function formatTimeRange(startTime: string | null, endTime: string | null) {
-  if (!startTime || !endTime) return 'Time TBD';
-  const s = parseHM(startTime);
-  const e = parseHM(endTime);
-  if (!s || !e) return 'Time TBD';
-  return `${fmtHM12(s.h, s.m)} - ${fmtHM12(e.h, e.m)}`;
-}
-
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
