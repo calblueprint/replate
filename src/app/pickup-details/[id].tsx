@@ -70,35 +70,6 @@ const MOCK_TASK: TaskDetails = {
   tray_count: 15,
 };
 
-function formatTimeRange(
-  startTime: string | null,
-  endTime: string | null,
-): string {
-  if (!startTime || !endTime) return 'Time TBD';
-
-  try {
-    // Parse time strings like "09:00" or "14:30"
-    const parseTime = (timeStr: string) => {
-      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
-      if (isNaN(hours) || isNaN(minutes)) return null;
-
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      const displayMinutes = minutes.toString().padStart(2, '0');
-      return `${displayHours}:${displayMinutes} ${ampm}`;
-    };
-
-    const startFormatted = parseTime(startTime);
-    const endFormatted = parseTime(endTime);
-
-    if (!startFormatted || !endFormatted) return 'Time TBD';
-
-    return `${startFormatted} - ${endFormatted}`;
-  } catch {
-    return 'Time TBD';
-  }
-}
-
 function formatPhoneNumber(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
