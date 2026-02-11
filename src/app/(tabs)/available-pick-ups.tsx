@@ -27,35 +27,6 @@ function localISODate(d: Date) {
 
 // datetime helpers
 
-function parseHM(ts: string): { h: number; m: number } | null {
-  const s = ts.trim();
-
-  // "YYYY-MM-DD HH:MM:SS UTC"
-  if (s.includes('UTC')) {
-    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-
-  // ISO like "YYYY-MM-DDTHH:MM:SSZ"
-  if (s.includes('T')) {
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-
-  // "HH:MM" or "HH:MM:SS"
-  const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-  if (!m) return null;
-  return { h: Number(m[1]), m: Number(m[2]) };
-}
-
-function fmtHM12(h: number, m: number) {
-  const ap = h >= 12 ? 'pm' : 'am';
-  const hr12 = h % 12 || 12;
-  return `${hr12}:${String(m).padStart(2, '0')} ${ap}`;
-}
-
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
