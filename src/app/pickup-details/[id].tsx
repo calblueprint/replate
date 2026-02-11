@@ -37,8 +37,9 @@ type TaskDetails = {
     city?: string | null;
     state?: string | null;
     zip?: string | null;
-    comments?: string | null;
   } | null;
+  building_access_instructions?: string | null;
+  location?: { comments: string | null };
   contact_name?: string | null;
   contact_phone?: string | null;
   contact_email?: string | null;
@@ -60,45 +61,14 @@ const MOCK_TASK: TaskDetails = {
     city: 'Oakland',
     state: 'CA',
     zip: '94618',
-    comments: 'Call when you arrive - ask for manager on duty',
   },
+  location: { comments: 'Call when you arrive - ask for manager on duty' },
   contact_name: 'Davina Chan',
   contact_phone: '669-222-7871',
   contact_email: 'rockridgecafehere@gmail.com',
   tray_type: 'Sandwiches & Salad',
   tray_count: 15,
 };
-
-function toISODateTime(
-  date: string | null | undefined,
-  time: string | null | undefined,
-) {
-  if (!date || !time) return null;
-
-  // already ISO
-  if (time.includes('T')) return time;
-
-  // "13:00" → "2026-02-06T13:00:00"
-  if (/^\d{2}:\d{2}$/.test(time)) {
-    return `${date}T${time}:00`;
-  }
-
-  // "2026-02-06 13:00:00 UTC"
-  if (time.includes('UTC')) {
-    return time.replace(' ', 'T').replace(' UTC', 'Z');
-  }
-
-  return null;
-}
-
-function formatPhoneNumber(phone: string): string {
-  const cleaned = phone.replace(/\D/g, '');
-  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-  if (match) {
-    return `${match[1]}-${match[2]}-${match[3]}`;
-  }
-  return phone;
-}
 
 function formatTimeRange(
   startTime: string | null,
@@ -107,13 +77,15 @@ function formatTimeRange(
   if (!startTime || !endTime) return 'Time TBD';
 
   try {
+    // Parse time strings like "09:00" or "14:30"
     const parseTime = (timeStr: string) => {
       const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
       if (isNaN(hours) || isNaN(minutes)) return null;
 
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const displayHours = hours % 12 || 12;
-      return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm.toLowerCase()}`;
+      const displayMinutes = minutes.toString().padStart(2, '0');
+      return `${displayHours}:${displayMinutes} ${ampm}`;
     };
 
     const startFormatted = parseTime(startTime);
@@ -127,6 +99,15 @@ function formatTimeRange(
   }
 }
 
+function formatPhoneNumber(phone: string): string {
+  const cleaned = phone.replace(/\D/g, '');
+  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+  if (match) {
+    return `${match[1]}-${match[2]}-${match[3]}`;
+  }
+  return phone;
+}
+
 function formatPickupDate(dateStr: string): string {
   try {
     const date = new Date(dateStr + 'T00:00:00');
@@ -137,6 +118,43 @@ function formatPickupDate(dateStr: string): string {
   } catch {
     return dateStr;
   }
+}
+
+function parseHMAny(ts: string): { h: number; m: number } | null {
+  const s = ts.trim();
+
+  // "YYYY-MM-DD HH:MM:SS UTC"
+  if (s.includes('UTC')) {
+    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
+    if (isNaN(d.getTime())) return null;
+    return { h: d.getHours(), m: d.getMinutes() };
+  }
+
+  // ISO "YYYY-MM-DDTHH:MM:SSZ"
+  if (s.includes('T')) {
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return null;
+    return { h: d.getHours(), m: d.getMinutes() };
+  }
+
+  // "HH:MM" or "HH:MM:SS"
+  const m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (!m) return null;
+  return { h: Number(m[1]), m: Number(m[2]) };
+}
+
+function fmt12(h: number, m: number) {
+  const ap = h >= 12 ? 'PM' : 'AM';
+  const hr12 = h % 12 || 12;
+  return `${hr12}:${String(m).padStart(2, '0')} ${ap}`;
+}
+
+function formatTimeRangeAny(startTime: string | null, endTime: string | null) {
+  if (!startTime || !endTime) return 'Time TBD';
+  const s = parseHMAny(startTime);
+  const e = parseHMAny(endTime);
+  if (!s || !e) return 'Time TBD';
+  return `${fmt12(s.h, s.m)} - ${fmt12(e.h, e.m)}`;
 }
 
 export default function PickupDetails() {
@@ -190,48 +208,40 @@ export default function PickupDetails() {
         const token = Array.isArray(id) ? id[0] : id;
         const url = `${BASE_URL}${API_ENDPOINTS.TASKS}/${encodeURIComponent(token ?? '')}`;
 
-        const data = await apiRequest<TaskDetails | TaskDetails[]>(url, {
+        const data = await apiRequest<TaskDetails>(url, {
           method: 'GET',
           validateResponse: r => {
-            if (!r || typeof r !== 'object') return false;
+            if (!r || typeof r !== 'object' || Array.isArray(r)) return false;
             const obj = r as any;
-            return (
-              typeof obj.id === 'number' &&
-              (typeof obj.pickup_date === 'string' ||
-                typeof obj.scheduled_date === 'string')
-            );
+            return typeof obj.id === 'number';
           },
         });
 
-        const raw: any = Array.isArray(data) ? data[0] : data;
+        const raw = data as any;
 
         const pickupDate = raw.pickup_date ?? raw.scheduled_date ?? null;
 
-        const startISO = toISODateTime(
-          pickupDate,
-          raw.start_time ?? raw.activity_start_time ?? null,
-        );
-
-        const endISO = toISODateTime(
-          pickupDate,
-          raw.end_time ?? raw.activity_end_time ?? null,
-        );
+        const startHM = raw.start_time ?? raw.activity_start_time ?? null;
+        const endHM = raw.end_time ?? raw.activity_end_time ?? null;
 
         const taskData: TaskDetails = {
           id: raw.id,
           encrypted_id: raw.encrypted_id,
           driver_id: raw.driver_id ?? null,
           pickup_date: pickupDate ?? '',
-          start_time: startISO,
-          end_time: endISO,
+          start_time: startHM,
+          end_time: endHM,
           location_name: raw.location_name ?? null,
           address: raw.address ?? null,
+          building_access_instructions:
+            raw.building_access_instructions ?? null,
           description: raw.description ?? null,
           contact_name: raw.contact_name ?? null,
           contact_phone: raw.contact_phone ?? null,
           contact_email: raw.contact_email ?? null,
           tray_type: raw.tray_type ?? null,
           tray_count: raw.tray_count ?? null,
+          location: raw.location ?? null,
         };
 
         setTask(taskData);
@@ -428,7 +438,7 @@ export default function PickupDetails() {
               <Text style={styles.infoLabel}>Pick-up Window</Text>
               <Text style={styles.infoValue}>
                 {formatPickupDate(task.pickup_date)}:{' '}
-                {formatTimeRange(task.start_time, task.end_time)}
+                {formatTimeRangeAny(task.start_time, task.end_time)}
               </Text>
             </View>
           </View>
@@ -520,7 +530,9 @@ export default function PickupDetails() {
             <Text style={styles.descriptionLabel}>
               Building access instructions
             </Text>
-            <Text style={styles.descriptionValue}>{addr?.comments || '—'}</Text>
+            <Text style={styles.descriptionValue}>
+              {task.building_access_instructions ?? '—'}
+            </Text>
           </View>
 
           <View style={styles.descriptionRow}>
@@ -548,17 +560,11 @@ export default function PickupDetails() {
           ) : (
             <TouchableOpacity style={styles.claimButton} onPress={handleClaim}>
               <Text style={styles.claimButtonText}>
-                Claim{' '}
+                Claim by{' '}
                 {task.end_time
                   ? (() => {
-                      const [hours, minutes] = task.end_time
-                        .split(':')
-                        .map(n => parseInt(n, 10));
-                      const ampm = hours >= 12 ? 'pm' : 'am';
-                      const displayHours = hours % 12 || 12;
-                      return `${displayHours}:${minutes
-                        .toString()
-                        .padStart(2, '0')} ${ampm}`;
+                      const hm = parseHMAny(task.end_time);
+                      return hm ? fmt12(hm.h, hm.m) : '';
                     })()
                   : ''}
               </Text>

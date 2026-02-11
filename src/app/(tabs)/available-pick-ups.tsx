@@ -27,6 +27,43 @@ function localISODate(d: Date) {
 
 // datetime helpers
 
+function parseHM(ts: string): { h: number; m: number } | null {
+  const s = ts.trim();
+
+  // "YYYY-MM-DD HH:MM:SS UTC"
+  if (s.includes('UTC')) {
+    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
+    if (isNaN(d.getTime())) return null;
+    return { h: d.getHours(), m: d.getMinutes() };
+  }
+
+  // ISO like "YYYY-MM-DDTHH:MM:SSZ"
+  if (s.includes('T')) {
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return null;
+    return { h: d.getHours(), m: d.getMinutes() };
+  }
+
+  // "HH:MM" or "HH:MM:SS"
+  const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  return { h: Number(m[1]), m: Number(m[2]) };
+}
+
+function fmtHM12(h: number, m: number) {
+  const ap = h >= 12 ? 'pm' : 'am';
+  const hr12 = h % 12 || 12;
+  return `${hr12}:${String(m).padStart(2, '0')} ${ap}`;
+}
+
+function formatTimeRange(startTime: string | null, endTime: string | null) {
+  if (!startTime || !endTime) return 'Time TBD';
+  const s = parseHM(startTime);
+  const e = parseHM(endTime);
+  if (!s || !e) return 'Time TBD';
+  return `${fmtHM12(s.h, s.m)} - ${fmtHM12(e.h, e.m)}`;
+}
+
 function getErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
@@ -38,11 +75,32 @@ function getErrorMessage(e: unknown): string {
 }
 
 // This is a bunch of helpers to fix formatting from backend, will clean up
-function parseBackendUtc(ts?: string | null): Date | null {
+function parseBackendTime(
+  dateISO: string | undefined,
+  ts?: string | null,
+): Date | null {
   if (!ts) return null;
-  const iso = ts.replace(' ', 'T').replace(' UTC', 'Z');
-  const d = new Date(iso);
-  return isNaN(d.getTime()) ? null : d;
+
+  // Case A: backend gave full "YYYY-MM-DD HH:MM:SS UTC"
+  if (ts.includes('UTC')) {
+    const iso = ts.replace(' ', 'T').replace(' UTC', 'Z');
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Case B: backend gave ISO already
+  if (ts.includes('T')) {
+    const d = new Date(ts);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Case C: backend gave "HH:MM" → combine with pickup_date
+  if (/^\d{2}:\d{2}$/.test(ts) && dateISO) {
+    const d = new Date(`${dateISO}T${ts}:00`);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  return null;
 }
 
 function fmtHour(d: Date): string {
@@ -58,12 +116,13 @@ function ampm(d: Date): 'AM' | 'PM' {
 }
 
 function fmtShortHourRange(
+  dateISO: string,
   startStr?: string | null,
   endStr?: string | null,
   opts?: { showAmPm?: boolean },
 ) {
-  const s = parseBackendUtc(startStr);
-  const e = parseBackendUtc(endStr);
+  const s = parseBackendTime(dateISO, startStr);
+  const e = parseBackendTime(dateISO, endStr);
   if (!s || !e) return 'Time TBD';
 
   const base = `${fmtHour(s)} – ${fmtHour(e)}`;
@@ -310,9 +369,14 @@ export default function AvailablePickupsPage() {
             <View style={styles.pickupCardTop}>
               <Image source={clockIcon} style={styles.clockIcon} />
               <Text style={styles.timeText}>
-                {fmtShortHourRange(item.slot_start_time, item.slot_end_time, {
-                  showAmPm: true,
-                })}
+                {fmtShortHourRange(
+                  item.pickup_date,
+                  item.slot_start_time,
+                  item.slot_end_time,
+                  {
+                    showAmPm: true,
+                  },
+                )}
               </Text>
             </View>
 
