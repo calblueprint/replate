@@ -19,10 +19,12 @@ import { DriverSignupData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
+import AnimatedPressable from '../../../components/AnimatedPressable';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
 import {
+  INPUT_LIMITS,
   validateEmail,
   validateName,
   validatePasswordMatch,
@@ -469,6 +471,7 @@ export default function SignupPage() {
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
+                  maxLength={INPUT_LIMITS.NAME_MAX}
                 />
               </Animated.View>
               {firstNameError && (
@@ -499,6 +502,7 @@ export default function SignupPage() {
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
+                  maxLength={INPUT_LIMITS.NAME_MAX}
                 />
               </Animated.View>
               {lastNameError && (
@@ -531,6 +535,7 @@ export default function SignupPage() {
                 autoComplete="off"
                 textContentType="none"
                 autoCorrect={false}
+                maxLength={INPUT_LIMITS.EMAIL_MAX}
               />
             </Animated.View>
             {emailError && (
@@ -561,6 +566,7 @@ export default function SignupPage() {
                 autoComplete="off"
                 textContentType="none"
                 autoCorrect={false}
+                maxLength={20}
               />
             </Animated.View>
             {phoneError && (
@@ -596,6 +602,7 @@ export default function SignupPage() {
                 passwordRules=""
                 blurOnSubmit={false}
                 onSubmitEditing={() => Keyboard.dismiss()}
+                maxLength={INPUT_LIMITS.PASSWORD_MAX}
               />
               <TouchableOpacity
                 style={authStyles.showButton}
@@ -695,6 +702,7 @@ export default function SignupPage() {
                 passwordRules=""
                 blurOnSubmit={false}
                 onSubmitEditing={() => Keyboard.dismiss()}
+                maxLength={INPUT_LIMITS.PASSWORD_MAX}
               />
               <TouchableOpacity
                 style={authStyles.showButton}
@@ -717,7 +725,7 @@ export default function SignupPage() {
           </View>
 
           <View style={authStyles.buttonContainer}>
-            <TouchableOpacity
+            <AnimatedPressable
               style={[
                 authStyles.grayButton,
                 {
@@ -745,12 +753,12 @@ export default function SignupPage() {
                 isLoading
               }
               onPress={handleSignUp}
-              activeOpacity={0.8}
+              scaleValue={0.97}
             >
               <Text style={authStyles.grayButtonText}>
                 {isLoading ? 'Creating Account...' : 'Continue '}
               </Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           </View>
 
           <Text style={authStyles.linkTextSignup}>

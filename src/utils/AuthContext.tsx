@@ -12,6 +12,7 @@ import {
   DriverResponse,
   DriverSignupData,
 } from '../../api/config';
+import { safeJsonParse, sanitizeObject } from './sanitization';
 
 // Simple AuthContext with persistence
 interface AuthContextType {
@@ -43,10 +44,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedDriver = await AsyncStorage.getItem('driver');
 
         if (storedDriver) {
-          setDriver(JSON.parse(storedDriver));
+          const parsed = safeJsonParse<DriverResponse>(storedDriver);
+          // Sanitize the parsed data to prevent prototype pollution
+          const sanitized = sanitizeObject(
+            parsed as unknown as Record<string, unknown>,
+          ) as unknown as DriverResponse;
+          setDriver(sanitized);
         }
-      } catch (error) {
-        console.error('AuthContext: failed to load stored driver', error);
+      } catch {
+        // Failed to load stored driver, user will need to login again
+        setDriver(null);
       } finally {
         setIsLoading(false);
       }
@@ -74,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    console.log('Logging out, clearing storage');
     setDriver(null);
     await AsyncStorage.removeItem('driver');
   };

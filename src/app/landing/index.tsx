@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    fontFamily: 'Lato_400Regular',
+    fontFamily: 'Lato',
     textAlign: 'center',
     color: colors.gray,
     lineHeight: 22,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     fontSize: 16,
-    fontFamily: 'Lato_700Bold',
+    fontFamily: 'LatoBold',
     color: colors.jasmine,
     lineHeight: 30,
   },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   },
   signupButtonText: {
     fontSize: 16,
-    fontFamily: 'Lato_700Bold',
+    fontFamily: 'LatoBold',
     color: colors.white,
     lineHeight: 30,
   },

@@ -1,0 +1,7 @@
+**/styles.ts
+**/styles.tsx
+**/_styles/**
+src/app/available-pick-ups/_styles/
+src/app/donation-details/styles.ts
+src/app/my-account/styles.ts
+src/app/onboarding/styles.tsx

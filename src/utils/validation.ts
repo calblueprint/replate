@@ -1,54 +1,49 @@
-// Allowed email domains whitelist
-const ALLOWED_EMAIL_DOMAINS = [
-  'gmail.com',
-  'yahoo.com',
-  'outlook.com',
-  'hotmail.com',
-  'icloud.com',
-  'protonmail.com',
-  'edu', // Allow any .edu domain
-];
+// Input length limits
+export const INPUT_LIMITS = {
+  NAME_MIN: 1,
+  NAME_MAX: 50,
+  EMAIL_MAX: 254, // RFC 5321 standard
+  PHONE_MIN: 10,
+  PHONE_MAX: 15,
+  PASSWORD_MIN: 8,
+  PASSWORD_MAX: 128,
+};
 
-// Email validation with domain whitelist
+// Email validation - accepts all valid email formats
 export const validateEmail = (email: string): string | null => {
   if (!email || email.trim() === '') {
     return 'Email is required';
   }
 
-  // Basic email format regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Check length limit
+  if (email.length > INPUT_LIMITS.EMAIL_MAX) {
+    return `Email must be less than ${INPUT_LIMITS.EMAIL_MAX} characters`;
+  }
+
+  // Comprehensive email format regex (RFC 5322 compliant)
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
   if (!emailRegex.test(email)) {
     return 'Please enter a valid email address';
-  }
-
-  // Extract domain
-  const domain = email.split('@')[1]?.toLowerCase();
-  if (!domain) {
-    return 'Please enter a valid email address';
-  }
-
-  // Check if domain is in whitelist or ends with .edu
-  const isAllowed =
-    ALLOWED_EMAIL_DOMAINS.some(
-      allowed =>
-        domain === allowed || (allowed === 'edu' && domain.endsWith('.edu')),
-    ) || false;
-
-  if (!isAllowed) {
-    return 'Email domain not allowed. Please use a valid email domain (e.g., gmail.com)';
   }
 
   return null;
 };
 
-// Password validation - minimum 8 characters with complexity requirements
+// Password validation with strength requirements
 export const validatePassword = (password: string): string | null => {
   if (!password || password.trim() === '') {
     return 'Password is required';
   }
 
-  if (password.length < 8) {
-    return 'Password must be at least 8 characters long';
+  // Check length limits
+  if (password.length < INPUT_LIMITS.PASSWORD_MIN) {
+    return `Password must be at least ${INPUT_LIMITS.PASSWORD_MIN} characters long`;
+  }
+
+  if (password.length > INPUT_LIMITS.PASSWORD_MAX) {
+    return `Password must be less than ${INPUT_LIMITS.PASSWORD_MAX} characters`;
   }
 
   // Check for uppercase letter
@@ -74,6 +69,44 @@ export const validatePassword = (password: string): string | null => {
   return null;
 };
 
+// Get password strength score (0-5)
+export const getPasswordStrength = (password: string): number => {
+  if (!password) return 0;
+
+  let strength = 0;
+
+  // Length check
+  if (password.length >= 8) strength++;
+  if (password.length >= 12) strength++;
+
+  // Character variety checks
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+  return Math.min(strength, 5);
+};
+
+// Get password strength label
+export const getPasswordStrengthLabel = (strength: number): string => {
+  switch (strength) {
+    case 0:
+    case 1:
+      return 'Very Weak';
+    case 2:
+      return 'Weak';
+    case 3:
+      return 'Fair';
+    case 4:
+      return 'Good';
+    case 5:
+      return 'Strong';
+    default:
+      return 'Unknown';
+  }
+};
+
 // Password match validation
 export const validatePasswordMatch = (
   password: string,
@@ -90,7 +123,7 @@ export const validatePasswordMatch = (
   return null;
 };
 
-// Name validation
+// Name validation with length limits
 export const validateName = (
   name: string,
   fieldName: string,
@@ -99,20 +132,59 @@ export const validateName = (
     return `${fieldName} is required`;
   }
 
+  if (name.trim().length < INPUT_LIMITS.NAME_MIN) {
+    return `${fieldName} is required`;
+  }
+
+  if (name.length > INPUT_LIMITS.NAME_MAX) {
+    return `${fieldName} must be less than ${INPUT_LIMITS.NAME_MAX} characters`;
+  }
+
+  // Check for invalid characters (only letters, spaces, hyphens, and apostrophes)
+  if (!/^[a-zA-Z\s'-]+$/.test(name)) {
+    return `${fieldName} can only contain letters, spaces, hyphens, and apostrophes`;
+  }
+
   return null;
 };
 
-// Phone validation (optional - basic format check)
+// Phone validation with proper format checking
 export const validatePhone = (phone: string): string | null => {
   if (!phone || phone.trim() === '') {
     return 'Phone number is required';
   }
 
   // Remove common formatting characters for validation
-  const digitsOnly = phone.replace(/[\s\-()]/g, '');
-  if (digitsOnly.length < 10) {
-    return 'Please enter a valid phone number';
+  const digitsOnly = phone.replace(/[\s\-().+]/g, '');
+
+  // Check if it contains only digits (and optional leading + for country code)
+  if (!/^\d+$/.test(digitsOnly)) {
+    return 'Phone number can only contain digits and formatting characters (spaces, hyphens, parentheses)';
+  }
+
+  // Check length limits
+  if (digitsOnly.length < INPUT_LIMITS.PHONE_MIN) {
+    return `Phone number must be at least ${INPUT_LIMITS.PHONE_MIN} digits`;
+  }
+
+  if (digitsOnly.length > INPUT_LIMITS.PHONE_MAX) {
+    return `Phone number must be less than ${INPUT_LIMITS.PHONE_MAX} digits`;
   }
 
   return null;
+};
+
+// Format phone number for display (US format)
+export const formatPhoneNumber = (phone: string): string => {
+  const digitsOnly = phone.replace(/\D/g, '');
+
+  if (digitsOnly.length === 10) {
+    return `(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`;
+  }
+
+  if (digitsOnly.length === 11 && digitsOnly[0] === '1') {
+    return `+1 (${digitsOnly.slice(1, 4)}) ${digitsOnly.slice(4, 7)}-${digitsOnly.slice(7)}`;
+  }
+
+  return phone;
 };

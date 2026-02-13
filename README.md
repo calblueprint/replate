@@ -1,68 +1,146 @@
-# Replate
+# Replate Mobile App
 
-### Overview
+A React Native mobile application for Replate food rescue volunteers, built with Expo Router.
 
-This is a template for building mobile applications using an Expo and React-Native. It provides eslint, typescript, and prettier configs, as well as git hooks, github actions, and PR templates.
+## Prerequisites
 
-**Note: This template is a work in progress. Code formatting configurations are opinionated and shouldn't be treated as truth.**
+### Required
 
-### Navigation
+- **Node.js** (v18 or later) - We recommend using [nvm](https://github.com/nvm-sh/nvm)
+- **pnpm** - This project enforces pnpm as the package manager
+  ```sh
+  npm install -g pnpm
+  ```
+- **Expo Go** app on your phone ([iOS](https://apps.apple.com/app/expo-go/id982107779) / [Android](https://play.google.com/store/apps/details?id=host.exp.exponent))
 
-**As of 8/20/2024**, this repo does not have a navigation framework configured. The main navigation frameworks supported by Expo (previously used in Blueprint projects) are [React Navigation](https://reactnavigation.org/) and [Expo Router](https://docs.expo.dev/router/introduction/):
+### Backend (Required for full functionality)
 
-1. (Preferred) React Navigation provides a **stack-based navigation model**, allowing screens to be pushed onto and popped out of a navigation stack. 
-    1. **NOTE: This framework provides more flexibility at the expense of more boilerplate code. However, being the more popular option, there is significant documentation and examples of mobile projects using React Navigation online.**
-2. Expo Router uses a **file-based router** for React Native and web applications. This framework allows applications to be accessible across platforms (iOS, Android, Web). When a file is added to the app directory, the file automatically becomes a route in your navigation. 
-    1. **NOTE: Expo Router is built on top of React Navigation and was released more recently. It may be easier to use out of the box, but it has rigid opinions regarding certain navigation features.**  
+The app connects to the **replate-business** Rails backend. You need to:
 
-### Backend
-
-**As of 8/20/2024**, this template is not connected to a backend framework. Blueprint projects typically use Supabase backend/databases. See past mobile projects for examples.
-
----
-## Getting Started
-
-### Prerequisites
-
-Check your installation of `npm` and `node`:
-
-```sh
-node -v
-npm -v
-```
-
-We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) (for Mac) or [nvm-windows](https://github.com/coreybutler/nvm-windows) (for Windows) to install Node.js and npm. See [Downloading and installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
-
-### Installation
-
-1. Fork/copy the repo.
-    1. [GitHub: Cloning a Repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository#cloning-a-repository)
-    2. [GitHub: Generating SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-
-2. Install project dependencies. This command installs all packages from [`package.json`](package.json).
-      ```sh
-      npm install
-      ```
-3. [in progress...] Set up secrets 
-
-### Development environment
-
-- **[VSCode](https://code.visualstudio.com/) (recommended)**
-  1. Open the project in VSCode.
-  2. Install recommended workspace VSCode extensions. You should see a pop-up on the bottom right to "install the recommended extensions for this repository".
-
-### Running the app
-
-1. In the project directory, run:
-   ```shell
-    npx expo start
+1. Clone the `replate-business` repository as a sibling directory:
+   ```sh
+   # From your projects folder
+   git clone <replate-business-repo-url> replate-business
    ```
-2. [Download Expo Go](https://docs.expo.dev/get-started/installation/#2-expo-go-app-for-android-and) on your phone, **connect to same network as your laptop**, and use your phone camera to scan the QR code displayed in the command line.
 
-### Development tools
+2. **Or** set the `REPLATE_BUSINESS_DIR` environment variable:
+   ```sh
+   export REPLATE_BUSINESS_DIR=/path/to/replate-business
+   ```
 
-View the list of development scripts in the `package.json` file. Each script can be run through the terminal in the root of the project directory using the command below:
+## Quick Start
+
+### Option 1: Start Everything (Recommended)
+
+This starts both the Rails backend and Expo app with automatic IP detection:
 
 ```sh
-npm run <insert script name here>
+./start.sh
 ```
+
+The script will:
+- Find the Rails backend automatically
+- Install dependencies if needed
+- Run database migrations
+- Detect your local IP for mobile device connections
+- Start both servers
+
+### Option 2: Start with Fresh Test Data
+
+If you need to reset the database with fresh test data:
+
+```sh
+pnpm start:fresh
+```
+
+### Option 3: Manual Start
+
+```sh
+# Terminal 1 - Rails backend
+cd ../replate-business
+bundle install
+rails db:migrate
+rails server -b 0.0.0.0 -p 3000
+
+# Terminal 2 - Expo app
+pnpm install
+pnpm start
+```
+
+## Environment Configuration
+
+Copy the example environment file:
+
+```sh
+cp .env.example .env
+```
+
+The `start.sh` script automatically updates the API URL with your local IP. For manual configuration:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EXPO_PUBLIC_API_BASE_URL` | Rails API base URL | `http://localhost:3000` |
+| `REPLATE_BUSINESS_DIR` | Custom path to Rails backend | (auto-detected) |
+
+## Test Credentials
+
+After seeding the database:
+
+- **Email:** `test@driver.com`
+- **Password:** `Password123!`
+
+## Development Scripts
+
+```sh
+pnpm start              # Start Expo
+pnpm start:fresh        # Reset data + start everything
+pnpm start:clean        # Clear Expo cache + start
+
+pnpm lint:check         # Run ESLint
+pnpm lint:fix           # Fix ESLint issues
+pnpm prettier:check     # Check formatting
+pnpm prettier:fix       # Fix formatting
+pnpm tsc                # TypeScript type check
+```
+
+## Stopping the Servers
+
+```sh
+./stop.sh
+```
+
+## Project Structure
+
+```
+src/
+├── app/                # Expo Router pages
+│   ├── (tabs)/         # Tab navigation screens
+│   ├── auth/           # Authentication flows
+│   ├── donation-details/
+│   ├── pickup-details/
+│   └── onboarding/
+├── components/         # Reusable UI components
+├── styles/             # Shared styles and themes
+└── utils/              # Utilities and contexts
+```
+
+## Troubleshooting
+
+### "replate-business directory not found"
+
+Either:
+1. Clone `replate-business` as a sibling to this repo
+2. Set `REPLATE_BUSINESS_DIR` environment variable
+
+### Port already in use
+
+The `start.sh` script automatically kills existing processes on ports 3000 and 8081. If issues persist:
+
+```sh
+lsof -ti:3000 | xargs kill -9
+lsof -ti:8081 | xargs kill -9
+```
+
+### Can't connect from phone
+
+Ensure your phone and computer are on the same WiFi network. The `start.sh` script auto-detects your IP, but you can manually set it in `.env`.

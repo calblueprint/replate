@@ -11,8 +11,8 @@ export const styles = StyleSheet.create({
   // header
   availableTasksTitle: {
     fontSize: 28,
-    fontFamily: 'LatoMedium',
-    fontWeight: '500',
+    fontFamily: 'LatoBold',
+    fontWeight: '700',
     color: '#2C805B',
     marginLeft: 26,
     marginTop: 27,
@@ -90,7 +90,7 @@ export const styles = StyleSheet.create({
   //cards
   pickupCard: {
     marginHorizontal: 16,
-    height: 106,
+    minHeight: 120,
     borderRadius: 15,
     backgroundColor: '#FFFFFF',
     overflow: 'hidden',
@@ -125,8 +125,8 @@ export const styles = StyleSheet.create({
 
   timeText: {
     fontSize: 14,
-    fontFamily: 'LatoSemiBold',
-    fontWeight: '600',
+    fontFamily: 'LatoBold',
+    fontWeight: '700',
     color: Colors.black,
   },
 
@@ -143,8 +143,8 @@ export const styles = StyleSheet.create({
 
   locationText: {
     fontSize: 16,
-    fontFamily: 'LatoMedium',
-    fontWeight: '500',
+    fontFamily: 'LatoBold',
+    fontWeight: '700',
     color: '#0E0E0E',
   },
 
@@ -186,20 +186,36 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
     marginHorizontal: 16,
     fontSize: 20,
-    fontFamily: 'LatoMedium',
-    fontWeight: '500',
+    fontFamily: 'LatoBold',
+    fontWeight: '700',
     color: '#427B60',
   },
   contentContainer: {
     paddingBottom: 24,
   },
   claimPickupText: {
-    marginTop: 24,
     textAlign: 'center',
     fontSize: 14,
     fontFamily: 'Lato',
-    fontWeight: '500',
-    color: '#8F8F8F',
+    fontWeight: '600',
+    color: '#58ad85',
+  },
+  safeAreaContainer: {
+    flex: 1,
+    backgroundColor: '#f8f8f8',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#6b7280',
+    fontFamily: 'Lato',
+  },
+  itemSeparator: {
+    height: 12,
   },
   //[id] styles
   detailsSections: {

@@ -1,8 +1,9 @@
 import { Alert } from 'react-native';
+import { apiRequest, ApiError as ApiUtilError } from './apiUtils';
+import { ENV_CONFIG } from './envConfig';
 
 // API Configuration for Rails Backend
-const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.206.10.153:3000';
+const BASE_URL = ENV_CONFIG.API_BASE_URL;
 
 export { BASE_URL };
 
@@ -13,6 +14,8 @@ export const API_ENDPOINTS = {
   REQUEST_PASSWORD_RESET: '/api/drivers/password',
   RESET_PASSWORD: '/api/drivers/password',
   PARTNERS: '/api/partners',
+  TASKS: '/api/tasks',
+  MY_TASKS: '/api/my_tasks',
 } as const;
 
 // Types for driver auth
@@ -54,6 +57,9 @@ export interface ApiError {
   error?: string;
   message?: string;
 }
+
+// Re-export ApiError from apiUtils for consistency
+export { ApiUtilError as ApiRequestError };
 
 // API functions
 export const driverAPI = {
@@ -354,19 +360,9 @@ export const driverAPI = {
 };
 
 export const getPartners = async () => {
-  console.log(
-    'FETCHING PARTNERS FROM:',
-    `${BASE_URL}${API_ENDPOINTS.PARTNERS}`,
-  );
-  const response = await fetch(`${BASE_URL}${API_ENDPOINTS.PARTNERS}`);
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Failed to fetch partners: ${text}`);
-  }
-
-  const json = await response.json();
-  return json;
+  return apiRequest(`${BASE_URL}${API_ENDPOINTS.PARTNERS}`, {
+    method: 'GET',
+  });
 };
 
 interface UpdateDriverResponse {
@@ -384,38 +380,18 @@ export async function updateDriverPartner(
   selectedNPOId: number,
 ): Promise<UpdateDriverResponse | null> {
   try {
-    const response = await fetch(
-      `${BASE_URL}${API_ENDPOINTS.DRIVERS}/${driverId}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          driver: { partner_id: selectedNPOId },
-        }),
+    const responseData = await apiRequest<
+      UpdateDriverResponse | { driver: UpdateDriverResponse }
+    >(`${BASE_URL}${API_ENDPOINTS.DRIVERS}/${driverId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
-    );
-
-    const contentType = response.headers.get('content-type') ?? '';
-
-    const responseData: unknown = contentType.includes('application/json')
-      ? await response.json()
-      : await response.text();
-
-    if (!response.ok) {
-      const msg =
-        isObject(responseData) && typeof responseData.message === 'string'
-          ? responseData.message
-          : typeof responseData === 'string'
-            ? responseData
-            : 'Unknown error';
-
-      console.error('Failed to update driver:', responseData);
-      Alert.alert('Error', msg);
-      return null;
-    }
+      body: JSON.stringify({
+        driver: { partner_id: selectedNPOId },
+      }),
+    });
 
     // supports both { driver: {...} } and {...}
     const driverObj =
@@ -432,8 +408,22 @@ export async function updateDriverPartner(
 
     return driverObj;
   } catch (err) {
-    console.error('Network or server error:', err);
-    Alert.alert('Network error', 'Unable to update driver.');
+    const errorMsg =
+      err instanceof ApiUtilError ? err.message : 'Unable to update driver.';
+    Alert.alert('Error', errorMsg);
     return null;
   }
+}
+
+export async function claimTask(encryptedTaskId: string, driverId: number) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+
+  return apiRequest(`${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/claim`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ driver_id: driverId }),
+  });
 }

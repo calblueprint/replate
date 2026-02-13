@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
-const REGULAR = 'Lato_400Regular';
-const BOLD = 'Lato_700Bold';
+const REGULAR = 'Lato';
+const BOLD = 'LatoBold';
 
 export const myAccountStyles = StyleSheet.create({
   container: {

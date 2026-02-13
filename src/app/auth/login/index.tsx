@@ -18,10 +18,11 @@ import { router } from 'expo-router';
 import { DriverLoginData } from '../../../../api/config';
 // Assets
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
+import AnimatedPressable from '../../../components/AnimatedPressable';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
 import { useAuth } from '../../../utils/AuthContext';
-import { validateEmail } from '../../../utils/validation';
+import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
 
 interface ApiErrorResponse {
   message?: string;
@@ -114,9 +115,9 @@ export default function LoginPage() {
         password,
       };
 
-      await login(loginData, false);
+      await login(loginData, true); // Keep user signed in
       setTimeout(() => {
-        router.push('/my-tasks');
+        router.push('/(tabs)/my-tasks');
       }, 500);
     } catch (error: unknown) {
       // Handle backend errors
@@ -257,6 +258,7 @@ export default function LoginPage() {
                 autoComplete="off"
                 textContentType="none"
                 autoCorrect={false}
+                maxLength={INPUT_LIMITS.EMAIL_MAX}
               />
             </Animated.View>
             {emailError && (
@@ -292,6 +294,7 @@ export default function LoginPage() {
                 passwordRules=""
                 blurOnSubmit={false}
                 onSubmitEditing={() => Keyboard.dismiss()}
+                maxLength={INPUT_LIMITS.PASSWORD_MAX}
               />
               <TouchableOpacity
                 style={authStyles.showButton}
@@ -325,7 +328,7 @@ export default function LoginPage() {
           </TouchableOpacity>
 
           <View style={authStyles.buttonContainer}>
-            <TouchableOpacity
+            <AnimatedPressable
               style={[
                 authStyles.grayButton,
                 {
@@ -334,12 +337,12 @@ export default function LoginPage() {
               ]}
               disabled={!email || !password || isLoading}
               onPress={handleLogin}
-              activeOpacity={0.8}
+              scaleValue={0.97}
             >
               <Text style={authStyles.grayButtonText}>
                 {isLoading ? 'Logging in...' : 'Log in '}
               </Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           </View>
 
           <Text style={authStyles.linkTextSignup}>
