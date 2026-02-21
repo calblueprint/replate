@@ -210,7 +210,7 @@ export default function AvailablePickupsPage() {
 
     // Only show mock card on TODAY
     if (__DEV__ && selectedISO === todayISO) {
-      return [MOCK_AVAILABLE_PICKUP, ...base];
+      return [...base];
     }
     return base;
   }, [source, selectedISO, todayISO]);
