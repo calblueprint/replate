@@ -123,16 +123,6 @@ type UiPickup = {
   pickup_location: string;
 };
 
-const MOCK_AVAILABLE_PICKUP: UiPickup = {
-  id: -1,
-  encrypted_id: 'mock-available-pickup', // must be unique (FlatList key)
-  pickup_date: localISODate(new Date()), // ensures it lands in “Today”
-  // use the same format your formatter expects (backend UTC string)
-  slot_start_time: `${localISODate(new Date())} 13:00:00 UTC`,
-  slot_end_time: `${localISODate(new Date())} 16:00:00 UTC`,
-  pickup_location: 'Rock Ridge Cafe (MOCK)',
-};
-
 export default function AvailablePickupsPage() {
   const todayISO = localISODate(new Date());
 
