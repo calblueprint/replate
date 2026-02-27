@@ -45,8 +45,8 @@ export default function AnimatedSegmentedControl({
     }
   };
 
-  const onSelectSegment = (value: 'left' | 'right') => {
-    if (value === 'left') {
+  const onSelectSegment = (segment: 'left' | 'right') => {
+    if (segment === 'left') {
       onChange('left');
       return;
     }

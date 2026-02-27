@@ -15,10 +15,9 @@ import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import checkIcon from 'assets/check-icon.png';
 import dateIcon from 'assets/date.png';
 import { useAuth } from '@/utils/AuthContext';
-import { apiRequest } from '~/api/apiUtils';
+import { ApiError, apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
 import { styles } from '../../styles/pages/pickup-details-styles';
 
@@ -46,28 +45,6 @@ type TaskDetails = {
   description?: string | null;
   tray_type?: string | null;
   tray_count?: number | null;
-};
-
-// Mock data for development
-const MOCK_TASK: TaskDetails = {
-  id: 1,
-  pickup_date: '2026-02-04',
-  start_time: '13:00',
-  end_time: '16:00',
-  location_name: 'Rock Ridge Cafe',
-  address: {
-    number: '5492',
-    street: 'College Ave',
-    city: 'Oakland',
-    state: 'CA',
-    zip: '94618',
-  },
-  location: { comments: 'Call when you arrive - ask for manager on duty' },
-  contact_name: 'Davina Chan',
-  contact_phone: '669-222-7871',
-  contact_email: 'rockridgecafehere@gmail.com',
-  tray_type: 'Sandwiches & Salad',
-  tray_count: 15,
 };
 
 function formatPhoneNumber(phone: string): string {
@@ -128,42 +105,80 @@ function formatTimeRangeAny(startTime: string | null, endTime: string | null) {
   return `${fmt12(s.h, s.m)} - ${fmt12(e.h, e.m)}`;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function parseOptionalString(value: unknown): string | null {
+  return typeof value === 'string' ? value : null;
+}
+
+function parseOptionalNumber(value: unknown): number | null {
+  return typeof value === 'number' ? value : null;
+}
+
+function normalizeAddress(value: unknown): TaskDetails['address'] {
+  if (!isRecord(value)) return null;
+
+  const number = parseOptionalString(value.number);
+  const street = parseOptionalString(value.street);
+  const aptNumber = parseOptionalString(value.apt_number);
+  const city = parseOptionalString(value.city);
+  const state = parseOptionalString(value.state);
+  const zip = parseOptionalString(value.zip);
+
+  return {
+    number,
+    street,
+    apt_number: aptNumber,
+    city,
+    state,
+    zip,
+  };
+}
+
 export default function PickupDetails() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams<{ id: string | string[] }>();
+  const taskId = Array.isArray(id) ? id[0] : id;
   const [task, setTask] = useState<TaskDetails | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isTaskAdded, setIsTaskAdded] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
   const { driver } = useAuth();
 
   const handleClaim = async () => {
-    const driverId = driver?.id;
-    const token = Array.isArray(id) ? id[0] : id;
+    if (isClaiming) return;
 
-    console.log('CLAIM driver.id', driverId);
-    console.log('CLAIM token used', token);
+    const driverId = driver?.id;
 
     try {
+      setIsClaiming(true);
       if (!driverId) throw new Error('No driver session');
-      if (!token) throw new Error('Missing task id');
+      if (!taskId) throw new Error('Missing task id');
 
-      await claimTask(token, driverId);
+      await claimTask(taskId, driverId);
       await AsyncStorage.removeItem('tasks');
 
       Toast.show({ type: 'success', text1: 'Pickup claimed!' });
       router.replace('/(tabs)/my-tasks');
-    } catch (e: any) {
-      const message = e?.message ?? 'Unknown error';
+    } catch (requestError: unknown) {
+      const message =
+        requestError instanceof Error ? requestError.message : 'Unknown error';
       const extra =
-        Array.isArray(e?.errors) && e.errors.length
-          ? ` • ${e.errors.join(', ')}`
+        requestError instanceof ApiError &&
+        Array.isArray(requestError.errors) &&
+        requestError.errors.length
+          ? ` • ${requestError.errors.join(', ')}`
           : '';
       Toast.show({
         type: 'error',
         text1: 'Could not claim pickup',
         text2: `${message}${extra}`,
       });
+    } finally {
+      setIsClaiming(false);
     }
   };
 
@@ -172,54 +187,83 @@ export default function PickupDetails() {
 
     (async () => {
       try {
+        if (cancelled) return;
         setIsLoading(true);
         setTask(null);
         setErr(null);
 
-        const token = Array.isArray(id) ? id[0] : id;
-        const url = `${BASE_URL}${API_ENDPOINTS.TASKS}/${encodeURIComponent(token ?? '')}`;
+        if (!taskId) {
+          setErr('Missing task id.');
+          setTask(null);
+          setIsLoading(false);
+          return;
+        }
 
-        const data = await apiRequest<TaskDetails>(url, {
+        const url = `${BASE_URL}${API_ENDPOINTS.TASKS}/${encodeURIComponent(taskId)}`;
+
+        const data = await apiRequest<Record<string, unknown>>(url, {
           method: 'GET',
           validateResponse: r => {
             if (!r || typeof r !== 'object' || Array.isArray(r)) return false;
-            const obj = r as any;
-            return typeof obj.id === 'number';
+            return typeof (r as Record<string, unknown>).id === 'number';
           },
         });
+        const pickupDate =
+          parseOptionalString(data.pickup_date) ??
+          parseOptionalString(data.scheduled_date) ??
+          null;
 
-        const raw = data as any;
-
-        const pickupDate = raw.pickup_date ?? raw.scheduled_date ?? null;
-
-        const startHM = raw.start_time ?? raw.activity_start_time ?? null;
-        const endHM = raw.end_time ?? raw.activity_end_time ?? null;
+        const startHM =
+          parseOptionalString(data.start_time) ??
+          parseOptionalString(data.activity_start_time) ??
+          null;
+        const endHM =
+          parseOptionalString(data.end_time) ??
+          parseOptionalString(data.activity_end_time) ??
+          null;
 
         const taskData: TaskDetails = {
-          id: raw.id,
-          encrypted_id: raw.encrypted_id,
-          driver_id: raw.driver_id ?? null,
+          id: data.id as number,
+          encrypted_id: parseOptionalString(data.encrypted_id) ?? undefined,
+          driver_id:
+            parseOptionalNumber(data.driver_id) ??
+            (typeof data.driver_id === 'string'
+              ? Number(data.driver_id) || null
+              : null),
           pickup_date: pickupDate ?? '',
           start_time: startHM,
           end_time: endHM,
-          location_name: raw.location_name ?? null,
-          address: raw.address ?? null,
+          location_name: parseOptionalString(data.location_name) ?? null,
+          address: normalizeAddress(data.address),
           building_access_instructions:
-            raw.building_access_instructions ?? null,
-          description: raw.description ?? null,
-          contact_name: raw.contact_name ?? null,
-          contact_phone: raw.contact_phone ?? null,
-          contact_email: raw.contact_email ?? null,
-          tray_type: raw.tray_type ?? null,
-          tray_count: raw.tray_count ?? null,
-          location: raw.location ?? null,
+            parseOptionalString(data.building_access_instructions) ?? null,
+          description: parseOptionalString(data.description) ?? null,
+          contact_name: parseOptionalString(data.contact_name) ?? null,
+          contact_phone: parseOptionalString(data.contact_phone) ?? null,
+          contact_email: parseOptionalString(data.contact_email) ?? null,
+          tray_type: parseOptionalString(data.tray_type) ?? null,
+          tray_count:
+            parseOptionalNumber(data.tray_count) ||
+            (typeof data.tray_count === 'string' &&
+            !Number.isNaN(Number(data.tray_count))
+              ? Number(data.tray_count)
+              : null),
+          location: isRecord(data.location)
+            ? {
+                comments: parseOptionalString(data.location.comments),
+              }
+            : undefined,
         };
 
         setTask(taskData);
-      } catch {
+      } catch (requestError: unknown) {
         if (!cancelled) {
-          // Use mock data for development
-          setTask(MOCK_TASK);
+          const message =
+            requestError instanceof Error
+              ? requestError.message
+              : 'Failed to load pickup details';
+          setErr(message);
+          setTask(null);
         }
       } finally {
         if (!cancelled) {
@@ -231,14 +275,10 @@ export default function PickupDetails() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [taskId, reloadToken]);
 
-  const handleUndoAdd = () => {
-    setIsTaskAdded(false);
-    Toast.show({
-      type: 'info',
-      text1: 'Removed from My Tasks',
-    });
+  const handleSignIn = () => {
+    router.replace('/auth/login');
   };
 
   const handleOpenMaps = () => {
@@ -330,8 +370,7 @@ export default function PickupDetails() {
         <TouchableOpacity
           style={styles.retryButton}
           onPress={() => {
-            setErr('');
-            setIsLoading(true);
+            setReloadToken(prev => prev + 1);
           }}
         >
           <Text style={styles.retryButtonText}>Retry</Text>
@@ -366,24 +405,13 @@ export default function PickupDetails() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Success Banner */}
-        {isTaskAdded && (
-          <View style={styles.successBanner}>
-            <Image source={checkIcon} style={styles.successIcon} />
-            <Text style={styles.successText}>Added to My Tasks</Text>
-            <TouchableOpacity style={styles.undoButton} onPress={handleUndoAdd}>
-              <Text style={styles.undoText}>Undo</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         {/* Location Section */}
         <View style={styles.locationSection}>
           <Ionicons
             name="location-sharp"
             size={24}
             color="#000"
-            style={{ marginTop: 4 }}
+            style={styles.sectionIcon}
           />
           <View style={styles.locationContent}>
             <Text style={styles.locationTitle}>
@@ -429,8 +457,13 @@ export default function PickupDetails() {
             {/* Contact Name with Actions */}
             {task.contact_name && (
               <View style={[styles.contactRow, { marginBottom: 16 }]}>
-                <Ionicons name="person-outline" size={20} color="#525454" />
-                <View style={[styles.contactInfo, { marginLeft: 16 }]}>
+                <Ionicons
+                  name="person-outline"
+                  size={20}
+                  color="#525454"
+                  style={styles.rowIcon}
+                />
+                <View style={styles.contactInfo}>
                   <Text style={styles.contactName}>{task.contact_name}</Text>
                 </View>
                 {task.contact_phone && (
@@ -455,8 +488,13 @@ export default function PickupDetails() {
             {/* Phone Number */}
             {task.contact_phone && !task.contact_name && (
               <View style={styles.contactRow}>
-                <Ionicons name="call-outline" size={20} color="#525454" />
-                <View style={[styles.contactInfo, { marginLeft: 16 }]}>
+                <Ionicons
+                  name="call-outline"
+                  size={20}
+                  color="#525454"
+                  style={styles.rowIcon}
+                />
+                <View style={styles.contactInfo}>
                   <Text style={styles.contactPhone}>
                     {formatPhoneNumber(task.contact_phone)}
                   </Text>
@@ -467,9 +505,14 @@ export default function PickupDetails() {
             {/* Email */}
             {task.contact_email && (
               <View style={[styles.contactRow, { marginBottom: 0 }]}>
-                <Ionicons name="mail-outline" size={20} color="#525454" />
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color="#525454"
+                  style={styles.rowIcon}
+                />
                 <TouchableOpacity
-                  style={[styles.contactInfo, { marginLeft: 16 }]}
+                  style={styles.contactInfo}
                   onPress={() => handleEmail(task.contact_email!)}
                 >
                   <Text style={styles.contactEmail}>{task.contact_email}</Text>
@@ -517,31 +560,46 @@ export default function PickupDetails() {
 
       {/* Bottom Button */}
       <View style={styles.bottomContainer}>
-        <View style={styles.bottomContainer}>
-          {task.driver_id ? (
-            <View style={styles.progressButton}>
-              <Ionicons
-                name="time-outline"
-                size={20}
-                color="#059669"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.progressButtonText}>Task in progress</Text>
-            </View>
-          ) : (
-            <TouchableOpacity style={styles.claimButton} onPress={handleClaim}>
-              <Text style={styles.claimButtonText}>
-                Claim by{' '}
-                {task.end_time
-                  ? (() => {
-                      const hm = parseHMAny(task.end_time);
-                      return hm ? fmt12(hm.h, hm.m) : '';
-                    })()
-                  : ''}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {task.driver_id ? (
+          <View style={styles.progressButton}>
+            <Ionicons
+              name="time-outline"
+              size={20}
+              color="#059669"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.progressButtonText}>Task in progress</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.claimButton,
+              (!driver?.id || isClaiming) && styles.claimButtonDisabled,
+            ]}
+            onPress={driver?.id ? handleClaim : handleSignIn}
+            disabled={isClaiming}
+          >
+            <Text
+              style={[
+                styles.claimButtonText,
+                (!driver?.id || isClaiming) && styles.claimButtonTextDisabled,
+              ]}
+            >
+              {driver?.id
+                ? isClaiming
+                  ? 'Claiming...'
+                  : `Claim by ${
+                      task.end_time
+                        ? (() => {
+                            const hm = parseHMAny(task.end_time);
+                            return hm ? fmt12(hm.h, hm.m) : '';
+                          })()
+                        : ''
+                    }`
+                : 'Sign in to claim this pickup'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Map Options Modal */}
@@ -564,7 +622,12 @@ export default function PickupDetails() {
               style={styles.modalOption}
               onPress={openInAppleMaps}
             >
-              <Ionicons name="navigate-outline" size={24} color="#525454" />
+              <Ionicons
+                name="navigate-outline"
+                size={24}
+                color="#525454"
+                style={styles.modalOptionIcon}
+              />
               <Text style={styles.modalOptionText}>Open in Apple Maps</Text>
             </TouchableOpacity>
 
@@ -572,7 +635,12 @@ export default function PickupDetails() {
               style={styles.modalOption}
               onPress={openInGoogleMaps}
             >
-              <Ionicons name="map-outline" size={24} color="#525454" />
+              <Ionicons
+                name="map-outline"
+                size={24}
+                color="#525454"
+                style={styles.modalOptionIcon}
+              />
               <Text style={styles.modalOptionText}>Open in Google Maps</Text>
             </TouchableOpacity>
 
@@ -580,7 +648,12 @@ export default function PickupDetails() {
               style={[styles.modalOption, { borderBottomWidth: 0 }]}
               onPress={copyAddress}
             >
-              <Ionicons name="copy-outline" size={24} color="#525454" />
+              <Ionicons
+                name="copy-outline"
+                size={24}
+                color="#525454"
+                style={styles.modalOptionIcon}
+              />
               <Text style={styles.modalOptionText}>Copy Address</Text>
             </TouchableOpacity>
 

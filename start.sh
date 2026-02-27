@@ -6,11 +6,31 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+START_FRONTEND=true
+
+for arg in "$@"; do
+  case "$arg" in
+    --resume|-r|--backend-only|--no-expo)
+      START_FRONTEND=false
+      ;;
+    -h|--help)
+      echo "Usage: ./start.sh [--resume|--backend-only|--no-expo]"
+      echo "  --resume, --backend-only, --no-expo  Start Rails server only (skip Expo)"
+      exit 0
+      ;;
+  esac
+done
+
 echo -e "${BLUE}Starting React Native app and Rails server...${NC}"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
+export BUNDLE_APP_CONFIG="${PROJECT_ROOT}/.bundle"
+export BUNDLE_USER_HOME="${BUNDLE_USER_HOME:-/tmp/replate-bundle}"
+export BUNDLE_PATH="${BUNDLE_PATH:-${PROJECT_ROOT}/vendor/bundle}"
+
+mkdir -p "$BUNDLE_APP_CONFIG" "$BUNDLE_USER_HOME" "$(dirname "$BUNDLE_PATH")"
 
 # Find replate-business directory
 RAILS_DIR=""
@@ -148,8 +168,7 @@ if [ -n "$RAILS_DIR" ] && [ -d "$RAILS_DIR" ]; then
   echo -e "${BLUE}Checking Rails dependencies...${NC}"
   if ! bundle check > /dev/null 2>&1; then
     echo -e "${YELLOW}Installing Rails dependencies...${NC}"
-    bundle install
-    if [ $? -ne 0 ]; then
+    if ! bundle install; then
       echo -e "${YELLOW}Failed to install Rails dependencies. Check the Rails directory.${NC}"
       cd "$PROJECT_ROOT"
     else
@@ -206,13 +225,9 @@ if [ -n "$RAILS_DIR" ] && [ -d "$RAILS_DIR" ]; then
   RAILS_PID=$!
   # Wait a bit longer for Rails to actually start
   sleep 3
-  # Find the actual Rails server process more reliably
-  ACTUAL_RAILS_PID=$(ps aux | grep "[r]ails server" | awk '{print $2}' | head -n 1)
-  if [ -z "$ACTUAL_RAILS_PID" ]; then
-    ACTUAL_RAILS_PID=$RAILS_PID
-  fi
-  echo $ACTUAL_RAILS_PID > "$PROJECT_ROOT/.pids/rails.pid"
-  echo -e "${GREEN}Rails server started - PID: ${ACTUAL_RAILS_PID}${NC}"
+  # Use the pid for the background rails launcher process
+  echo $RAILS_PID > "$PROJECT_ROOT/.pids/rails.pid"
+  echo -e "${GREEN}Rails server started - PID: ${RAILS_PID}${NC}"
   echo -e "${BLUE}  Command: rails server -b 0.0.0.0 -p 3000${NC}"
   echo -e "${BLUE}  Logs: $PROJECT_ROOT/.pids/rails.log${NC}"
   cd "$PROJECT_ROOT"
@@ -235,12 +250,43 @@ elif [ ! -f "pnpm-lock.yaml" ]; then
   NEED_INSTALL=true
 elif [ "package.json" -nt "node_modules" ] || [ "pnpm-lock.yaml" -nt "node_modules" ]; then
   NEED_INSTALL=true
+elif [ ! -x "$PROJECT_ROOT/node_modules/.bin/expo" ]; then
+  NEED_INSTALL=true
+  echo -e "${YELLOW}Expo binary missing. Running dependency install to recover node_modules...${NC}"
 fi
 
 if [ "$NEED_INSTALL" = true ]; then
   echo -e "${YELLOW}Dependencies need to be installed/updated. Running pnpm install...${NC}"
-  pnpm install
-  echo -e "${GREEN}Dependencies installed${NC}"
+  if CI=true pnpm install; then
+    echo -e "${GREEN}Dependencies installed${NC}"
+  else
+    echo -e "${YELLOW}pnpm install failed (likely no network/lockfile issues).${NC}"
+    if [ "$START_FRONTEND" = true ]; then
+      echo -e "${YELLOW}Cannot start Expo without dependencies installed.${NC}"
+      exit 1
+    else
+      echo -e "${YELLOW}Resume mode enabled. Skipping frontend startup and keeping Rails running.${NC}"
+      START_FRONTEND=false
+    fi
+  fi
+fi
+
+# Validate frontend dependency when starting Expo
+if [ "$START_FRONTEND" = true ] && [ ! -x "$PROJECT_ROOT/node_modules/.bin/expo" ]; then
+  echo -e "${YELLOW}Expo binary not found at ./node_modules/.bin/expo.${NC}"
+  echo -e "${YELLOW}Run 'pnpm install' (with network) and retry.${NC}"
+  if [ "$START_FRONTEND" = true ]; then
+    exit 1
+  fi
+fi
+
+if [ "$START_FRONTEND" = false ]; then
+  echo -e "${YELLOW}Skipping Expo startup (resume mode). Backend is running for now.${NC}"
+  echo -e "${BLUE}To run frontend later: cd \"$PROJECT_ROOT\" && pnpm exec expo start${NC}"
+  echo -e "${BLUE}When done with frontend, stop with Ctrl+C.${NC}"
+  while true; do
+    sleep 60
+  done
 fi
 
 # Start React Native app
@@ -254,4 +300,4 @@ echo -e "${GREEN}Rails server started${NC}"
 echo -e "${GREEN}Starting Expo...${NC}"
 echo ""
 # Run Expo in foreground so QR code is visible
-pnpm start
+pnpm exec expo start

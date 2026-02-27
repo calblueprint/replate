@@ -66,6 +66,14 @@ export const styles = StyleSheet.create({
     marginRight: 20,
     tintColor: '#000',
   },
+  sectionIcon: {
+    marginTop: 4,
+    marginRight: 16,
+  },
+  rowIcon: {
+    marginRight: 16,
+    marginTop: 1,
+  },
   locationContent: {
     flex: 1,
   },
@@ -154,6 +162,7 @@ export const styles = StyleSheet.create({
   },
   contactInfo: {
     flex: 1,
+    marginRight: 12,
   },
   contactLabel: {
     fontSize: 12,
@@ -350,6 +359,7 @@ export const styles = StyleSheet.create({
     height: 24,
     marginRight: 16,
     tintColor: '#525454',
+    marginTop: 1,
   },
   modalOptionText: {
     fontSize: 16,

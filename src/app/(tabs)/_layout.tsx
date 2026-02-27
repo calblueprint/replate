@@ -1,40 +1,13 @@
 import React from 'react';
-import { Dimensions, Image } from 'react-native';
-import {
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated';
+import { Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tabs } from 'expo-router';
 import homeIcon from 'assets/home.png';
 import profileIcon from 'assets/profile.png';
 import tasksIcon from 'assets/tasks.png';
 
-const { width: screenWidth } = Dimensions.get('window');
-
 export default function TabLayout() {
-  const translateX = useSharedValue(0);
   const insets = useSafeAreaInsets();
-
-  useAnimatedStyle(() => {
-    const opacity = interpolate(
-      translateX.value,
-      [-screenWidth * 0.3, 0, screenWidth * 0.3],
-      [0.7, 1, 0.7],
-    );
-
-    const scale = interpolate(
-      translateX.value,
-      [-screenWidth * 0.3, 0, screenWidth * 0.3],
-      [0.95, 1, 0.95],
-    );
-
-    return {
-      transform: [{ translateX: translateX.value }, { scale }],
-      opacity,
-    };
-  });
 
   return (
     <Tabs

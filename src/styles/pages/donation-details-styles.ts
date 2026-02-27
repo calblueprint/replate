@@ -12,6 +12,77 @@ export const styles = StyleSheet.create({
     paddingBottom: 120,
   },
 
+  stateContainer: {
+    backgroundColor: '#FFFFFF',
+  },
+
+  loadingText: {
+    marginTop: 12,
+    color: '#6b7280',
+    fontFamily: 'Lato',
+  },
+
+  errorText: {
+    color: '#991b1b',
+    marginBottom: 12,
+    textAlign: 'center',
+    fontFamily: 'LatoBold',
+  },
+
+  emptyText: {
+    color: '#6b7280',
+    fontFamily: 'Lato',
+  },
+
+  retryButton: {
+    backgroundColor: '#58ad85',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+
+  retryButtonText: {
+    color: '#fff',
+    fontFamily: 'LatoBold',
+  },
+
+  retryTextButton: {
+    marginTop: 12,
+  },
+
+  retryTextButtonText: {
+    color: '#58ad85',
+    fontFamily: 'LatoBold',
+  },
+
+  partnerErrorCard: {
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#ffd8a8',
+    backgroundColor: '#fff8ee',
+    borderRadius: 8,
+    padding: 10,
+  },
+
+  partnerErrorText: {
+    color: '#92400e',
+    marginBottom: 8,
+    fontFamily: 'Lato',
+  },
+
+  partnerRetryButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#ffd8a8',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+
+  partnerRetryButtonText: {
+    color: '#92400e',
+    fontFamily: 'LatoBold',
+  },
+
   section: {
     borderColor: '#A9A9A980',
     borderWidth: 0.8,
@@ -125,6 +196,12 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 14,
     fontFamily: 'Lato',
+  },
+  missedButtonDisabled: {
+    borderColor: '#d1d5db',
+  },
+  missedTextDisabled: {
+    color: '#9ca3af',
   },
 
   completeButton: {

@@ -359,11 +359,73 @@ export const driverAPI = {
   },
 };
 
-export const getPartners = async () => {
-  return apiRequest(`${BASE_URL}${API_ENDPOINTS.PARTNERS}`, {
-    method: 'GET',
-  });
+export type PartnerTuple = [number, string];
+
+function isPartnerTuple(value: unknown): value is PartnerTuple {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === 'number' &&
+    typeof value[1] === 'string'
+  );
+}
+
+export async function getPartners(): Promise<PartnerTuple[]> {
+  const responseData = await apiRequest<unknown>(
+    `${BASE_URL}${API_ENDPOINTS.PARTNERS}`,
+    {
+      method: 'GET',
+    },
+  );
+
+  if (!Array.isArray(responseData)) {
+    throw new ApiUtilError('Invalid partners response shape from server', 0, [
+      'validation_failed',
+    ]);
+  }
+
+  return responseData.filter(isPartnerTuple);
+}
+
+export type TaskResponse = {
+  id: number;
+  encrypted_id: string;
+  pickup_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  location_name: string | null;
+  food_rescuer_notes?: string | null;
+  total_pounds_entered?: number | null;
 };
+
+function isTaskResponse(value: unknown): value is TaskResponse {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+
+  const record = value as Record<string, unknown>;
+
+  return (
+    typeof record.id === 'number' &&
+    typeof record.encrypted_id === 'string' &&
+    typeof record.pickup_date === 'string' &&
+    (record.start_time === null || typeof record.start_time === 'string') &&
+    (record.end_time === null || typeof record.end_time === 'string') &&
+    (record.location_name === null || typeof record.location_name === 'string')
+  );
+}
+
+export async function getTask(encryptedTaskId: string): Promise<TaskResponse> {
+  const safeId = encodeURIComponent(encryptedTaskId);
+
+  return apiRequest<TaskResponse>(
+    `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}`,
+    {
+      method: 'GET',
+      validateResponse: responseData => {
+        return isTaskResponse(responseData);
+      },
+    },
+  );
+}
 
 interface UpdateDriverResponse {
   id: number;
@@ -425,5 +487,57 @@ export async function claimTask(encryptedTaskId: string, driverId: number) {
       Accept: 'application/json',
     },
     body: JSON.stringify({ driver_id: driverId }),
+  });
+}
+
+type DonationCompletionPayload = {
+  status?: 'complete' | 'failed' | 'cancelled_late';
+  total_pounds_entered: number;
+  food_rescuer_notes: string | null;
+  rescuer_logs: unknown[];
+};
+
+export type DonationCompletionStatus = 'complete' | 'failed' | 'cancelled_late';
+
+export async function submitDonationCompletion(
+  encryptedTaskId: string,
+  payload: DonationCompletionPayload,
+) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+
+  return apiRequest(`${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function submitTaskCompletion(
+  encryptedTaskId: string,
+  pounds: number,
+  notes: string | null,
+  rescuerLogs: unknown[] = [],
+): Promise<unknown> {
+  return submitDonationCompletion(encryptedTaskId, {
+    status: 'complete',
+    total_pounds_entered: pounds,
+    food_rescuer_notes: notes,
+    rescuer_logs: rescuerLogs,
+  });
+}
+
+export async function submitTaskMissed(
+  encryptedTaskId: string,
+  notes: string | null,
+  rescuerLogs: unknown[] = [],
+): Promise<unknown> {
+  return submitDonationCompletion(encryptedTaskId, {
+    status: 'failed',
+    total_pounds_entered: 0,
+    food_rescuer_notes: notes,
+    rescuer_logs: rescuerLogs,
   });
 }
