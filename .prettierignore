@@ -4,3 +4,6 @@ README.md
 .gitattributes
 pnpm-lock.yaml
 babel.config.js
+
+# bundler gems installed locally — not our code
+vendor/

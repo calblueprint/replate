@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import {
   Animated,
-  Dimensions,
+  LayoutChangeEvent,
   Pressable,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Colors from '@/styles/colors';
-
-const { width } = Dimensions.get('window');
 
 interface AnimatedSegmentedControlProps {
   leftLabel: string;
@@ -23,10 +22,36 @@ export default function AnimatedSegmentedControl({
   value,
   onChange,
 }: AnimatedSegmentedControlProps) {
+  const [trackWidth, setTrackWidth] = React.useState(0);
+  const { width: windowWidth } = useWindowDimensions();
   const translateX = useRef(
     new Animated.Value(value === 'left' ? 0 : 1),
   ).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fallbackWidth = Math.max(0, windowWidth - 52);
+  const sliderRange = Math.max(
+    0,
+    trackWidth > 0 ? trackWidth / 2 - 2 : fallbackWidth / 2 - 2,
+  );
+  const sliderWidth = Math.max(
+    0,
+    trackWidth > 0 ? trackWidth / 2 - 4 : fallbackWidth / 2 - 4,
+  );
+
+  const handleTrackLayout = (event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+    if (width > 0) {
+      setTrackWidth(width);
+    }
+  };
+
+  const onSelectSegment = (value: 'left' | 'right') => {
+    if (value === 'left') {
+      onChange('left');
+      return;
+    }
+    onChange('right');
+  };
 
   useEffect(() => {
     // Fade in animation
@@ -47,17 +72,21 @@ export default function AnimatedSegmentedControl({
   }, [value]);
 
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+    <Animated.View
+      style={[styles.container, { opacity: fadeAnim }]}
+      onLayout={handleTrackLayout}
+    >
       <View style={styles.track}>
         <Animated.View
           style={[
             styles.slider,
             {
+              width: sliderWidth,
               transform: [
                 {
                   translateX: translateX.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [2, (width - 52) / 2 - 2],
+                    outputRange: [2, sliderRange],
                   }),
                 },
               ],
@@ -67,8 +96,10 @@ export default function AnimatedSegmentedControl({
 
         <Pressable
           style={styles.button}
-          onPress={() => onChange('left')}
+          onPress={() => onSelectSegment('left')}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: value === 'left' }}
         >
           <Animated.Text
             style={[
@@ -87,8 +118,10 @@ export default function AnimatedSegmentedControl({
 
         <Pressable
           style={styles.button}
-          onPress={() => onChange('right')}
+          onPress={() => onSelectSegment('right')}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: value === 'right' }}
         >
           <Animated.Text
             style={[
@@ -125,7 +158,6 @@ const styles = StyleSheet.create({
   },
   slider: {
     position: 'absolute',
-    width: (width - 52) / 2 - 4,
     height: 46,
     backgroundColor: Colors.jasmine,
     borderRadius: 23,

@@ -7,12 +7,14 @@ import {
   RefreshControl,
   SafeAreaView,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clockIcon from 'assets/date.png';
 import replateLogo from 'assets/replate-logo.png';
+import AnimatedSegmentedControl from '@/components/AnimatedSegmentedControl';
 import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
@@ -142,11 +144,6 @@ export default function AvailablePickupsPage() {
   const { driver } = useAuth();
   const driverId = driver?.id;
 
-  const remoteRef = React.useRef<UiPickup[] | null>(null);
-  React.useEffect(() => {
-    remoteRef.current = remote;
-  }, [remote]);
-
   const fetchTasks = React.useCallback(
     async (isRefresh = false) => {
       try {
@@ -184,7 +181,12 @@ export default function AvailablePickupsPage() {
   );
 
   React.useEffect(() => {
-    if (!driverId) return;
+    if (!driverId) {
+      setIsLoading(false);
+      setError('Sign in required to view available tasks.');
+      return;
+    }
+
     fetchTasks();
   }, [driverId, fetchTasks]);
 
@@ -212,6 +214,39 @@ export default function AvailablePickupsPage() {
         <ActivityIndicator size="large" color="#58ad85" />
         <Text style={styles.loadingText}>Loading tasks...</Text>
       </View>
+    );
+  }
+
+  if (!driverId) {
+    return (
+      <SafeAreaView style={styles.safeAreaContainer}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 24,
+            gap: 12,
+          }}
+        >
+          <Text style={{ fontSize: 16, textAlign: 'center' }}>
+            Sign in required to view available tasks.
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#58ad85',
+              borderRadius: 10,
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+            }}
+            onPress={() => router.replace('/auth/login')}
+          >
+            <Text style={{ color: '#fff', fontFamily: 'LatoBold' }}>
+              Sign In
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -249,67 +284,15 @@ export default function AvailablePickupsPage() {
               <Text style={styles.availableTasksTitle}>
                 Available Tasks ({filtered.length})
               </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  backgroundColor: '#F3F4F6',
-                  borderRadius: 12,
-                  padding: 4,
-                  marginTop: 10,
+              <AnimatedSegmentedControl
+                leftLabel="Today"
+                rightLabel="Tomorrow"
+                value={tab}
+                onChange={value => {
+                  setTab(value);
+                  setSelectedISO(value === 'left' ? todayISO : tomorrowISO);
                 }}
-              >
-                <Pressable
-                  style={{
-                    flex: 1,
-                    paddingVertical: 10,
-                    paddingHorizontal: 20,
-                    backgroundColor: tab === 'left' ? '#FFFFFF' : 'transparent',
-                    borderRadius: 8,
-                    alignItems: 'center',
-                  }}
-                  onPress={() => {
-                    setTab('left');
-                    setSelectedISO(todayISO);
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '600',
-                      color: tab === 'left' ? '#06B97C' : '#9CA3AF',
-                      fontFamily: 'LatoBold',
-                    }}
-                  >
-                    Today
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={{
-                    flex: 1,
-                    paddingVertical: 10,
-                    paddingHorizontal: 20,
-                    backgroundColor:
-                      tab === 'right' ? '#FFFFFF' : 'transparent',
-                    borderRadius: 8,
-                    alignItems: 'center',
-                  }}
-                  onPress={() => {
-                    setTab('right');
-                    setSelectedISO(tomorrowISO);
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '600',
-                      color: tab === 'right' ? '#06B97C' : '#9CA3AF',
-                      fontFamily: 'LatoBold',
-                    }}
-                  >
-                    Tomorrow
-                  </Text>
-                </Pressable>
-              </View>
+              />
             </View>
             <Text style={styles.dateHeaderText}>
               {fmtDateHeader(selectedISO)}
