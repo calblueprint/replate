@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clockIcon from 'assets/date.png';
@@ -222,135 +223,145 @@ export default function AvailablePickupsPage() {
 
   if (!driverId) {
     return (
-      <View style={styles.safeAreaContainer}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 24,
-            gap: 12,
-          }}
-        >
-          <Text style={{ fontSize: 16, textAlign: 'center' }}>
-            Sign in required to view available tasks.
-          </Text>
-          <TouchableOpacity
+      <View style={styles.outerContainer}>
+        <SafeAreaView style={styles.safeAreaContainer}>
+          <View
             style={{
-              backgroundColor: '#58ad85',
-              borderRadius: 10,
-              paddingHorizontal: 20,
-              paddingVertical: 10,
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: 24,
+              gap: 12,
             }}
-            onPress={() => router.replace('/auth/login')}
           >
-            <Text style={{ color: '#fff', fontFamily: 'LatoBold' }}>
-              Sign In
+            <Text style={{ fontSize: 16, textAlign: 'center' }}>
+              Sign in required to view available tasks.
             </Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#58ad85',
+                borderRadius: 10,
+                paddingHorizontal: 20,
+                paddingVertical: 10,
+              }}
+              onPress={() => router.replace('/auth/login')}
+            >
+              <Text style={{ color: '#fff', fontFamily: 'LatoBold' }}>
+                Sign In
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
       </View>
     );
   }
 
   return (
-    <View style={styles.safeAreaContainer}>
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item.encrypted_id}
-        contentContainerStyle={styles.contentContainer}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-            colors={['#58ad85']}
-            tintColor="#58ad85"
-          />
-        }
-        ListHeaderComponent={
-          <View>
-            {error ? (
-              <View style={styles.error}>
-                <Text style={{ color: '#991b1b' }}>
-                  Failed to load tasks: {error}
-                </Text>
-                <Text style={{ color: '#6b7280', marginTop: 4, fontSize: 12 }}>
-                  Pull down to retry
-                </Text>
-              </View>
-            ) : null}
-            <View style={styles.header}>
-              <View style={styles.headerTopRow}>
-                <Text style={styles.date}>{headerDate}</Text>
-                <View style={styles.avatarCircle}>
-                  <Text style={styles.avatarLetter}>
-                    {(driver?.first_name || '?')[0]}
+    <View style={styles.outerContainer}>
+      <SafeAreaView style={styles.safeAreaContainer}>
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item.encrypted_id}
+          contentContainerStyle={styles.contentContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={['#58ad85']}
+              tintColor="#58ad85"
+            />
+          }
+          ListHeaderComponent={
+            <View>
+              {error ? (
+                <View style={styles.error}>
+                  <Text style={{ color: '#991b1b' }}>
+                    Failed to load tasks: {error}
+                  </Text>
+                  <Text
+                    style={{ color: '#6b7280', marginTop: 4, fontSize: 12 }}
+                  >
+                    Pull down to retry
                   </Text>
                 </View>
+              ) : null}
+              <View style={styles.header}>
+                <View style={styles.headerTopRow}>
+                  <Text style={styles.date}>{headerDate}</Text>
+                  <View style={styles.avatarCircle}>
+                    <Text style={styles.avatarLetter}>
+                      {(driver?.first_name || '?')[0]}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.greeting}>Available Tasks</Text>
+                <Text style={styles.subtext}>
+                  {filtered.length} task{filtered.length === 1 ? '' : 's'}{' '}
+                  available
+                </Text>
+                <AnimatedSegmentedControl
+                  leftLabel="Today"
+                  rightLabel="Tomorrow"
+                  value={tab}
+                  onChange={value => {
+                    setTab(value);
+                    setSelectedISO(value === 'left' ? todayISO : tomorrowISO);
+                  }}
+                />
               </View>
-              <Text style={styles.greeting}>Available Tasks</Text>
-              <Text style={styles.subtext}>
-                {filtered.length} task{filtered.length === 1 ? '' : 's'}{' '}
-                available
+              <Text style={styles.dateHeaderText}>
+                {fmtDateHeader(selectedISO)}
               </Text>
-              <AnimatedSegmentedControl
-                leftLabel="Today"
-                rightLabel="Tomorrow"
-                value={tab}
-                onChange={value => {
-                  setTab(value);
-                  setSelectedISO(value === 'left' ? todayISO : tomorrowISO);
-                }}
-              />
             </View>
-            <Text style={styles.dateHeaderText}>
-              {fmtDateHeader(selectedISO)}
+          }
+          ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+          renderItem={({ item }) => (
+            <View style={styles.pickupCard}>
+              <View style={styles.pickupCardTop}>
+                <Image source={clockIcon} style={styles.clockIcon} />
+                <Text style={styles.timeText}>
+                  {fmtShortHourRange(
+                    item.pickup_date,
+                    item.slot_start_time,
+                    item.slot_end_time,
+                    {
+                      showAmPm: true,
+                    },
+                  )}
+                </Text>
+              </View>
+
+              <View style={styles.pickupCardBottom}>
+                <View style={styles.pickupLeft}>
+                  <Text style={styles.locationText}>
+                    {item.pickup_location}
+                  </Text>
+                  {/* temp address */}
+                  {/* <Text style={styles.addressText}>Temp Address</Text> */}
+                </View>
+
+                <Pressable
+                  onPress={() => {
+                    router.push({
+                      pathname: '/pickup-details/[id]',
+                      params: { id: item.encrypted_id },
+                    });
+                  }}
+                  style={styles.detailsButton}
+                >
+                  <Text style={styles.detailsButtonText}>Pick-up details</Text>
+                  <Text style={styles.chevron}>›</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+          ListEmptyComponent={
+            <Text style={styles.claimPickupText}>
+              No pickups for this date.
             </Text>
-          </View>
-        }
-        ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-        renderItem={({ item }) => (
-          <View style={styles.pickupCard}>
-            <View style={styles.pickupCardTop}>
-              <Image source={clockIcon} style={styles.clockIcon} />
-              <Text style={styles.timeText}>
-                {fmtShortHourRange(
-                  item.pickup_date,
-                  item.slot_start_time,
-                  item.slot_end_time,
-                  {
-                    showAmPm: true,
-                  },
-                )}
-              </Text>
-            </View>
-
-            <View style={styles.pickupCardBottom}>
-              <View style={styles.pickupLeft}>
-                <Text style={styles.locationText}>{item.pickup_location}</Text>
-                {/* temp address */}
-                {/* <Text style={styles.addressText}>Temp Address</Text> */}
-              </View>
-
-              <Pressable
-                onPress={() => {
-                  router.push({
-                    pathname: '/pickup-details/[id]',
-                    params: { id: item.encrypted_id },
-                  });
-                }}
-                style={styles.detailsButton}
-              >
-                <Text style={styles.detailsButtonText}>Pick-up details</Text>
-                <Text style={styles.chevron}>›</Text>
-              </Pressable>
-            </View>
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.claimPickupText}>No pickups for this date.</Text>
-        }
-      />
+          }
+        />
+      </SafeAreaView>
     </View>
   );
 }

@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
   header: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 22,
-    paddingTop: 58,
+    paddingTop: 14,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#D8E0E9',
@@ -209,10 +209,14 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#58ad85',
   },
+  // white behind status bar so header looks flush with top of screen
+  outerContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
   safeAreaContainer: {
     flex: 1,
     backgroundColor: '#EAEEF2',
-    paddingTop: 0,
   },
   loadingContainer: {
     flex: 1,
