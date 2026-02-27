@@ -144,8 +144,9 @@ export default function AnimatedSegmentedControl({
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 26,
-    marginBottom: 23,
+    marginHorizontal: 0,
+    marginTop: 12,
+    marginBottom: 0,
   },
   track: {
     flexDirection: 'row',
