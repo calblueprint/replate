@@ -9,14 +9,58 @@ export const styles = StyleSheet.create({
     marginTop: 16,
   },
   // header
-  availableTasksTitle: {
-    fontSize: 28,
+  header: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 22,
+    paddingTop: 58,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#D8E0E9',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 4,
+    fontFamily: 'Lato',
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  date: {
+    fontSize: 15,
+    color: '#525454',
+    fontFamily: 'Lato',
+  },
+  avatarCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#aeddc4',
+    borderWidth: 2,
+    borderColor: '#3ea377',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarLetter: {
+    fontSize: 16,
+    color: '#3EA377',
+    fontWeight: '600',
     fontFamily: 'LatoBold',
-    fontWeight: '700',
-    color: '#2C805B',
-    marginLeft: 26,
-    marginTop: 27,
-    marginBottom: 14,
+  },
+  greeting: {
+    color: '#427B60',
+    textAlign: 'left',
+    fontFamily: 'LatoBold',
+    fontSize: 27,
+    height: 32,
+  },
+  subtext: {
+    textAlign: 'left',
+    color: '#2D8A60',
+    fontSize: 15,
+    marginTop: 12,
+    fontFamily: 'Lato',
   },
   segmentWrap: {
     flexDirection: 'row',
@@ -51,41 +95,6 @@ export const styles = StyleSheet.create({
   },
   segmentTextInactive: {
     color: Colors.black,
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    // creates the “header container” separation
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOpacity: 0.08,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 6 },
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
-
-    // keeps the shadow from being clipped by the next content
-    marginBottom: 14,
-  },
-  replateTitle: {
-    fontSize: 18,
-    fontFamily: 'Lato',
-    color: '#3EA377',
-    fontWeight: '400',
-  },
-  logo: {
-    height: 30,
-    width: 30,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center', // vertical centering
-    justifyContent: 'center', // horizontal centering
-    gap: 5, // space between text & logo
-    marginTop: 12,
   },
   //cards
   pickupCard: {
@@ -191,7 +200,7 @@ export const styles = StyleSheet.create({
     color: '#427B60',
   },
   contentContainer: {
-    paddingBottom: 24,
+    paddingBottom: 140,
   },
   claimPickupText: {
     textAlign: 'center',
@@ -202,7 +211,8 @@ export const styles = StyleSheet.create({
   },
   safeAreaContainer: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#EAEEF2',
+    paddingTop: 0,
   },
   loadingContainer: {
     flex: 1,
@@ -216,6 +226,9 @@ export const styles = StyleSheet.create({
   },
   itemSeparator: {
     height: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDF1F7',
+    marginHorizontal: 16,
   },
   //[id] styles
   detailsSections: {

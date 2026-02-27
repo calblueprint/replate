@@ -5,7 +5,6 @@ import {
   Image,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
@@ -13,7 +12,6 @@ import {
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clockIcon from 'assets/date.png';
-import replateLogo from 'assets/replate-logo.png';
 import AnimatedSegmentedControl from '@/components/AnimatedSegmentedControl';
 import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
@@ -127,6 +125,11 @@ type UiPickup = {
 
 export default function AvailablePickupsPage() {
   const todayISO = localISODate(new Date());
+  const headerDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
 
   const tomorrowISO = React.useMemo(() => {
     const d = new Date();
@@ -219,7 +222,7 @@ export default function AvailablePickupsPage() {
 
   if (!driverId) {
     return (
-      <SafeAreaView style={styles.safeAreaContainer}>
+      <View style={styles.safeAreaContainer}>
         <View
           style={{
             flex: 1,
@@ -246,12 +249,12 @@ export default function AvailablePickupsPage() {
             </Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeAreaContainer}>
+    <View style={styles.safeAreaContainer}>
       <FlatList
         data={filtered}
         keyExtractor={item => item.encrypted_id}
@@ -277,12 +280,18 @@ export default function AvailablePickupsPage() {
               </View>
             ) : null}
             <View style={styles.header}>
-              <View style={styles.brandRow}>
-                <Text style={styles.replateTitle}>Replate</Text>
-                <Image style={styles.logo} source={replateLogo} />
+              <View style={styles.headerTopRow}>
+                <Text style={styles.date}>{headerDate}</Text>
+                <View style={styles.avatarCircle}>
+                  <Text style={styles.avatarLetter}>
+                    {(driver?.first_name || '?')[0]}
+                  </Text>
+                </View>
               </View>
-              <Text style={styles.availableTasksTitle}>
-                Available Tasks ({filtered.length})
+              <Text style={styles.greeting}>Available Tasks</Text>
+              <Text style={styles.subtext}>
+                {filtered.length} task{filtered.length === 1 ? '' : 's'}{' '}
+                available
               </Text>
               <AnimatedSegmentedControl
                 leftLabel="Today"
@@ -342,6 +351,6 @@ export default function AvailablePickupsPage() {
           <Text style={styles.claimPickupText}>No pickups for this date.</Text>
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }
