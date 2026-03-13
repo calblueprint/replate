@@ -1,148 +1,92 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-// Landing page image
-import REPLATE_IMAGE from '../../../assets/replate-logo.png';
-import colors from '../../styles/colors';
-import { typography } from '../../styles/typography';
+import AnimatedEntry from '@/components/AnimatedEntry';
+import AnimatedPressable from '@/components/AnimatedPressable';
+import ReplateLogo from '@/components/ReplateLogo';
+import colors from '@/styles/colors';
 
 export default function LandingPage() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white">
       <View
-        style={[
-          styles.content,
-          {
-            paddingTop: Math.max(insets.top + 20, 40),
-            paddingBottom: Math.max(insets.bottom, 20),
-          },
-        ]}
+        className="absolute top-0 left-0 right-0 bg-primary-50 opacity-60"
+        style={{ height: '45%' }}
+      />
+
+      <View
+        className="flex-1 px-6 justify-between w-full"
+        style={{
+          paddingTop: Math.max(insets.top + 40, 60),
+          paddingBottom: Math.max(insets.bottom + 20, 40),
+        }}
       >
-        {/* Top Section - Image */}
-        <View style={styles.topSection}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={REPLATE_IMAGE}
-              style={styles.image}
-              resizeMode="contain"
-            />
+        {/* Logo + Brand */}
+        <View className="items-center pt-10">
+          <AnimatedEntry from={{ opacity: 0, scale: 0.8 }} duration={500}>
+            <ReplateLogo size={140} />
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={150}>
+            <Text className="text-4xl font-heading text-neutral-800 text-center mt-5">
+              replate
+            </Text>
+          </AnimatedEntry>
+        </View>
+
+        {/* Value Prop */}
+        <AnimatedEntry delay={300} duration={450}>
+          <View className="items-center px-3">
+            <Text className="text-2xl font-heading text-center text-neutral-800 leading-8 mb-4">
+              Rescue food.{'\n'}Feed communities.
+            </Text>
+            <View className="w-10 h-[3px] bg-primary-400 rounded-sm mb-4" />
+            <Text className="text-base font-body text-center text-neutral-500 leading-6">
+              Join the movement to reduce food waste and help those in need
+              across the Bay Area.
+            </Text>
           </View>
-        </View>
+        </AnimatedEntry>
 
-        {/* Middle Section - Text */}
-        <View style={styles.middleSection}>
-          <Text style={styles.welcomeText}>Welcome!</Text>
-          <Text style={styles.subtitle}>Let's sign you into your account.</Text>
-        </View>
+        {/* Buttons */}
+        <AnimatedEntry delay={500} duration={450} className="w-full">
+          <View className="w-full items-center gap-3 pb-5">
+            <AnimatedPressable
+              className="w-full bg-primary-400 rounded-xl py-4 items-center justify-center min-h-[56px]"
+              style={{
+                shadowColor: colors.primary[400],
+                shadowOpacity: 0.3,
+                shadowOffset: { width: 0, height: 4 },
+                shadowRadius: 12,
+                elevation: 5,
+              }}
+              onPress={() => router.replace('/auth/signup')}
+              scaleValue={0.97}
+              accessibilityRole="button"
+              accessibilityLabel="Get started with Replate"
+            >
+              <Text className="text-base font-subheading text-white">
+                Get Started
+              </Text>
+            </AnimatedPressable>
 
-        {/* Bottom Section - Buttons */}
-        <View style={styles.buttonContainer}>
-          {/* LOGIN Button - Outlined */}
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => router.replace('/auth/login')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.loginButtonText}>LOGIN</Text>
-          </TouchableOpacity>
-
-          {/* SIGNUP Button - Filled */}
-          <TouchableOpacity
-            style={styles.signupButton}
-            onPress={() => router.replace('/auth/signup')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.signupButtonText}>SIGNUP</Text>
-          </TouchableOpacity>
-        </View>
+            <AnimatedPressable
+              className="w-full border-[1.5px] border-primary-400 rounded-xl py-4 items-center justify-center min-h-[56px]"
+              onPress={() => router.replace('/auth/login')}
+              scaleValue={0.97}
+              accessibilityRole="button"
+              accessibilityLabel="Log in to Replate"
+            >
+              <Text className="text-base font-subheading text-primary-600">
+                Log In
+              </Text>
+            </AnimatedPressable>
+          </View>
+        </AnimatedEntry>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  topSection: {
-    alignItems: 'center',
-    marginBottom: 56,
-  },
-  imageContainer: {
-    width: 100,
-    aspectRatio: 848 / 818,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  middleSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-    paddingHorizontal: 20,
-  },
-  welcomeText: {
-    ...typography.h2,
-    fontSize: 30,
-    textAlign: 'center',
-    color: colors.black,
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 15,
-    fontFamily: 'Lato',
-    textAlign: 'center',
-    color: colors.gray,
-    lineHeight: 22,
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 12,
-  },
-  loginButton: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: colors.jasmine,
-    borderRadius: 10,
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-    minHeight: 50,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    fontFamily: 'LatoBold',
-    color: colors.jasmine,
-    lineHeight: 30,
-  },
-  signupButton: {
-    width: '100%',
-    backgroundColor: colors.jasmine,
-    borderRadius: 10,
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 50,
-  },
-  signupButtonText: {
-    fontSize: 16,
-    fontFamily: 'LatoBold',
-    color: colors.white,
-    lineHeight: 30,
-  },
-});

@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  ViewStyle,
-} from 'react-native';
+import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import { router, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import colors from '@/styles/colors';
 
 interface BackButtonProps {
   style?: StyleProp<ViewStyle>;
@@ -40,9 +35,8 @@ export default function BackButton({ style, onPress }: BackButtonProps) {
             } else {
               router.replace('/landing');
             }
-          } catch (err) {
+          } catch {
             // If all else fails, just go to landing
-            console.log('Navigation error, going to landing:', err);
             router.replace('/landing');
           }
         }
@@ -51,38 +45,14 @@ export default function BackButton({ style, onPress }: BackButtonProps) {
   };
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={handlePress}
-      style={[styles.container, style]}
-      activeOpacity={0.7}
+      style={[{ padding: 4, alignSelf: 'flex-start', marginBottom: 12 }, style]}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      accessibilityLabel="Go back"
+      accessibilityRole="button"
     >
-      <Ionicons
-        name="chevron-back"
-        size={24}
-        color="#525454"
-        style={styles.icon}
-      />
-      <Text style={styles.text}>Back</Text>
-    </TouchableOpacity>
+      <Ionicons name="chevron-back" size={24} color={colors.neutral[700]} />
+    </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    alignSelf: 'flex-start',
-    // Shift slightly left to align the text with content if desired,
-    // but typically top-left alignment is fine.
-    marginLeft: -8, // Offset the padding built into the icon usually
-  },
-  icon: {
-    marginRight: 5,
-  },
-  text: {
-    fontSize: 14,
-    fontFamily: 'Lato',
-    color: '#525454',
-  },
-});

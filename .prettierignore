@@ -4,3 +4,4 @@ README.md
 .gitattributes
 pnpm-lock.yaml
 babel.config.js
+vendor/

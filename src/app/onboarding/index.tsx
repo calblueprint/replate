@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import replateIcon from '/assets/replate-logo.png';
-import { iconStyles } from '@/components/NavBar/styles';
+import AnimatedEntry from '@/components/AnimatedEntry';
+import AnimatedPressable from '@/components/AnimatedPressable';
+import ReplateLogo from '@/components/ReplateLogo';
+import colors from '@/styles/colors';
+import { useAuth } from '@/utils/AuthContext';
+import { useProfile } from '@/utils/ProfileContext';
 import { ApiError } from '~/api/apiUtils';
 import { getPartners, updateDriverPartner } from '~/api/config';
-import { useAuth } from '~/src/utils/AuthContext';
-import { styles } from '../../styles/pages/onboarding-styles';
-import { useProfile } from '../../utils/ProfileContext';
 
 export default function OnboardingFlow() {
   type PartnerTuple = [number, string];
@@ -65,92 +67,116 @@ export default function OnboardingFlow() {
     try {
       setIsUpdating(true);
       const updated = await updateDriverPartner(driver.id, selectedNPOId);
-      if (!updated) return; // stay on page if it failed
+      if (!updated) return;
       await refreshProfile(driver.id);
       router.replace('/(tabs)/my-tasks');
+    } catch {
+      setError('Failed to update partner. Please try again.');
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Show loading state while fetching partners
   if (isLoading) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: 'center', alignItems: 'center' },
-        ]}
-      >
-        <ActivityIndicator size="large" color="#58ad85" />
-        <Text style={{ marginTop: 12, color: '#6b7280' }}>
-          Loading partners...
-        </Text>
-      </View>
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-1 p-5 justify-center items-center">
+          <ActivityIndicator size="large" color={colors.primary[400]} />
+          <Text className="mt-3 text-neutral-500 font-body">
+            Loading partners...
+          </Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View>
-        <View style={styles.imageContainer}>
-          <Image
-            source={replateIcon}
-            style={[iconStyles.logo]}
-            resizeMode="contain"
-          />
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="flex-1 p-5 justify-between">
+        <View>
+          <AnimatedEntry from={{ opacity: 0, scale: 0.9 }} duration={450}>
+            <View className="w-full items-center justify-center mt-2 mb-2.5">
+              <ReplateLogo size={96} />
+            </View>
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={100}>
+            <Text className="text-2xl text-neutral-800 mt-6 mb-8 font-heading">
+              Which NPO are you partnered with?
+            </Text>
+          </AnimatedEntry>
+
+          {error && (
+            <View
+              className="bg-error-light p-3 mb-4 rounded-lg"
+              accessibilityLiveRegion="polite"
+            >
+              <Text className="text-error-dark text-center font-body">
+                {error}
+              </Text>
+            </View>
+          )}
+
+          <AnimatedEntry delay={200}>
+            <DropDownPicker
+              open={open}
+              value={selectedNPOId}
+              items={items}
+              setOpen={setOpen}
+              setValue={cb => setSelectedNPOId(cb(selectedNPOId))}
+              setItems={setItems}
+              placeholder="Select an NPO"
+              style={{
+                width: '100%',
+                height: 60,
+                borderColor: open ? colors.primary[600] : colors.neutral[300],
+                borderWidth: 1,
+                borderRadius: 8,
+              }}
+              placeholderStyle={{ color: colors.neutral[400] }}
+              dropDownContainerStyle={{
+                borderColor: colors.neutral[300],
+                borderWidth: 1,
+                marginTop: 28,
+                paddingVertical: 5,
+                paddingHorizontal: 5,
+                borderRadius: 8,
+              }}
+              listItemContainerStyle={{
+                height: 50,
+                justifyContent: 'center',
+              }}
+              selectedItemContainerStyle={{
+                backgroundColor: colors.primary[200],
+                borderRadius: 8,
+              }}
+              showTickIcon={false}
+              textStyle={{ fontSize: 15, fontFamily: 'Lato-Regular' }}
+              zIndex={1000}
+            />
+          </AnimatedEntry>
         </View>
 
-        <Text style={styles.title}>Which NPO are you partnered with?</Text>
-
-        {error && (
-          <View
-            style={{
-              backgroundColor: '#fee2e2',
-              padding: 12,
-              marginBottom: 16,
-              borderRadius: 8,
-            }}
+        <AnimatedEntry delay={300}>
+          <AnimatedPressable
+            className={`mb-8 py-4 rounded-xl items-center justify-center min-h-[48px] ${
+              disabled ? 'bg-neutral-300' : 'bg-primary-400'
+            }`}
+            disabled={disabled}
+            onPress={() => void handleUpdatePress()}
+            accessibilityRole="button"
+            accessibilityLabel={isUpdating ? 'Saving' : 'Finish onboarding'}
           >
-            <Text style={{ color: '#991b1b', textAlign: 'center' }}>
-              {error}
-            </Text>
-          </View>
-        )}
-
-        <DropDownPicker
-          open={open}
-          value={selectedNPOId}
-          items={items}
-          setOpen={setOpen}
-          setValue={cb => setSelectedNPOId(cb(selectedNPOId))}
-          setItems={setItems}
-          placeholder="Select an NPO"
-          style={[styles.dropdownStyle, open && styles.dropdownOpenStyle]}
-          placeholderStyle={styles.placeholderStyle}
-          dropDownContainerStyle={styles.dropdownListStyle}
-          listItemContainerStyle={styles.itemContainerStyle}
-          selectedItemContainerStyle={styles.selectedItemContainer}
-          showTickIcon={false}
-          textStyle={styles.textStyle}
-          zIndex={1000}
-        />
+            {isUpdating ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white text-base font-subheading">
+                Finish
+              </Text>
+            )}
+          </AnimatedPressable>
+        </AnimatedEntry>
       </View>
-
-      <Pressable
-        style={[
-          styles.buttonBase,
-          disabled ? styles.buttonDisabled : styles.buttonEnabled,
-        ]}
-        disabled={disabled}
-        onPress={() => void handleUpdatePress()}
-      >
-        {isUpdating ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Finish</Text>
-        )}
-      </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -11,6 +11,14 @@ export interface ApiOptions extends RequestInit {
   sanitize?: boolean; // Whether to sanitize response data (default: true)
 }
 
+/** Shape of error responses from the API when cast from unknown */
+export interface ApiErrorResponse {
+  message?: string;
+  error?: string;
+  errors?: string[];
+  status?: number;
+}
+
 export class ApiError extends Error {
   status: number;
   errors: string[];
