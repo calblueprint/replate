@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -13,30 +13,61 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { getPartners, submitCompletionDetails } from 'api/config';
 import dateIcon from 'assets/date.png';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import PhotoUpload from '../../components/PhotoUpload/PhotoUpload';
 import { styles } from '../../styles/pages/donation-details-styles';
-
-const MOCK_NPOS = [
-  { label: 'Rescuing Leftover Cuisine (RLC)', value: 'RLC' },
-  { label: 'Denver Food Rescue (DFR)', value: 'DFR' },
-  { label: 'Hollywood Food Coalition (HFC)', value: 'HFC' },
-];
 
 export default function DonationLayout() {
   const params = useLocalSearchParams<{ id?: string; location?: string }>();
   const location = params.location || 'Unknown';
   const [weight, setWeight] = useState('');
   const [selectedNPO, setSelectedNPO] = useState('');
+  const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [npoOptions, setNpoOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
   const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
 
-  const handleComplete = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'Complete',
-      text2: `Donation recorded for ${location}.`,
-    });
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const partners = await getPartners();
+        const options = (partners as { id: number; name: string }[]).map(p => ({
+          label: p.name,
+          value: String(p.id),
+        }));
+        setNpoOptions(options);
+      } catch {
+        Toast.show({
+          type: 'error',
+          text1: 'Could not load recipients.',
+        });
+      }
+    };
+    fetchPartners();
+  }, []);
+
+  const handleComplete = async () => {
+    if (!params.id) return;
+    setLoading(true);
+    try {
+      await submitCompletionDetails(params.id, {
+        total_pounds_entered: weight,
+        description: notes || undefined,
+      });
+      Toast.show({ type: 'success', text1: 'Donation recorded!' });
+      router.replace('/(tabs)/my-tasks');
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: 'Could not save. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleMissed = () => {
@@ -115,7 +146,7 @@ export default function DonationLayout() {
               onChangeText={setSelectedNPO}
               required
               isPicker
-              options={MOCK_NPOS}
+              options={npoOptions}
             />
 
             {/* Image upload */}
@@ -130,6 +161,8 @@ export default function DonationLayout() {
                 multiline
                 numberOfLines={4}
                 placeholder="Optional notes"
+                value={notes}
+                onChangeText={setNotes}
               />
             </View>
           </View>
@@ -144,10 +177,10 @@ export default function DonationLayout() {
         <TouchableOpacity
           style={[
             styles.completeButton,
-            !isFormValid && styles.completeButtonDisabled,
+            (!isFormValid || loading) && styles.completeButtonDisabled,
           ]}
           onPress={handleComplete}
-          disabled={!isFormValid}
+          disabled={!isFormValid || loading}
         >
           <Text style={[styles.completeText]}>Complete</Text>
         </TouchableOpacity>

@@ -427,3 +427,18 @@ export async function claimTask(encryptedTaskId: string, driverId: number) {
     body: JSON.stringify({ driver_id: driverId }),
   });
 }
+
+export async function submitCompletionDetails(
+  encryptedTaskId: string,
+  data: { total_pounds_entered: string; description?: string },
+) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+  return apiRequest(
+    `${BASE_URL}/api/tasks/${safeId}/update_completion_details`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    },
+  );
+}
