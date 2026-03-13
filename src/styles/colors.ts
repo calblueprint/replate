@@ -31,7 +31,7 @@ const colors = {
   warning: { light: '#FFF8EE', main: '#F59E0B', dark: '#92400E' },
   // Surfaces
   white: '#FFFFFF',
-  black: '#000000',
+  black: '#000000', // kept for RN shadow compatibility; prefer neutral.900
   background: '#F1F4F7',
   card: '#FFFFFF',
 } as const;

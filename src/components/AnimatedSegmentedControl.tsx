@@ -60,7 +60,7 @@ export default function AnimatedSegmentedControl({
                 height: 38,
                 backgroundColor: colors.primary[400],
                 borderRadius: 19,
-                shadowColor: colors.black,
+                shadowColor: colors.neutral[900],
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.15,
                 shadowRadius: 3,

@@ -20,7 +20,7 @@ export default function TabLayout() {
           elevation: 12,
           shadowOpacity: 0.08,
           shadowRadius: 10,
-          shadowColor: colors.black,
+          shadowColor: colors.neutral[900],
           shadowOffset: { width: 0, height: -4 },
           paddingTop: 10,
           paddingBottom: Math.max(insets.bottom - 10, 10),
