@@ -1,49 +1,69 @@
-import { TouchableOpacity } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import colors from '@/styles/colors';
 
-export default function PickupDetailsLayout() {
+function CustomHeader() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const handleBack = () => {
     if (router.canGoBack()) {
       router.back();
     } else {
-      // Navigate to available pickups tab if can't go back
       router.replace('/(tabs)/available-pick-ups');
     }
   };
 
   return (
+    <View
+      style={{
+        paddingTop: insets.top,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.neutral[100],
+      }}
+    >
+      <View
+        style={{
+          height: 56,
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+        }}
+      >
+        <Pressable
+          onPress={handleBack}
+          style={{ padding: 4, marginRight: 8 }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
+          <Ionicons name="chevron-back" size={24} color={colors.neutral[700]} />
+        </Pressable>
+        <Text
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            fontFamily: 'Lato-Bold',
+            fontSize: 18,
+            color: colors.neutral[800],
+            marginRight: 36,
+          }}
+        >
+          Pickup Details
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+export default function PickupDetailsLayout() {
+  return (
     <Stack
       screenOptions={{
-        headerTitle: 'Pickup',
-        headerLeft: () => (
-          <TouchableOpacity
-            onPress={handleBack}
-            style={{
-              marginLeft: 16,
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: '#F3F4F6',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Ionicons name="chevron-back" size={20} color="#000" />
-          </TouchableOpacity>
-        ),
-        headerBackVisible: false, // Hide the default back button
-        headerStyle: {
-          backgroundColor: '#ffffff',
-        },
-        headerTitleStyle: {
-          fontFamily: 'LatoBold',
-          fontSize: 18,
-          color: '#000',
-        },
-        headerTitleAlign: 'center',
+        header: () => <CustomHeader />,
       }}
     >
       <Stack.Screen name="[id]" />

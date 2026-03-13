@@ -4,6 +4,9 @@ import eslintPluginPrettier from 'eslint-plugin-prettier';
 import tsEslint from 'typescript-eslint';
 
 export default [
+  {
+    ignores: ['vendor/**', 'metro.config.js', 'tailwind.config.js'],
+  },
   js.configs.recommended,
   ...tsEslint.configs.recommended,
   {

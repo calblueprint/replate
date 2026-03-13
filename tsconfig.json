@@ -18,6 +18,11 @@
     }
   },
   "extends": "expo/tsconfig.base",
-  "include": ["src/**/*.ts", "src/**/*.tsx", "./graphics.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "./graphics.d.ts",
+    "./nativewind-env.d.ts"
+  ],
   "exclude": ["node_modules"]
 }

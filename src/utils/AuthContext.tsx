@@ -11,7 +11,7 @@ import {
   DriverLoginData,
   DriverResponse,
   DriverSignupData,
-} from '../../api/config';
+} from '~/api/config';
 import { safeJsonParse, sanitizeObject } from './sanitization';
 
 // Simple AuthContext with persistence
@@ -23,11 +23,8 @@ interface AuthContextType {
     credentials: DriverLoginData,
     staySignedIn?: boolean,
   ) => Promise<void>;
-  signup: (
-    driverData: DriverSignupData,
-    staySignedIn?: boolean,
-  ) => Promise<void>;
-  logout: () => void;
+  signup: (driverData: DriverSignupData) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,12 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedDriver = await AsyncStorage.getItem('driver');
 
         if (storedDriver) {
-          const parsed = safeJsonParse<DriverResponse>(storedDriver);
-          // Sanitize the parsed data to prevent prototype pollution
-          const sanitized = sanitizeObject(
-            parsed as unknown as Record<string, unknown>,
-          ) as unknown as DriverResponse;
-          setDriver(sanitized);
+          const parsed = safeJsonParse<DriverResponse>(storedDriver, null);
+          if (parsed && typeof parsed === 'object' && 'id' in parsed) {
+            // Sanitize the parsed data to prevent prototype pollution
+            const sanitized = sanitizeObject(
+              parsed as unknown as Record<string, unknown>,
+            ) as unknown as DriverResponse;
+            setDriver(sanitized);
+          }
         }
       } catch {
         // Failed to load stored driver, user will need to login again
@@ -71,18 +70,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (driverData: DriverSignupData, staySignedIn = false) => {
+  const signup = async (driverData: DriverSignupData) => {
     const newDriver = await driverAPI.signup(driverData);
     setDriver(newDriver);
-
-    if (staySignedIn) {
-      await AsyncStorage.setItem('driver', JSON.stringify(newDriver));
-    }
+    await AsyncStorage.setItem('driver', JSON.stringify(newDriver));
   };
 
   const logout = async () => {
     setDriver(null);
-    await AsyncStorage.removeItem('driver');
+    await AsyncStorage.multiRemove(['driver', 'tasks']);
   };
 
   return (

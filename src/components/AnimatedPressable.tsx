@@ -7,9 +7,12 @@ import {
   ViewStyle,
 } from 'react-native';
 
+const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
+
 interface AnimatedPressableProps extends PressableProps {
   children: React.ReactNode;
   style?: ViewStyle | ViewStyle[];
+  className?: string;
   scaleValue?: number;
   animationDuration?: number;
 }
@@ -17,6 +20,7 @@ interface AnimatedPressableProps extends PressableProps {
 export default function AnimatedPressable({
   children,
   style,
+  className,
   onPress,
   onPressIn,
   onPressOut,
@@ -45,22 +49,16 @@ export default function AnimatedPressable({
   };
 
   return (
-    <Pressable
+    <AnimatedPressableBase
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      accessibilityRole="button"
+      className={className}
+      style={[style, { transform: [{ scale: scaleAnim }] }]}
       {...props}
     >
-      <Animated.View
-        style={[
-          style,
-          {
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        {children}
-      </Animated.View>
-    </Pressable>
+      {children}
+    </AnimatedPressableBase>
   );
 }

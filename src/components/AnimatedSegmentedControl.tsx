@@ -1,14 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  Animated,
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
-import Colors from '@/styles/colors';
-
-const { width } = Dimensions.get('window');
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, LayoutChangeEvent, Pressable, View } from 'react-native';
+import colors from '@/styles/colors';
 
 interface AnimatedSegmentedControlProps {
   leftLabel: string;
@@ -27,6 +19,7 @@ export default function AnimatedSegmentedControl({
     new Animated.Value(value === 'left' ? 0 : 1),
   ).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
     // Fade in animation
@@ -46,60 +39,82 @@ export default function AnimatedSegmentedControl({
     }).start();
   }, [value]);
 
-  return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <View style={styles.track}>
-        <Animated.View
-          style={[
-            styles.slider,
-            {
-              transform: [
-                {
-                  translateX: translateX.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [2, (width - 52) / 2 - 2],
-                  }),
-                },
-              ],
-            },
-          ]}
-        />
+  const segmentWidth = containerWidth / 2;
 
-        <Pressable
-          style={styles.button}
-          onPress={() => onChange('left')}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Animated.Text
+  const handleLayout = (event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width);
+  };
+
+  return (
+    <Animated.View className="mx-5 mb-5" style={{ opacity: fadeAnim }}>
+      <View
+        className="flex-row bg-neutral-100 rounded-full h-[42px] border border-neutral-200 relative"
+        onLayout={handleLayout}
+      >
+        {containerWidth > 0 && (
+          <Animated.View
             style={[
-              styles.label,
               {
-                color: translateX.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['#fff', '#000'],
-                }),
+                position: 'absolute',
+                width: segmentWidth - 4,
+                height: 38,
+                backgroundColor: colors.primary[400],
+                borderRadius: 19,
+                shadowColor: colors.neutral[900],
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.15,
+                shadowRadius: 3,
+                elevation: 3,
+                transform: [
+                  {
+                    translateX: translateX.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [2, segmentWidth - 2],
+                    }),
+                  },
+                ],
               },
             ]}
+          />
+        )}
+
+        <Pressable
+          className="flex-1 justify-center items-center z-[2]"
+          onPress={() => onChange('left')}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="tab"
+          accessibilityLabel={leftLabel}
+          accessibilityState={{ selected: value === 'left' }}
+        >
+          <Animated.Text
+            className="text-base font-subheading"
+            style={{
+              color: translateX.interpolate({
+                inputRange: [0, 1],
+                outputRange: [colors.white, colors.neutral[700]],
+              }),
+            }}
           >
             {leftLabel}
           </Animated.Text>
         </Pressable>
 
         <Pressable
-          style={styles.button}
+          className="flex-1 justify-center items-center z-[2]"
           onPress={() => onChange('right')}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="tab"
+          accessibilityLabel={rightLabel}
+          accessibilityState={{ selected: value === 'right' }}
         >
           <Animated.Text
-            style={[
-              styles.label,
-              {
-                color: translateX.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['#000', '#fff'],
-                }),
-              },
-            ]}
+            className="text-base font-subheading"
+            style={{
+              color: translateX.interpolate({
+                inputRange: [0, 1],
+                outputRange: [colors.neutral[700], colors.white],
+              }),
+            }}
           >
             {rightLabel}
           </Animated.Text>
@@ -108,45 +123,3 @@ export default function AnimatedSegmentedControl({
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: 26,
-    marginBottom: 23,
-  },
-  track: {
-    flexDirection: 'row',
-    backgroundColor: '#f3f3f3',
-    borderRadius: 25,
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#E4EDFF',
-    position: 'relative',
-  },
-  slider: {
-    position: 'absolute',
-    width: (width - 52) / 2 - 4,
-    height: 46,
-    backgroundColor: Colors.jasmine,
-    borderRadius: 23,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  button: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Lato',
-  },
-});

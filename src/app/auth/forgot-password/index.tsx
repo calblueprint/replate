@@ -1,89 +1,43 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Image,
-  Keyboard,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
-import { driverAPI } from '../../../../api/config';
-// Assets
-import REPLATE_LOGO from '../../../../assets/replate-logo.png';
-import BackButton from '../../../components/BackButton';
-import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
-import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
-
-interface ApiErrorResponse {
-  message?: string;
-  errors?: string[];
-  status?: number;
-}
+import AnimatedEntry from '@/components/AnimatedEntry';
+import AnimatedPressable from '@/components/AnimatedPressable';
+import BackButton from '@/components/BackButton';
+import FormInput from '@/components/FormInput';
+import ReplateLogo from '@/components/ReplateLogo';
+import { INPUT_LIMITS, validateEmail } from '@/utils/validation';
+import { ApiError } from '~/api/apiUtils';
+import { driverAPI } from '~/api/config';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-
-  // Error states
   const [emailError, setEmailError] = useState<string | null>(null);
 
-  const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
-
-  // Focus state
-  const [emailFocused, setEmailFocused] = useState(false);
-
-  const emailBorderAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(emailBorderAnim, {
-      toValue: emailFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [emailFocused]);
-
-  const emailBorderWidth = emailBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const emailBorderColor = emailBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
 
   const handleEmailChange = (text: string) => {
     setEmail(text);
     setEmailError(null);
   };
 
-  // Check if email is valid (no validation errors)
   const isEmailValid = email.trim().length > 0 && validateEmail(email) === null;
 
   const handleRequestReset = async () => {
-    // Guard: Don't proceed if validation fails
-    if (!email || !isEmailValid || isLoading) {
-      return;
-    }
+    if (!email || !isEmailValid || isLoading) return;
 
-    // Clear previous errors
     setEmailError(null);
 
-    // Validate email
     const emailValidationError = validateEmail(email);
     if (emailValidationError) {
       setEmailError(emailValidationError);
-      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
       return;
     }
 
@@ -98,9 +52,10 @@ export default function ForgotPasswordPage() {
         text2: 'Password reset instructions have been sent to your email.',
       });
     } catch (error) {
-      const apiError = error as ApiErrorResponse;
       const errorMessage =
-        apiError.message || 'Failed to send reset email. Please try again.';
+        error instanceof ApiError
+          ? error.message
+          : 'Failed to send reset email. Please try again.';
       setEmailError(errorMessage);
       Toast.show({
         type: 'error',
@@ -114,45 +69,47 @@ export default function ForgotPasswordPage() {
 
   if (emailSent) {
     return (
-      <SafeAreaView style={authStyles.container}>
+      <SafeAreaView className="flex-1 bg-white">
         <ScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={[
-            authStyles.scrollViewContent,
-            {
-              paddingTop: Math.max(insets.top + 20, 40),
-              paddingBottom: Math.max(insets.bottom + 40, 60),
-            },
-          ]}
+          contentContainerStyle={{
+            padding: 20,
+            paddingTop: Math.max(insets.top + 20, 40),
+            paddingBottom: Math.max(insets.bottom + 40, 60),
+          }}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={authStyles.formCard}>
-            <View style={authStyles.logoContainer}>
-              <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
+          <View className="w-full">
+            <View className="items-center mb-6 mt-5">
+              <ReplateLogo size={96} />
             </View>
-            <Text style={authStyles.titleCentered}>Check your email</Text>
-            <Text style={authStyles.subtitleCentered}>
+            <Text className="text-3xl font-heading text-center mb-3 text-neutral-800">
+              Check your email
+            </Text>
+            <Text className="text-sm font-body text-center mb-6 text-neutral-500">
               We've sent password reset instructions to {email}
             </Text>
 
-            <View style={authStyles.buttonContainer}>
-              <TouchableOpacity
-                style={authStyles.grayButton}
+            <View className="mt-3 mb-4">
+              <AnimatedPressable
+                className="w-full bg-primary-400 rounded-xl py-3.5 items-center justify-center min-h-[48px]"
                 onPress={() => router.push('/auth/login')}
-                activeOpacity={0.8}
+                accessibilityRole="button"
               >
-                <Text style={authStyles.grayButtonText}>Back to login</Text>
-              </TouchableOpacity>
+                <Text className="text-base font-subheading text-white">
+                  Back to login
+                </Text>
+              </AnimatedPressable>
             </View>
 
-            <Text style={authStyles.linkTextSignup}>
+            <Text className="text-center text-neutral-600 font-body text-sm mt-4">
               Didn't receive the email?{' '}
               <Text
-                style={authStyles.linkSignup}
+                className="text-primary-600 underline font-body-medium"
                 onPress={() => {
                   setEmailSent(false);
                   setEmail('');
                 }}
+                accessibilityRole="link"
               >
                 Try again
               </Text>
@@ -164,93 +121,87 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <SafeAreaView style={authStyles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={[
-          authStyles.content,
-          {
-            paddingTop: Math.max(insets.top + 20, 40),
-            paddingBottom: Math.max(insets.bottom + 40, 60),
-          },
-        ]}
+        contentContainerStyle={{
+          padding: 20,
+          paddingTop: Math.max(insets.top + 20, 40),
+          paddingBottom: Math.max(insets.bottom + 40, 60),
+        }}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={authStyles.formCard}>
+        <View className="w-full">
           <BackButton />
-          <View style={authStyles.logoContainer}>
-            <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
-          </View>
-          <Text style={authStyles.titleCentered}>Forgot Password?</Text>
-          <Text style={authStyles.subtitleCentered}>
-            Enter your email address and we'll send you instructions to reset
-            your password.
-          </Text>
+          <AnimatedEntry from={{ opacity: 0, scale: 0.9 }} duration={450}>
+            <View className="items-center mb-6 mt-5">
+              <ReplateLogo size={96} />
+            </View>
+          </AnimatedEntry>
 
-          <View>
-            <Text style={authStyles.inputLabelDark}>EMAIL</Text>
-            <Animated.View
-              style={[
-                authStyles.inputWrapper,
-                {
-                  borderColor: emailError ? ERROR_COLOR : emailBorderColor,
-                  borderWidth: emailBorderWidth,
-                },
-              ]}
-            >
-              <TextInput
-                style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="Enter your email"
-                placeholderTextColor="#989898"
-                value={email}
-                onChangeText={handleEmailChange}
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                autoCorrect={false}
-                blurOnSubmit={false}
-                onSubmitEditing={() => {
-                  Keyboard.dismiss();
-                  handleRequestReset();
-                }}
-                maxLength={INPUT_LIMITS.EMAIL_MAX}
-              />
-            </Animated.View>
-            {emailError && (
-              <Text style={authStyles.errorText}>{emailError}</Text>
-            )}
-          </View>
-
-          <View style={authStyles.buttonContainer}>
-            <TouchableOpacity
-              style={[
-                authStyles.grayButton,
-                authStyles.buttonEnabled,
-                {
-                  opacity: !email || !isEmailValid || isLoading ? 0.5 : 1,
-                },
-              ]}
-              disabled={!email || !isEmailValid || isLoading}
-              onPress={handleRequestReset}
-              activeOpacity={0.8}
-            >
-              <Text style={authStyles.grayButtonText}>
-                {isLoading ? 'Sending...' : 'Send Reset Link'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={authStyles.linkTextSignup}>
-            Remember your password?{' '}
-            <Text
-              style={authStyles.linkSignup}
-              onPress={() => router.push('/auth/login')}
-            >
-              Log in
+          <AnimatedEntry delay={100}>
+            <Text className="text-3xl font-heading text-center mb-3 text-neutral-800">
+              Forgot Password?
             </Text>
-          </Text>
+            <Text className="text-sm font-body text-center mb-6 text-neutral-500">
+              Enter your email address and we'll send you instructions to reset
+              your password.
+            </Text>
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={200}>
+            <FormInput
+              label="EMAIL"
+              value={email}
+              onChangeText={handleEmailChange}
+              error={emailError}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleRequestReset}
+              maxLength={INPUT_LIMITS.EMAIL_MAX}
+            />
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={300}>
+            <View className="mt-3 mb-4">
+              <AnimatedPressable
+                className={`w-full rounded-xl py-3.5 items-center justify-center min-h-[48px] ${
+                  !email || !isEmailValid || isLoading
+                    ? 'bg-neutral-300'
+                    : 'bg-primary-400'
+                }`}
+                disabled={!email || !isEmailValid || isLoading}
+                onPress={handleRequestReset}
+                accessibilityRole="button"
+              >
+                <Text
+                  className={`text-base font-subheading ${
+                    !email || !isEmailValid || isLoading
+                      ? 'text-neutral-500'
+                      : 'text-white'
+                  }`}
+                >
+                  {isLoading ? 'Sending...' : 'Send Reset Link'}
+                </Text>
+              </AnimatedPressable>
+            </View>
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={400}>
+            <Text className="text-center text-neutral-600 font-body text-sm mt-4">
+              Remember your password?{' '}
+              <Text
+                className="text-primary-600 underline font-body-medium"
+                onPress={() => router.push('/auth/login')}
+                accessibilityRole="link"
+              >
+                Log in
+              </Text>
+            </Text>
+          </AnimatedEntry>
         </View>
       </ScrollView>
     </SafeAreaView>

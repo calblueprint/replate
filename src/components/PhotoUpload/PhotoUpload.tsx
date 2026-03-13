@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Alert, Image, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import uploadIcon from 'assets/image.png';
-import { styles } from './styles';
 
 interface PhotoUploadProps {
   onSelect: (uri: string | null) => void;
@@ -10,6 +9,7 @@ interface PhotoUploadProps {
 
 export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
   const [image, setImage] = useState<string | null>(null);
+  const [isPickerLoading, setIsPickerLoading] = useState(false);
 
   const requestPermissions = async () => {
     const { granted: cameraGranted } =
@@ -28,39 +28,50 @@ export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
 
   const openCamera = async () => {
     if (!(await requestPermissions())) return;
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    setIsPickerLoading(true);
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setImage(uri);
-      onSelect(uri);
+      if (!result.canceled && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        setImage(uri);
+        onSelect(uri);
+      }
+    } finally {
+      setIsPickerLoading(false);
     }
   };
 
   const openGallery = async () => {
     if (!(await requestPermissions())) return;
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    setIsPickerLoading(true);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setImage(uri);
-      onSelect(uri);
+      if (!result.canceled && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        setImage(uri);
+        onSelect(uri);
+      }
+    } finally {
+      setIsPickerLoading(false);
     }
   };
 
   const handlePress = () => {
     if (image) {
       Alert.alert('Replace or Delete?', '', [
-        { text: 'Replace', onPress: openGallery },
+        { text: 'Take Photo', onPress: openCamera },
+        { text: 'Replace from Gallery', onPress: openGallery },
         {
           text: 'Delete',
           style: 'destructive' as const,
@@ -81,20 +92,34 @@ export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
+    <Pressable
+      className="w-full"
       onPress={handlePress}
-      activeOpacity={0.8}
+      style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+      accessibilityLabel="Upload photo"
+      accessibilityRole="button"
     >
-      {image ? (
-        <View style={styles.imageWrapper}>
-          <Image source={{ uri: image }} style={styles.image} />
+      {isPickerLoading ? (
+        <View className="w-full h-[70px] rounded-xl bg-neutral-100 justify-center items-center">
+          <ActivityIndicator />
+        </View>
+      ) : image ? (
+        <View className="w-full overflow-hidden" style={{ aspectRatio: 4 / 3 }}>
+          <Image
+            source={{ uri: image }}
+            className="w-full h-full rounded-xl"
+            resizeMode="cover"
+          />
         </View>
       ) : (
-        <View style={styles.placeholder}>
-          <Image source={uploadIcon} style={styles.icon} resizeMode="contain" />
+        <View className="w-full h-[70px] rounded-xl bg-neutral-100 justify-center items-center">
+          <Image
+            source={uploadIcon}
+            className="w-10 h-10"
+            resizeMode="contain"
+          />
         </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }

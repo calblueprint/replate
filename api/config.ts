@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { apiRequest, ApiError as ApiUtilError } from './apiUtils';
+import { ApiError, ApiErrorResponse, apiRequest } from './apiUtils';
 import { ENV_CONFIG } from './envConfig';
 
 // API Configuration for Rails Backend
@@ -51,15 +51,64 @@ export interface DriverResponse {
   phone?: string;
 }
 
-// Error types for better error handling
-export interface ApiError {
-  errors?: string[];
-  error?: string;
-  message?: string;
+/**
+ * Parses an error response body, returning an ApiError instance.
+ * Handles JSON parsing failures and fallback to text.
+ */
+async function parseErrorResponse(
+  response: Response,
+  fallbackMessage: string,
+): Promise<ApiError> {
+  const responseClone = response.clone();
+  try {
+    const body: ApiErrorResponse = await response.json();
+    return new ApiError(
+      body.errors?.join(', ') || body.error || body.message || fallbackMessage,
+      response.status,
+      body.errors || [],
+    );
+  } catch {
+    // JSON parsing failed - try text
+    try {
+      const text = await responseClone.text();
+      // Attempt JSON parse on text (in case content-type was wrong)
+      try {
+        const parsed = JSON.parse(text) as ApiErrorResponse;
+        return new ApiError(
+          parsed.errors?.join(', ') ||
+            parsed.error ||
+            parsed.message ||
+            fallbackMessage,
+          response.status,
+          parsed.errors || [],
+        );
+      } catch {
+        return new ApiError(
+          text || `Server error (${response.status})`,
+          response.status,
+        );
+      }
+    } catch {
+      return new ApiError(
+        `Server error (${response.status}). Please try again.`,
+        response.status,
+      );
+    }
+  }
 }
 
-// Re-export ApiError from apiUtils for consistency
-export { ApiUtilError as ApiRequestError };
+/**
+ * Wraps a network-level TypeError into an ApiError.
+ */
+function handleFetchError(error: unknown): never {
+  if (error instanceof TypeError && error.message.includes('fetch')) {
+    throw new ApiError(
+      'Network error. Please check your connection and try again.',
+      0,
+    );
+  }
+  throw error;
+}
 
 // API functions
 export const driverAPI = {
@@ -72,70 +121,13 @@ export const driverAPI = {
       });
 
       if (!response.ok) {
-        // Clone the response so we can read it multiple times if needed
-        const responseClone = response.clone();
-        try {
-          const error: ApiError = await response.json();
-          // Return error object with errors array for better parsing
-          const errorObj = {
-            message: error.errors?.join(', ') || error.error || 'Signup failed',
-            errors: error.errors || [],
-            status: response.status,
-          };
-          throw errorObj;
-        } catch (parseError) {
-          // If parseError is already our error object (has status and message), re-throw it
-          if (
-            typeof parseError === 'object' &&
-            parseError !== null &&
-            'status' in parseError &&
-            'message' in parseError
-          ) {
-            throw parseError;
-          }
-          // Otherwise, JSON parsing failed - try to read as text
-          try {
-            const text = await responseClone.text();
-            // Try to parse as JSON one more time
-            try {
-              const parsed = JSON.parse(text);
-              throw {
-                message:
-                  parsed.errors?.join(', ') || parsed.error || 'Signup failed',
-                errors: parsed.errors || [],
-                status: response.status,
-              };
-            } catch {
-              // Not valid JSON, use text as message
-              throw {
-                message: text || `Server error (${response.status})`,
-                errors: [],
-                status: response.status,
-              };
-            }
-          } catch {
-            // Couldn't read response, use status code
-            throw {
-              message: `Server error (${response.status}). Please try again.`,
-              errors: [],
-              status: response.status,
-            };
-          }
-        }
+        throw await parseErrorResponse(response, 'Signup failed');
       }
 
       return response.json();
     } catch (error) {
-      // Handle network errors (fetch failures)
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw {
-          message: 'Network error. Please check your connection and try again.',
-          errors: [],
-          status: 0,
-        };
-      }
-      // Re-throw API errors
-      throw error;
+      if (error instanceof ApiError) throw error;
+      handleFetchError(error);
     }
   },
 
@@ -148,61 +140,21 @@ export const driverAPI = {
       });
 
       if (!response.ok) {
-        // Clone the response so we can read it multiple times if needed
-        const responseClone = response.clone();
-        try {
-          const error: ApiError = await response.json();
-          // Return error object with proper message
-          throw {
-            message: error.error || error.message || 'Login failed',
-            errors: [],
-            status: response.status,
-          };
-        } catch (parseError) {
-          // If parseError is already our error object (has status and message), re-throw it
-          if (
-            typeof parseError === 'object' &&
-            parseError !== null &&
-            'status' in parseError &&
-            'message' in parseError
-          ) {
-            throw parseError;
-          }
-          // JSON parsing failed - try to read as text
-          try {
-            const text = await responseClone.text();
-            throw {
-              message: text || `Authentication failed (${response.status})`,
-              errors: [],
-              status: response.status,
-            };
-          } catch {
-            // Couldn't read response, use status-based message
-            const statusMessage =
-              response.status === 401
-                ? 'Invalid email or password'
-                : `Server error (${response.status})`;
-            throw {
-              message: statusMessage,
-              errors: [],
-              status: response.status,
-            };
-          }
+        const apiError = await parseErrorResponse(response, 'Login failed');
+        // Override message for 401 to be more user-friendly
+        if (
+          response.status === 401 &&
+          !apiError.message.toLowerCase().includes('invalid')
+        ) {
+          throw new ApiError('Invalid email or password', 401, apiError.errors);
         }
+        throw apiError;
       }
 
       return response.json();
     } catch (error) {
-      // Handle network errors (fetch failures)
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw {
-          message: 'Network error. Please check your connection and try again.',
-          errors: [],
-          status: 0,
-        };
-      }
-      // Re-throw API errors
-      throw error;
+      if (error instanceof ApiError) throw error;
+      handleFetchError(error);
     }
   },
 
@@ -218,66 +170,13 @@ export const driverAPI = {
       );
 
       if (!response.ok) {
-        const responseClone = response.clone();
-        try {
-          const error: ApiError = await response.json();
-          throw {
-            message:
-              error.errors?.join(', ') ||
-              error.error ||
-              error.message ||
-              'Failed to send reset email',
-            errors: error.errors || [],
-            status: response.status,
-          };
-        } catch (parseError) {
-          if (
-            typeof parseError === 'object' &&
-            parseError !== null &&
-            'status' in parseError &&
-            'message' in parseError
-          ) {
-            throw parseError;
-          }
-          try {
-            const text = await responseClone.text();
-            try {
-              const parsed = JSON.parse(text);
-              throw {
-                message:
-                  parsed.errors?.join(', ') ||
-                  parsed.error ||
-                  'Failed to send reset email',
-                errors: parsed.errors || [],
-                status: response.status,
-              };
-            } catch {
-              throw {
-                message: text || `Server error (${response.status})`,
-                errors: [],
-                status: response.status,
-              };
-            }
-          } catch {
-            throw {
-              message: `Server error (${response.status}). Please try again.`,
-              errors: [],
-              status: response.status,
-            };
-          }
-        }
+        throw await parseErrorResponse(response, 'Failed to send reset email');
       }
 
       return response.json();
     } catch (error) {
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw {
-          message: 'Network error. Please check your connection and try again.',
-          errors: [],
-          status: 0,
-        };
-      }
-      throw error;
+      if (error instanceof ApiError) throw error;
+      handleFetchError(error);
     }
   },
 
@@ -295,66 +194,13 @@ export const driverAPI = {
       );
 
       if (!response.ok) {
-        const responseClone = response.clone();
-        try {
-          const error: ApiError = await response.json();
-          throw {
-            message:
-              error.errors?.join(', ') ||
-              error.error ||
-              error.message ||
-              'Failed to reset password',
-            errors: error.errors || [],
-            status: response.status,
-          };
-        } catch (parseError) {
-          if (
-            typeof parseError === 'object' &&
-            parseError !== null &&
-            'status' in parseError &&
-            'message' in parseError
-          ) {
-            throw parseError;
-          }
-          try {
-            const text = await responseClone.text();
-            try {
-              const parsed = JSON.parse(text);
-              throw {
-                message:
-                  parsed.errors?.join(', ') ||
-                  parsed.error ||
-                  'Failed to reset password',
-                errors: parsed.errors || [],
-                status: response.status,
-              };
-            } catch {
-              throw {
-                message: text || `Server error (${response.status})`,
-                errors: [],
-                status: response.status,
-              };
-            }
-          } catch {
-            throw {
-              message: `Server error (${response.status}). Please try again.`,
-              errors: [],
-              status: response.status,
-            };
-          }
-        }
+        throw await parseErrorResponse(response, 'Failed to reset password');
       }
 
       return response.json();
     } catch (error) {
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw {
-          message: 'Network error. Please check your connection and try again.',
-          errors: [],
-          status: 0,
-        };
-      }
-      throw error;
+      if (error instanceof ApiError) throw error;
+      handleFetchError(error);
     }
   },
 };
@@ -409,7 +255,7 @@ export async function updateDriverPartner(
     return driverObj;
   } catch (err) {
     const errorMsg =
-      err instanceof ApiUtilError ? err.message : 'Unable to update driver.';
+      err instanceof ApiError ? err.message : 'Unable to update driver.';
     Alert.alert('Error', errorMsg);
     return null;
   }
@@ -426,4 +272,19 @@ export async function claimTask(encryptedTaskId: string, driverId: number) {
     },
     body: JSON.stringify({ driver_id: driverId }),
   });
+}
+
+export async function submitCompletionDetails(
+  encryptedTaskId: string,
+  data: { total_pounds_entered: string; description?: string },
+) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+  return apiRequest(
+    `${BASE_URL}/api/tasks/${safeId}/update_completion_details`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    },
+  );
 }

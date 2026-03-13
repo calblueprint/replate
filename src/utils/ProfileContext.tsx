@@ -1,6 +1,7 @@
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -9,8 +10,8 @@ import {
   apiRequest,
   ApiError as ApiUtilError,
   validateResponse,
-} from '../../api/apiUtils';
-import { API_ENDPOINTS, BASE_URL } from '../../api/config';
+} from '~/api/apiUtils';
+import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import { useAuth } from './AuthContext';
 
 // Extended driver profile interface to include NPO/partner information
@@ -27,7 +28,6 @@ interface ProfileContextType {
   profile: DriverProfile | null;
   loading: boolean;
   error: string | null;
-  setProfile: (profile: DriverProfile | null) => void;
   refreshProfile: (driverId: number) => Promise<void>;
   clearProfile: () => void;
 }
@@ -44,12 +44,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
   const [error, setError] = useState<string | null>(null);
   const { driver } = useAuth();
 
-  const setProfile = (newProfile: DriverProfile | null) => {
-    setProfileState(newProfile);
-    setError(null);
-  };
-
-  const refreshProfile = async (driverId: number) => {
+  const refreshProfile = useCallback(async (driverId: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -87,12 +82,12 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const clearProfile = () => {
+  const clearProfile = useCallback(() => {
     setProfileState(null);
     setError(null);
-  };
+  }, []);
 
   useEffect(() => {
     if (driver?.id) {
@@ -100,13 +95,12 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     } else {
       clearProfile();
     }
-  }, [driver?.id]);
+  }, [driver?.id, refreshProfile, clearProfile]);
 
   const value: ProfileContextType = {
     profile,
     loading,
     error,
-    setProfile,
     refreshProfile,
     clearProfile,
   };

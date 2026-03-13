@@ -253,5 +253,5 @@ echo ""
 echo -e "${GREEN}Rails server started${NC}"
 echo -e "${GREEN}Starting Expo...${NC}"
 echo ""
-# Run Expo in foreground so QR code is visible
-pnpm start
+# Run Expo in foreground so QR code is visible (clear cache for NativeWind/Tailwind)
+pnpm start -- --clear

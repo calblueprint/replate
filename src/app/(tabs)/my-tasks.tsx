@@ -1,19 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import elementIcon from 'assets/elements.png';
+import AnimatedEntry from '@/components/AnimatedEntry';
+import AnimatedPressable from '@/components/AnimatedPressable';
+import PageHeader from '@/components/PageHeader';
+import TaskCard, { TaskCardSkeleton } from '@/components/TaskCard';
+import colors from '@/styles/colors';
+import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
-import styles from '../../styles/tabs/my-tasks-styles';
-import { useAuth } from '../../utils/AuthContext';
 
 type Task = {
   id: number;
@@ -31,72 +27,6 @@ type Task = {
   } | null;
 };
 
-function formatTimeRange(
-  startTime: string | null,
-  endTime: string | null,
-): string {
-  if (!startTime || !endTime) return 'Time TBD';
-
-  try {
-    // Parse time strings like "09:00" or "14:30"
-    const parseTime = (timeStr: string) => {
-      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
-      if (isNaN(hours) || isNaN(minutes)) return null;
-
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      const displayMinutes = minutes.toString().padStart(2, '0');
-      return `${displayHours}:${displayMinutes} ${ampm}`;
-    };
-
-    const startFormatted = parseTime(startTime);
-    const endFormatted = parseTime(endTime);
-
-    if (!startFormatted || !endFormatted) return 'Time TBD';
-
-    return `${startFormatted} - ${endFormatted}`;
-  } catch {
-    return 'Time TBD';
-  }
-}
-
-function formatAddress(task: Task): string {
-  // If we have address data from API, use it
-  if (task.address) {
-    const { street, city, state, zip } = task.address;
-    const parts = [];
-
-    if (street) parts.push(street);
-    if (city) parts.push(city);
-    if (state) parts.push(state);
-    if (zip) parts.push(zip);
-
-    if (parts.length > 0) {
-      return parts.join(', ');
-    }
-  }
-
-  // Fallback to location name parsing
-  if (task.location_name) {
-    // Return a generic Oakland/Berkeley address based on the location name
-    if (task.location_name.includes('Oakland')) {
-      return 'Oakland, CA';
-    } else if (task.location_name.includes('Berkeley')) {
-      return 'Berkeley, CA';
-    } else if (
-      task.location_name.includes('San Francisco') ||
-      task.location_name.includes('SF')
-    ) {
-      return 'San Francisco, CA';
-    } else if (task.location_name.includes('San Jose')) {
-      return 'San Jose, CA';
-    }
-    return 'Bay Area, CA';
-  }
-
-  return 'Address details in app';
-}
-
 export default function MyTasksPage() {
   const router = useRouter();
   const { driver } = useAuth();
@@ -104,12 +34,6 @@ export default function MyTasksPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
 
   const fetchTasks = useCallback(
     async (isRefresh = false) => {
@@ -147,148 +71,114 @@ export default function MyTasksPage() {
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
-    fetchTasks(true);
+    void fetchTasks(true);
   }, [fetchTasks]);
 
   const hasTasks = tasks.length > 0;
 
-  // Show loading indicator on initial load
   if (isLoading && tasks.length === 0) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#58ad85" />
-        <Text style={{ marginTop: 12, color: '#6b7280' }}>
-          Loading your tasks...
-        </Text>
-      </View>
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerStyle={{ paddingBottom: 140 }}
+      >
+        <PageHeader
+          title={`Welcome Back, ${driver?.first_name || ''}`}
+          subtitle="Loading your tasks..."
+          driverName={driver?.first_name}
+        />
+        <View className="px-5 pt-6">
+          <TaskCardSkeleton />
+          <TaskCardSkeleton />
+          <TaskCardSkeleton />
+        </View>
+      </ScrollView>
     );
   }
 
   return (
     <ScrollView
-      style={styles.container}
+      className="flex-1 bg-background"
       contentContainerStyle={{ paddingBottom: 140 }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
-          colors={['#58ad85']}
-          tintColor="#58ad85"
+          colors={[colors.primary[400]]}
+          tintColor={colors.primary[400]}
         />
       }
     >
-      {/* HEADER SECTION */}
-      <View style={styles.headerContainer}>
-        <View style={styles.headerTopRow}>
-          <Text style={styles.date}>{today}</Text>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarLetter}>{driver?.first_name[0]}</Text>
-          </View>
-        </View>
-        <Text style={styles.greeting}>
-          Welcome Back, {driver?.first_name || ''}
-        </Text>
-        <Text style={styles.subtext}>
-          You have <Text style={styles.bold}>{tasks.length} tasks</Text> in
-          progress today
-        </Text>
-      </View>
+      <PageHeader
+        title={`Welcome Back, ${driver?.first_name || ''}`}
+        subtitle={`You have ${tasks.length} tasks in progress today`}
+        driverName={driver?.first_name}
+      />
 
-      {/* ERROR MESSAGE */}
       {error && (
         <View
-          style={{
-            backgroundColor: '#fee2e2',
-            padding: 12,
-            marginHorizontal: 20,
-            marginBottom: 16,
-            borderRadius: 8,
-          }}
+          className="bg-error-light p-3 mx-5 mt-4 rounded-lg"
+          accessibilityLiveRegion="polite"
         >
-          <Text style={{ color: '#991b1b' }}>{error}</Text>
-          <Text style={{ color: '#6b7280', marginTop: 4, fontSize: 12 }}>
+          <Text className="text-error-dark font-body">{error}</Text>
+          <Text className="text-neutral-500 mt-1 text-xs font-body">
             Pull down to retry
           </Text>
         </View>
       )}
 
-      {/* TASKS SECTION */}
-      <View style={styles.taskSection}>
+      <View className="px-5 pt-6 pb-8">
         {hasTasks ? (
           <>
-            <Text style={styles.sectionHeader}>TODAY ({tasks.length})</Text>
-            {tasks.map(task => (
-              <View key={task.id} style={styles.card}>
-                <View style={styles.cardAccent} />
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>
-                    Pickup from {task.location_name || 'Unknown Location'}
-                  </Text>
-                  <Text style={styles.cardAddress}>{formatAddress(task)}</Text>
-                  <Text style={styles.cardTime}>
-                    {formatTimeRange(task.start_time, task.end_time)}
-                  </Text>
-
-                  <View style={styles.buttonRow}>
-                    <TouchableOpacity
-                      style={[styles.button, styles.buttonOutline]}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/pickup-details/[id]',
-                          params: {
-                            id: task.encrypted_id,
-                            location: task.location_name ?? '',
-                          },
-                        })
-                      }
-                    >
-                      <Text
-                        style={[styles.buttonText, styles.buttonOutlineText]}
-                      >
-                        View pickup details
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[styles.button, styles.buttonFilled]}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/donation-details/[id]',
-                          params: {
-                            id: task.encrypted_id,
-                            location: task.location_name ?? '',
-                          },
-                        })
-                      }
-                    >
-                      <Text
-                        style={[styles.buttonText, styles.buttonFilledText]}
-                      >
-                        Enter donation details
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
+            <Text className="text-xs text-neutral-600 mb-4 font-label tracking-wider">
+              TODAY ({tasks.length})
+            </Text>
+            {tasks.map((task, index) => (
+              <AnimatedEntry key={task.id} delay={index * 80}>
+                <TaskCard
+                  task={task}
+                  onViewDetails={() =>
+                    router.push({
+                      pathname: '/pickup-details/[id]',
+                      params: {
+                        id: task.encrypted_id,
+                        location: task.location_name ?? '',
+                      },
+                    })
+                  }
+                />
+              </AnimatedEntry>
             ))}
           </>
         ) : (
-          <View style={styles.emptyStateContainer}>
-            <Image
-              source={elementIcon}
-              style={styles.emptyIcon}
-              resizeMode="contain"
-            />
+          <View className="flex-1 items-center justify-center py-16">
+            <AnimatedEntry from={{ opacity: 0, scale: 0.8 }} duration={500}>
+              <Image
+                source={elementIcon}
+                className="w-36 h-36 mb-6"
+                resizeMode="contain"
+                accessibilityLabel="No tasks illustration"
+              />
+            </AnimatedEntry>
 
-            <Text style={styles.emptyTitle}>You have no new tasks</Text>
+            <Text className="text-base font-subheading text-neutral-500 text-center mb-2">
+              No tasks yet
+            </Text>
+            <Text className="text-sm font-body text-neutral-500 text-center mb-8 px-8">
+              Browse available pickups to get started
+            </Text>
 
-            <TouchableOpacity
-              style={styles.emptyButton}
+            <AnimatedPressable
+              className="px-8 rounded-xl bg-primary-400 items-center justify-center self-center shadow-sm min-h-[48px] py-3"
               onPress={() => router.replace('/(tabs)/available-pick-ups')}
+              accessibilityRole="button"
+              accessibilityLabel="Add task"
             >
-              <Text style={styles.emptyButtonText}>Add Task</Text>
-            </TouchableOpacity>
+              <Text className="text-white text-base font-subheading text-center">
+                Add Task
+              </Text>
+            </AnimatedPressable>
           </View>
         )}
       </View>

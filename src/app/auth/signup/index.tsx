@@ -1,41 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Image,
-  Keyboard,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
-import { DriverSignupData } from '../../../../api/config';
-import CHECK_ICON from '../../../../assets/check-icon.png';
-// Assets
-import REPLATE_LOGO from '../../../../assets/replate-logo.png';
-import AnimatedPressable from '../../../components/AnimatedPressable';
-import BackButton from '../../../components/BackButton';
-import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
-import { useAuth } from '../../../utils/AuthContext';
+import AnimatedEntry from '@/components/AnimatedEntry';
+import AnimatedPressable from '@/components/AnimatedPressable';
+import BackButton from '@/components/BackButton';
+import FormInput from '@/components/FormInput';
+import PasswordRequirements, {
+  isPasswordValid,
+} from '@/components/PasswordRequirements';
+import ReplateLogo from '@/components/ReplateLogo';
+import { useAuth } from '@/utils/AuthContext';
 import {
   INPUT_LIMITS,
   validateEmail,
   validateName,
   validatePasswordMatch,
   validatePhone,
-} from '../../../utils/validation';
-
-interface ApiErrorResponse {
-  message?: string;
-  errors?: string[];
-  status?: number;
-}
+} from '@/utils/validation';
+import { ApiError } from '~/api/apiUtils';
+import { DriverSignupData } from '~/api/config';
 
 export default function SignupPage() {
   const [first_name, setFirstName] = useState('');
@@ -44,11 +32,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Error states
   const [firstNameError, setFirstNameError] = useState<string | null>(null);
   const [lastNameError, setLastNameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -58,136 +43,22 @@ export default function SignupPage() {
     string | null
   >(null);
 
-  const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
-
-  // Focus states
-  const [firstNameFocused, setFirstNameFocused] = useState(false);
-  const [lastNameFocused, setLastNameFocused] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [phoneFocused, setPhoneFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
-
-  const firstNameBorderAnim = useRef(new Animated.Value(0)).current;
-  const lastNameBorderAnim = useRef(new Animated.Value(0)).current;
-  const emailBorderAnim = useRef(new Animated.Value(0)).current;
-  const phoneBorderAnim = useRef(new Animated.Value(0)).current;
-  const passwordBorderAnim = useRef(new Animated.Value(0)).current;
-  const confirmPasswordBorderAnim = useRef(new Animated.Value(0)).current;
-
   const { signup } = useAuth();
+  const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastNameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    Animated.timing(firstNameBorderAnim, {
-      toValue: firstNameFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [firstNameFocused]);
-
-  useEffect(() => {
-    Animated.timing(lastNameBorderAnim, {
-      toValue: lastNameFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [lastNameFocused]);
-
-  useEffect(() => {
-    Animated.timing(emailBorderAnim, {
-      toValue: emailFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [emailFocused]);
-
-  useEffect(() => {
-    Animated.timing(phoneBorderAnim, {
-      toValue: phoneFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [phoneFocused]);
-
-  useEffect(() => {
-    Animated.timing(passwordBorderAnim, {
-      toValue: passwordFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [passwordFocused]);
-
-  useEffect(() => {
-    Animated.timing(confirmPasswordBorderAnim, {
-      toValue: confirmPasswordFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [confirmPasswordFocused]);
-
-  const firstNameBorderWidth = firstNameBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const firstNameBorderColor = firstNameBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
-
-  const lastNameBorderWidth = lastNameBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const lastNameBorderColor = lastNameBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
-
-  const emailBorderWidth = emailBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const emailBorderColor = emailBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
-
-  const phoneBorderWidth = phoneBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const phoneBorderColor = phoneBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
-
-  const passwordBorderWidth = passwordBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const passwordBorderColor = passwordBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
-
-  const confirmPasswordBorderWidth = confirmPasswordBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const confirmPasswordBorderColor = confirmPasswordBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
 
   const handleSignUp = async () => {
-    // Clear previous errors
     setFirstNameError(null);
     setLastNameError(null);
     setPhoneError(null);
@@ -195,16 +66,13 @@ export default function SignupPage() {
     setPasswordError(null);
     setConfirmPasswordError(null);
 
-    // Run all validations (skip password complexity since button is disabled until valid)
     const firstNameErr = validateName(first_name, 'First name');
     const lastNameErr = validateName(last_name, 'Last name');
     const phoneErr = validatePhone(phone_number);
     const emailErr = validateEmail(email);
-    // Only check if password is required, not complexity (handled by button disable)
     const passwordErr = !password ? 'Password is required' : null;
     const confirmPasswordErr = validatePasswordMatch(password, confirmPassword);
 
-    // Set errors
     setFirstNameError(firstNameErr);
     setLastNameError(lastNameErr);
     setPhoneError(phoneErr);
@@ -212,7 +80,6 @@ export default function SignupPage() {
     setPasswordError(passwordErr);
     setConfirmPasswordError(confirmPasswordErr);
 
-    // If any errors exist, don't proceed
     if (
       firstNameErr ||
       lastNameErr ||
@@ -230,32 +97,26 @@ export default function SignupPage() {
       const signupData: DriverSignupData = {
         email,
         password,
-        password_confirmation: password,
+        password_confirmation: confirmPassword,
         first_name,
         last_name,
         phone: phone_number,
       };
 
       await signup(signupData);
-      setTimeout(() => {
+      navTimerRef.current = setTimeout(() => {
         router.replace('/onboarding');
       }, 500);
     } catch (error: unknown) {
-      // Handle backend errors
-      const apiError = error as ApiErrorResponse | Error;
-      const errorMessage: string =
-        'message' in apiError && apiError.message
-          ? apiError.message
-          : apiError instanceof Error
-            ? apiError.message
-            : '';
-      const errorsArray: string[] =
-        'errors' in apiError && Array.isArray(apiError.errors)
-          ? apiError.errors.filter((e): e is string => typeof e === 'string')
-          : [];
-      const status = 'status' in apiError ? apiError.status : undefined;
+      const isApiError = error instanceof ApiError;
+      const errorMessage = isApiError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : '';
+      const errorsArray = isApiError ? error.errors : [];
+      const status = isApiError ? error.status : undefined;
 
-      // Handle network errors
       if (
         status === 0 ||
         (errorMessage && errorMessage.toLowerCase().includes('network'))
@@ -270,7 +131,6 @@ export default function SignupPage() {
         return;
       }
 
-      // Handle server errors
       if (status && status >= 500) {
         Toast.show({
           type: 'error',
@@ -282,7 +142,6 @@ export default function SignupPage() {
         return;
       }
 
-      // Parse errors and map to specific fields
       let hasFieldErrors = false;
       const allErrors =
         errorsArray.length > 0
@@ -295,7 +154,6 @@ export default function SignupPage() {
         if (!err) continue;
         const errLower = err.toLowerCase();
 
-        // Email errors
         if (errLower.includes('email')) {
           hasFieldErrors = true;
           if (errLower.includes('taken') || errLower.includes('already')) {
@@ -307,9 +165,7 @@ export default function SignupPage() {
           } else {
             setEmailError(err);
           }
-        }
-        // Password errors - only show non-complexity errors (complexity handled by requirements list)
-        else if (
+        } else if (
           errLower.includes('password') &&
           !errLower.includes('too short') &&
           !errLower.includes('minimum') &&
@@ -322,18 +178,14 @@ export default function SignupPage() {
         ) {
           hasFieldErrors = true;
           setPasswordError(err);
-        }
-        // Phone errors
-        else if (errLower.includes('phone')) {
+        } else if (errLower.includes('phone')) {
           hasFieldErrors = true;
           if (errLower.includes('invalid')) {
             setPhoneError('Please enter a valid phone number.');
           } else {
             setPhoneError(err);
           }
-        }
-        // Name errors
-        else if (
+        } else if (
           errLower.includes('first name') ||
           errLower.includes('first_name')
         ) {
@@ -348,7 +200,6 @@ export default function SignupPage() {
         }
       }
 
-      // If no specific field errors, show generic error toast
       if (!hasFieldErrors) {
         Toast.show({
           type: 'error',
@@ -363,413 +214,255 @@ export default function SignupPage() {
     }
   };
 
-  // Clear errors when user starts typing
   const handleFirstNameChange = (text: string) => {
     setFirstName(text);
     if (firstNameError) setFirstNameError(null);
   };
-
   const handleLastNameChange = (text: string) => {
     setLastName(text);
     if (lastNameError) setLastNameError(null);
   };
-
   const handlePhoneChange = (text: string) => {
     setPhoneNumber(text);
     if (phoneError) setPhoneError(null);
   };
-
   const handleEmailChange = (text: string) => {
     setEmail(text);
     if (emailError) setEmailError(null);
   };
-
   const handlePasswordChange = (text: string) => {
     setPassword(text);
     if (passwordError) setPasswordError(null);
-    // Live validation: check if confirm password matches
     if (confirmPassword) {
       const matchError = validatePasswordMatch(text, confirmPassword);
       setConfirmPasswordError(matchError);
     } else {
-      // Clear error if confirm password is empty
       setConfirmPasswordError(null);
     }
   };
-
   const handleConfirmPasswordChange = (text: string) => {
     setConfirmPassword(text);
-    // Live validation: check if passwords match
     if (text) {
       const matchError = validatePasswordMatch(password, text);
       setConfirmPasswordError(matchError);
     } else {
-      // Clear error if field is empty
       setConfirmPasswordError(null);
     }
   };
 
-  // Check if all password requirements are met
-  const isPasswordValid =
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /[0-9]/.test(password) &&
-    /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const passwordValid = isPasswordValid(password);
 
   return (
-    <SafeAreaView style={authStyles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={[
-          authStyles.scrollViewContent,
-          {
-            paddingBottom: Math.max(insets.bottom + 40, 60),
-          },
-        ]}
+        contentContainerStyle={{
+          padding: 20,
+          paddingTop: 40,
+          paddingBottom: Math.max(insets.bottom + 40, 60),
+        }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={true}
         keyboardDismissMode="interactive"
         contentInsetAdjustmentBehavior="automatic"
-        style={authStyles.scrollViewFlex}
+        className="flex-1"
       >
-        <View style={authStyles.formCard}>
+        <View className="w-full">
           <BackButton />
-          {/* Logo */}
-          <View style={authStyles.logoContainer}>
-            <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
-          </View>
+          <AnimatedEntry from={{ opacity: 0, scale: 0.9 }} duration={450}>
+            <View className="items-center mb-6 mt-5">
+              <ReplateLogo size={96} />
+            </View>
+          </AnimatedEntry>
 
-          <Text style={authStyles.titleCentered}>Welcome!</Text>
-          <Text style={authStyles.subtitleCentered}>
-            Please enter your details
-          </Text>
+          <AnimatedEntry delay={100}>
+            <Text className="text-3xl font-heading text-center mb-3 text-neutral-800">
+              Create Account
+            </Text>
+            <Text className="text-sm font-body text-center mb-6 text-neutral-500">
+              Please enter your details
+            </Text>
+          </AnimatedEntry>
 
-          <View style={authStyles.nameRow}>
-            <View style={authStyles.nameFieldContainer}>
-              <Text style={authStyles.inputLabelDark}>NAME</Text>
-              <Animated.View
-                style={[
-                  authStyles.inputHalfWrapper,
-                  {
-                    borderColor: firstNameError
-                      ? ERROR_COLOR
-                      : firstNameBorderColor,
-                    borderWidth: firstNameBorderWidth,
-                  },
-                ]}
-              >
-                <TextInput
-                  style={[authStyles.inputHalfInner, authStyles.textBlack]}
-                  placeholder="First name "
-                  placeholderTextColor="#989898"
+          <AnimatedEntry delay={200}>
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <FormInput
+                  label="FIRST NAME"
                   value={first_name}
                   onChangeText={handleFirstNameChange}
-                  onFocus={() => setFirstNameFocused(true)}
-                  onBlur={() => setFirstNameFocused(false)}
+                  error={firstNameError}
+                  placeholder="First name"
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
+                  returnKeyType="next"
+                  onSubmitEditing={() => lastNameRef.current?.focus()}
+                  blurOnSubmit={false}
                   maxLength={INPUT_LIMITS.NAME_MAX}
                 />
-              </Animated.View>
-              {firstNameError && (
-                <Text style={authStyles.errorText}>{firstNameError}</Text>
-              )}
-            </View>
-            <View style={authStyles.nameFieldContainer}>
-              <Text style={authStyles.inputLabelDark}>LAST</Text>
-              <Animated.View
-                style={[
-                  authStyles.inputHalfWrapper,
-                  {
-                    borderColor: lastNameError
-                      ? ERROR_COLOR
-                      : lastNameBorderColor,
-                    borderWidth: lastNameBorderWidth,
-                  },
-                ]}
-              >
-                <TextInput
-                  style={[authStyles.inputHalfInner, authStyles.textBlack]}
-                  placeholder="Last name "
-                  placeholderTextColor="#989898"
+              </View>
+              <View className="flex-1">
+                <FormInput
+                  ref={lastNameRef}
+                  label="LAST NAME"
                   value={last_name}
                   onChangeText={handleLastNameChange}
-                  onFocus={() => setLastNameFocused(true)}
-                  onBlur={() => setLastNameFocused(false)}
+                  error={lastNameError}
+                  placeholder="Last name"
                   autoComplete="off"
                   textContentType="none"
                   autoCorrect={false}
+                  returnKeyType="next"
+                  onSubmitEditing={() => emailRef.current?.focus()}
+                  blurOnSubmit={false}
                   maxLength={INPUT_LIMITS.NAME_MAX}
                 />
-              </Animated.View>
-              {lastNameError && (
-                <Text style={authStyles.errorText}>{lastNameError}</Text>
-              )}
+              </View>
             </View>
-          </View>
 
-          <View>
-            <Text style={authStyles.inputLabelDark}>EMAIL</Text>
-            <Animated.View
-              style={[
-                authStyles.inputWrapper,
-                {
-                  borderColor: emailError ? ERROR_COLOR : emailBorderColor,
-                  borderWidth: emailBorderWidth,
-                },
-              ]}
-            >
-              <TextInput
-                style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="Email@gmail.com"
-                placeholderTextColor="#989898"
-                value={email}
-                onChangeText={handleEmailChange}
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="off"
-                textContentType="none"
-                autoCorrect={false}
-                maxLength={INPUT_LIMITS.EMAIL_MAX}
-              />
-            </Animated.View>
-            {emailError && (
-              <Text style={authStyles.errorText}>{emailError}</Text>
-            )}
-          </View>
+            <FormInput
+              ref={emailRef}
+              label="EMAIL"
+              value={email}
+              onChangeText={handleEmailChange}
+              error={emailError}
+              placeholder="Email@gmail.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="off"
+              textContentType="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={() => phoneRef.current?.focus()}
+              blurOnSubmit={false}
+              maxLength={INPUT_LIMITS.EMAIL_MAX}
+            />
 
-          <View>
-            <Text style={authStyles.inputLabelDark}>PHONE</Text>
-            <Animated.View
-              style={[
-                authStyles.inputWrapper,
-                {
-                  borderColor: phoneError ? ERROR_COLOR : phoneBorderColor,
-                  borderWidth: phoneBorderWidth,
-                },
-              ]}
-            >
-              <TextInput
-                style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="(123) 456-7890"
-                placeholderTextColor="#989898"
-                value={phone_number}
-                onChangeText={handlePhoneChange}
-                onFocus={() => setPhoneFocused(true)}
-                onBlur={() => setPhoneFocused(false)}
-                keyboardType="phone-pad"
-                autoComplete="off"
-                textContentType="none"
-                autoCorrect={false}
-                maxLength={20}
-              />
-            </Animated.View>
-            {phoneError && (
-              <Text style={authStyles.errorText}>{phoneError}</Text>
-            )}
-          </View>
+            <FormInput
+              ref={phoneRef}
+              label="PHONE"
+              value={phone_number}
+              onChangeText={handlePhoneChange}
+              error={phoneError}
+              placeholder="(123) 456-7890"
+              keyboardType="phone-pad"
+              autoComplete="off"
+              textContentType="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+              blurOnSubmit={false}
+              maxLength={20}
+            />
 
-          <View>
-            <Text style={authStyles.inputLabelDark}>PASSWORD</Text>
-            <Animated.View
-              style={[
-                authStyles.passwordContainer,
-                {
-                  borderColor: passwordError
-                    ? ERROR_COLOR
-                    : passwordBorderColor,
-                  borderWidth: passwordBorderWidth,
-                },
-              ]}
-            >
-              <TextInput
-                style={[authStyles.passwordInput, authStyles.textBlack]}
-                placeholder="Enter password"
-                placeholderTextColor="#989898"
-                value={password}
-                onChangeText={handlePasswordChange}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-                secureTextEntry={!showPassword}
-                autoComplete="off"
-                textContentType="oneTimeCode"
-                autoCorrect={false}
-                passwordRules=""
-                blurOnSubmit={false}
-                onSubmitEditing={() => Keyboard.dismiss()}
-                maxLength={INPUT_LIMITS.PASSWORD_MAX}
-              />
-              <TouchableOpacity
-                style={authStyles.showButton}
-                onPress={() => setShowPassword(!showPassword)}
+            <FormInput
+              ref={passwordRef}
+              label="PASSWORD"
+              value={password}
+              onChangeText={handlePasswordChange}
+              error={passwordError}
+              placeholder="Enter password"
+              secureTextEntry
+              showToggle
+              autoComplete="off"
+              textContentType="oneTimeCode"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+              blurOnSubmit={false}
+              maxLength={INPUT_LIMITS.PASSWORD_MAX}
+            />
+            <PasswordRequirements password={password} />
+
+            {/* Hidden dummy TextInput to prevent iOS strong password suggestion */}
+            <TextInput
+              className="h-[0.1px] opacity-0 absolute"
+              autoComplete="off"
+              textContentType="none"
+              accessibilityElementsHidden={true}
+              importantForAccessibility="no"
+            />
+
+            <FormInput
+              ref={confirmPasswordRef}
+              label="CONFIRM PASSWORD"
+              value={confirmPassword}
+              onChangeText={handleConfirmPasswordChange}
+              error={confirmPasswordError}
+              placeholder="Enter same password"
+              secureTextEntry
+              showToggle
+              autoComplete="off"
+              textContentType="oneTimeCode"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleSignUp}
+              maxLength={INPUT_LIMITS.PASSWORD_MAX}
+            />
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={360}>
+            <View className="mt-3 mb-4">
+              <AnimatedPressable
+                className={`w-full rounded-xl py-3.5 items-center justify-center min-h-[48px] ${
+                  !email ||
+                  !password ||
+                  !confirmPassword ||
+                  !first_name ||
+                  !last_name ||
+                  !phone_number ||
+                  !passwordValid ||
+                  isLoading
+                    ? 'bg-neutral-300'
+                    : 'bg-primary-400'
+                }`}
+                disabled={
+                  !email ||
+                  !password ||
+                  !confirmPassword ||
+                  !first_name ||
+                  !last_name ||
+                  !phone_number ||
+                  !passwordValid ||
+                  isLoading
+                }
+                onPress={handleSignUp}
+                scaleValue={0.97}
+                accessibilityRole="button"
               >
                 <Text
-                  style={
-                    showPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-            <View style={authStyles.passwordRequirements}>
-              {[
-                {
-                  text: '8 characters',
-                  met: password.length >= 8,
-                },
-                {
-                  text: '1 uppercase letter',
-                  met: /[A-Z]/.test(password),
-                },
-                {
-                  text: '1 lowercase letter number',
-                  met: /[a-z]/.test(password),
-                },
-                {
-                  text: '1 special character',
-                  met: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-                },
-                {
-                  text: '1 number',
-                  met: /[0-9]/.test(password),
-                },
-              ].map((requirement, index) => (
-                <View key={index} style={authStyles.requirementRow}>
-                  <View
-                    style={[
-                      authStyles.requirementCircle,
-                      requirement.met && authStyles.requirementCircleMet,
-                    ]}
-                  >
-                    <Image
-                      source={CHECK_ICON}
-                      style={[
-                        authStyles.requirementCheckmark,
-                        requirement.met
-                          ? authStyles.requirementCheckmarkMet
-                          : authStyles.requirementCheckmarkUnmet,
-                      ]}
-                    />
-                  </View>
-                  <Text style={authStyles.requirementTextDark}>
-                    {requirement.text}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Hidden dummy TextInput to prevent iOS strong password suggestion */}
-          <TextInput
-            style={authStyles.hiddenInput}
-            autoComplete="off"
-            textContentType="none"
-          />
-
-          <View>
-            <Text style={authStyles.inputLabelDark}>CONFIRM PASSWORD</Text>
-            <Animated.View
-              style={[
-                authStyles.passwordContainer,
-                {
-                  borderColor: confirmPasswordError
-                    ? ERROR_COLOR
-                    : confirmPasswordBorderColor,
-                  borderWidth: confirmPasswordBorderWidth,
-                },
-              ]}
-            >
-              <TextInput
-                style={[authStyles.passwordInput, authStyles.textBlack]}
-                placeholder="Enter same password"
-                placeholderTextColor="#989898"
-                value={confirmPassword}
-                onChangeText={handleConfirmPasswordChange}
-                onFocus={() => setConfirmPasswordFocused(true)}
-                onBlur={() => setConfirmPasswordFocused(false)}
-                secureTextEntry={!showConfirmPassword}
-                autoComplete="off"
-                textContentType="oneTimeCode"
-                autoCorrect={false}
-                passwordRules=""
-                blurOnSubmit={false}
-                onSubmitEditing={() => Keyboard.dismiss()}
-                maxLength={INPUT_LIMITS.PASSWORD_MAX}
-              />
-              <TouchableOpacity
-                style={authStyles.showButton}
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                <Text
-                  style={
-                    showConfirmPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-            {confirmPasswordError && (
-              <Text style={authStyles.errorText}>{confirmPasswordError}</Text>
-            )}
-          </View>
-
-          <View style={authStyles.buttonContainer}>
-            <AnimatedPressable
-              style={[
-                authStyles.grayButton,
-                {
-                  opacity:
+                  className={`text-base font-subheading ${
                     !email ||
                     !password ||
                     !confirmPassword ||
                     !first_name ||
                     !last_name ||
                     !phone_number ||
-                    !isPasswordValid ||
+                    !passwordValid ||
                     isLoading
-                      ? 0.5
-                      : 1,
-                },
-              ]}
-              disabled={
-                !email ||
-                !password ||
-                !confirmPassword ||
-                !first_name ||
-                !last_name ||
-                !phone_number ||
-                !isPasswordValid ||
-                isLoading
-              }
-              onPress={handleSignUp}
-              scaleValue={0.97}
-            >
-              <Text style={authStyles.grayButtonText}>
-                {isLoading ? 'Creating Account...' : 'Continue '}
-              </Text>
-            </AnimatedPressable>
-          </View>
+                      ? 'text-neutral-500'
+                      : 'text-white'
+                  }`}
+                >
+                  {isLoading ? 'Creating Account...' : 'Continue'}
+                </Text>
+              </AnimatedPressable>
+            </View>
+          </AnimatedEntry>
 
-          <Text style={authStyles.linkTextSignup}>
-            Already have an account?{' '}
-            <Text
-              style={authStyles.linkSignup}
-              onPress={() => router.replace('/auth/login')}
-            >
-              Sign in
+          <AnimatedEntry delay={440}>
+            <Text className="text-center text-neutral-600 font-body text-sm mt-4">
+              Already have an account?{' '}
+              <Text
+                className="text-primary-600 underline font-body-medium"
+                onPress={() => router.replace('/auth/login')}
+                accessibilityRole="link"
+              >
+                Sign in
+              </Text>
             </Text>
-          </Text>
+          </AnimatedEntry>
         </View>
       </ScrollView>
     </SafeAreaView>

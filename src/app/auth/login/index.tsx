@@ -1,136 +1,70 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Image,
-  Keyboard,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
-import { DriverLoginData } from '../../../../api/config';
-// Assets
-import REPLATE_LOGO from '../../../../assets/replate-logo.png';
-import AnimatedPressable from '../../../components/AnimatedPressable';
-import BackButton from '../../../components/BackButton';
-import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
-import { useAuth } from '../../../utils/AuthContext';
-import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
-
-interface ApiErrorResponse {
-  message?: string;
-  errors?: string[];
-  status?: number;
-}
+import AnimatedEntry from '@/components/AnimatedEntry';
+import AnimatedPressable from '@/components/AnimatedPressable';
+import BackButton from '@/components/BackButton';
+import FormInput from '@/components/FormInput';
+import ReplateLogo from '@/components/ReplateLogo';
+import { useAuth } from '@/utils/AuthContext';
+import { INPUT_LIMITS, validateEmail } from '@/utils/validation';
+import { ApiError } from '~/api/apiUtils';
+import { DriverLoginData } from '~/api/config';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Error states
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // Focus states
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-
-  const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
-
-  const emailBorderAnim = useRef(new Animated.Value(0)).current;
-  const passwordBorderAnim = useRef(new Animated.Value(0)).current;
-
   const { login } = useAuth();
+  const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const passwordRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    Animated.timing(emailBorderAnim, {
-      toValue: emailFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [emailFocused]);
-
-  useEffect(() => {
-    Animated.timing(passwordBorderAnim, {
-      toValue: passwordFocused ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, [passwordFocused]);
-
-  const emailBorderWidth = emailBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const emailBorderColor = emailBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
-
-  const passwordBorderWidth = passwordBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.5],
-  });
-
-  const passwordBorderColor = passwordBorderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
-  });
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
 
   const handleLogin = async () => {
-    // Clear previous errors
     setEmailError(null);
     setPasswordError(null);
 
-    // Run validations
     const emailErr = validateEmail(email);
     const passwordErr =
       !password || password.trim() === '' ? 'Password is required' : null;
 
-    // Set errors
     setEmailError(emailErr);
     setPasswordError(passwordErr);
 
-    // If any errors exist, don't proceed
-    if (emailErr || passwordErr) {
-      return;
-    }
+    if (emailErr || passwordErr) return;
 
     try {
       setIsLoading(true);
 
-      const loginData: DriverLoginData = {
-        email,
-        password,
-      };
-
-      await login(loginData, true); // Keep user signed in
-      setTimeout(() => {
-        router.push('/(tabs)/my-tasks');
+      const loginData: DriverLoginData = { email, password };
+      await login(loginData, true);
+      navTimerRef.current = setTimeout(() => {
+        router.replace('/(tabs)/my-tasks');
       }, 500);
     } catch (error: unknown) {
-      // Handle backend errors
-      const apiError = error as ApiErrorResponse | Error;
-      const errorMessage: string =
-        'message' in apiError && apiError.message
-          ? apiError.message
-          : apiError instanceof Error
-            ? apiError.message
-            : '';
-      const status = 'status' in apiError ? apiError.status : undefined;
+      const isApiError = error instanceof ApiError;
+      const errorMessage = isApiError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : '';
+      const status = isApiError ? error.status : undefined;
 
-      // Handle network errors
       if (
         status === 0 ||
         (errorMessage && errorMessage.toLowerCase().includes('network'))
@@ -145,7 +79,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Handle server errors
       if (status && status >= 500) {
         Toast.show({
           type: 'error',
@@ -157,7 +90,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Check for invalid credentials
       if (errorMessage) {
         const errLower = errorMessage.toLowerCase();
         if (
@@ -194,7 +126,6 @@ export default function LoginPage() {
     }
   };
 
-  // Clear errors when user starts typing
   const handleEmailChange = (text: string) => {
     setEmail(text);
     if (emailError) setEmailError(null);
@@ -206,154 +137,125 @@ export default function LoginPage() {
   };
 
   return (
-    <SafeAreaView style={authStyles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={[
-          authStyles.scrollViewContent,
-          {
-            paddingBottom: Math.max(insets.bottom + 40, 60),
-          },
-        ]}
+        contentContainerStyle={{
+          padding: 20,
+          paddingTop: 40,
+          paddingBottom: Math.max(insets.bottom + 40, 60),
+        }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={true}
         keyboardDismissMode="interactive"
         contentInsetAdjustmentBehavior="automatic"
-        style={authStyles.scrollViewFlex}
+        className="flex-1"
       >
-        <View style={authStyles.formCard}>
+        <View className="w-full">
           <BackButton />
-          {/* Logo */}
-          <View style={authStyles.logoContainer}>
-            <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
-          </View>
+          <AnimatedEntry from={{ opacity: 0, scale: 0.9 }} duration={450}>
+            <View className="items-center mb-6 mt-5">
+              <ReplateLogo size={96} />
+            </View>
+          </AnimatedEntry>
 
-          <Text style={authStyles.titleCentered}>Welcome!</Text>
-          <Text style={authStyles.subtitleCentered}>
-            Please enter your details
-          </Text>
-
-          <View>
-            <Text style={authStyles.inputLabelDark}>EMAIL</Text>
-            <Animated.View
-              style={[
-                authStyles.inputWrapper,
-                {
-                  borderColor: emailError ? ERROR_COLOR : emailBorderColor,
-                  borderWidth: emailBorderWidth,
-                },
-              ]}
-            >
-              <TextInput
-                style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="Email@gmail.com"
-                placeholderTextColor="#989898"
-                value={email}
-                onChangeText={handleEmailChange}
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="off"
-                textContentType="none"
-                autoCorrect={false}
-                maxLength={INPUT_LIMITS.EMAIL_MAX}
-              />
-            </Animated.View>
-            {emailError && (
-              <Text style={authStyles.errorText}>{emailError}</Text>
-            )}
-          </View>
-
-          <View>
-            <Text style={authStyles.inputLabelDark}>PASSWORD</Text>
-            <Animated.View
-              style={[
-                authStyles.passwordContainer,
-                {
-                  borderColor: passwordError
-                    ? ERROR_COLOR
-                    : passwordBorderColor,
-                  borderWidth: passwordBorderWidth,
-                },
-              ]}
-            >
-              <TextInput
-                style={[authStyles.passwordInput, authStyles.textBlack]}
-                placeholder="Enter password"
-                placeholderTextColor="#989898"
-                value={password}
-                onChangeText={handlePasswordChange}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-                secureTextEntry={!showPassword}
-                autoComplete="off"
-                textContentType="oneTimeCode"
-                autoCorrect={false}
-                passwordRules=""
-                blurOnSubmit={false}
-                onSubmitEditing={() => Keyboard.dismiss()}
-                maxLength={INPUT_LIMITS.PASSWORD_MAX}
-              />
-              <TouchableOpacity
-                style={authStyles.showButton}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Text
-                  style={
-                    showPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-            {passwordError && (
-              <Text style={authStyles.errorText}>{passwordError}</Text>
-            )}
-          </View>
-
-          <TouchableOpacity
-            onPress={() => router.replace('/auth/forgot-password')}
-            style={authStyles.forgotPasswordLink}
-          >
-            <Text
-              style={[authStyles.linkSignup, authStyles.forgotPasswordLinkText]}
-            >
-              Forgot password?
+          <AnimatedEntry delay={100}>
+            <Text className="text-3xl font-heading text-center mb-3 text-neutral-800">
+              Welcome Back
             </Text>
-          </TouchableOpacity>
+            <Text className="text-sm font-body text-center mb-6 text-neutral-500">
+              Please enter your details
+            </Text>
+          </AnimatedEntry>
 
-          <View style={authStyles.buttonContainer}>
+          <AnimatedEntry delay={200}>
+            <FormInput
+              label="EMAIL"
+              value={email}
+              onChangeText={handleEmailChange}
+              error={emailError}
+              placeholder="Email@gmail.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="off"
+              textContentType="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+              blurOnSubmit={false}
+              maxLength={INPUT_LIMITS.EMAIL_MAX}
+            />
+
+            <FormInput
+              ref={passwordRef}
+              label="PASSWORD"
+              value={password}
+              onChangeText={handlePasswordChange}
+              error={passwordError}
+              placeholder="Enter password"
+              secureTextEntry
+              showToggle
+              autoComplete="off"
+              textContentType="oneTimeCode"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+              maxLength={INPUT_LIMITS.PASSWORD_MAX}
+            />
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={280}>
             <AnimatedPressable
-              style={[
-                authStyles.grayButton,
-                {
-                  opacity: !email || !password || isLoading ? 0.5 : 1,
-                },
-              ]}
-              disabled={!email || !password || isLoading}
-              onPress={handleLogin}
-              scaleValue={0.97}
+              className="self-start py-1.5 mb-4"
+              onPress={() => router.replace('/auth/forgot-password')}
+              accessibilityRole="link"
+              accessibilityLabel="Forgot password"
             >
-              <Text style={authStyles.grayButtonText}>
-                {isLoading ? 'Logging in...' : 'Log in '}
+              <Text className="text-primary-600 underline font-body-medium text-sm">
+                Forgot password?
               </Text>
             </AnimatedPressable>
-          </View>
+          </AnimatedEntry>
 
-          <Text style={authStyles.linkTextSignup}>
-            Need an account?{' '}
-            <Text
-              style={authStyles.linkSignup}
-              onPress={() => router.replace('/auth/signup')}
-            >
-              Sign up
+          <AnimatedEntry delay={360}>
+            <View className="mt-3 mb-4">
+              <AnimatedPressable
+                className={`w-full rounded-xl py-3.5 items-center justify-center min-h-[48px] ${
+                  !email || !password || isLoading
+                    ? 'bg-neutral-300'
+                    : 'bg-primary-400'
+                }`}
+                disabled={!email || !password || isLoading}
+                onPress={handleLogin}
+                scaleValue={0.97}
+                accessibilityRole="button"
+                accessibilityLabel={isLoading ? 'Logging in' : 'Log in'}
+              >
+                <Text
+                  className={`text-base font-subheading ${
+                    !email || !password || isLoading
+                      ? 'text-neutral-500'
+                      : 'text-white'
+                  }`}
+                >
+                  {isLoading ? 'Logging in...' : 'Log in'}
+                </Text>
+              </AnimatedPressable>
+            </View>
+          </AnimatedEntry>
+
+          <AnimatedEntry delay={440}>
+            <Text className="text-center text-neutral-600 font-body text-sm mt-4">
+              Need an account?{' '}
+              <Text
+                className="text-primary-600 underline font-body-medium"
+                onPress={() => router.replace('/auth/signup')}
+                accessibilityRole="link"
+              >
+                Sign up
+              </Text>
             </Text>
-          </Text>
+          </AnimatedEntry>
         </View>
       </ScrollView>
     </SafeAreaView>
