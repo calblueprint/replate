@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   RefreshControl,
   ScrollView,
   Text,
@@ -104,6 +105,7 @@ export default function MyTasksPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [segmentTab, setSegmentTab] = useState<'left' | 'right'>('left');
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -189,14 +191,76 @@ export default function MyTasksPage() {
         <Text style={styles.greeting}>
           Welcome Back, {driver?.first_name || ''}
         </Text>
-        <Text style={styles.subtext}>
-          You have <Text style={styles.bold}>{tasks.length} tasks</Text> in
-          progress today
-        </Text>
+        {segmentTab === 'left' ? (
+          <Text style={styles.subtext}>
+            You have <Text style={styles.bold}>{tasks.length} tasks</Text> in
+            progress today
+          </Text>
+        ) : (
+          <Text style={styles.subtext}>
+            View your completed pickups and past activity.
+          </Text>
+        )}
+        <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: '#F3F4F6',
+            borderRadius: 12,
+            padding: 4,
+            marginTop: 16,
+          }}
+        >
+          <Pressable
+            style={{
+              flex: 1,
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+              backgroundColor:
+                segmentTab === 'left' ? '#FFFFFF' : 'transparent',
+              borderRadius: 8,
+              alignItems: 'center',
+            }}
+            onPress={() => setSegmentTab('left')}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: '600',
+                color: segmentTab === 'left' ? '#06B97C' : '#9CA3AF',
+                fontFamily: 'LatoBold',
+              }}
+            >
+              In Progress
+            </Text>
+          </Pressable>
+          <Pressable
+            style={{
+              flex: 1,
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+              backgroundColor:
+                segmentTab === 'right' ? '#FFFFFF' : 'transparent',
+              borderRadius: 8,
+              alignItems: 'center',
+            }}
+            onPress={() => setSegmentTab('right')}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: '600',
+                color: segmentTab === 'right' ? '#06B97C' : '#9CA3AF',
+                fontFamily: 'LatoBold',
+              }}
+            >
+              History
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* ERROR MESSAGE */}
-      {error && (
+      {segmentTab === 'left' && error && (
         <View
           style={{
             backgroundColor: '#fee2e2',
@@ -215,7 +279,13 @@ export default function MyTasksPage() {
 
       {/* TASKS SECTION */}
       <View style={styles.taskSection}>
-        {hasTasks ? (
+        {segmentTab === 'right' ? (
+          <View style={styles.emptyStateContainer}>
+            <Text style={[styles.emptyTitle, { marginTop: 0 }]}>
+              History will show your completed pickups here.
+            </Text>
+          </View>
+        ) : hasTasks ? (
           <>
             <Text style={styles.sectionHeader}>TODAY ({tasks.length})</Text>
             {tasks.map(task => (
