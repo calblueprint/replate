@@ -104,6 +104,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="history"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="my-account"
         options={{
           title: 'Profile',

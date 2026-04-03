@@ -15,6 +15,7 @@ import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import styles from '../../styles/tabs/my-tasks-styles';
 import { useAuth } from '../../utils/AuthContext';
+import HistoryHomeContent from './history';
 
 type Task = {
   id: number;
@@ -259,7 +260,7 @@ export default function MyTasksPage() {
         </View>
       </View>
 
-      {/* ERROR MESSAGE */}
+      {/* ERROR MESSAGE — in-progress tasks only */}
       {segmentTab === 'left' && error && (
         <View
           style={{
@@ -277,91 +278,91 @@ export default function MyTasksPage() {
         </View>
       )}
 
-      {/* TASKS SECTION */}
-      <View style={styles.taskSection}>
-        {segmentTab === 'right' ? (
-          <View style={styles.emptyStateContainer}>
-            <Text style={[styles.emptyTitle, { marginTop: 0 }]}>
-              History will show your completed pickups here.
-            </Text>
-          </View>
-        ) : hasTasks ? (
-          <>
-            <Text style={styles.sectionHeader}>TODAY ({tasks.length})</Text>
-            {tasks.map(task => (
-              <View key={task.id} style={styles.card}>
-                <View style={styles.cardAccent} />
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>
-                    Pickup from {task.location_name || 'Unknown Location'}
-                  </Text>
-                  <Text style={styles.cardAddress}>{formatAddress(task)}</Text>
-                  <Text style={styles.cardTime}>
-                    {formatTimeRange(task.start_time, task.end_time)}
-                  </Text>
+      {/* TASKS vs HISTORY */}
+      {segmentTab === 'right' ? (
+        <HistoryHomeContent />
+      ) : (
+        <View style={styles.taskSection}>
+          {hasTasks ? (
+            <>
+              <Text style={styles.sectionHeader}>TODAY ({tasks.length})</Text>
+              {tasks.map(task => (
+                <View key={task.id} style={styles.card}>
+                  <View style={styles.cardAccent} />
+                  <View style={styles.cardContent}>
+                    <Text style={styles.cardTitle}>
+                      Pickup from {task.location_name || 'Unknown Location'}
+                    </Text>
+                    <Text style={styles.cardAddress}>
+                      {formatAddress(task)}
+                    </Text>
+                    <Text style={styles.cardTime}>
+                      {formatTimeRange(task.start_time, task.end_time)}
+                    </Text>
 
-                  <View style={styles.buttonRow}>
-                    <TouchableOpacity
-                      style={[styles.button, styles.buttonOutline]}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/pickup-details/[id]',
-                          params: {
-                            id: task.encrypted_id,
-                            location: task.location_name ?? '',
-                          },
-                        })
-                      }
-                    >
-                      <Text
-                        style={[styles.buttonText, styles.buttonOutlineText]}
+                    <View style={styles.buttonRow}>
+                      <TouchableOpacity
+                        style={[styles.button, styles.buttonOutline]}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/pickup-details/[id]',
+                            params: {
+                              id: task.encrypted_id,
+                              location: task.location_name ?? '',
+                            },
+                          })
+                        }
                       >
-                        View pickup details
-                      </Text>
-                    </TouchableOpacity>
+                        <Text
+                          style={[styles.buttonText, styles.buttonOutlineText]}
+                        >
+                          View pickup details
+                        </Text>
+                      </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={[styles.button, styles.buttonFilled]}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/donation-details/[id]',
-                          params: {
-                            id: task.encrypted_id,
-                            location: task.location_name ?? '',
-                          },
-                        })
-                      }
-                    >
-                      <Text
-                        style={[styles.buttonText, styles.buttonFilledText]}
+                      <TouchableOpacity
+                        style={[styles.button, styles.buttonFilled]}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/donation-details/[id]',
+                            params: {
+                              id: task.encrypted_id,
+                              location: task.location_name ?? '',
+                            },
+                          })
+                        }
                       >
-                        Enter donation details
-                      </Text>
-                    </TouchableOpacity>
+                        <Text
+                          style={[styles.buttonText, styles.buttonFilledText]}
+                        >
+                          Enter donation details
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-              </View>
-            ))}
-          </>
-        ) : (
-          <View style={styles.emptyStateContainer}>
-            <Image
-              source={elementIcon}
-              style={styles.emptyIcon}
-              resizeMode="contain"
-            />
+              ))}
+            </>
+          ) : (
+            <View style={styles.emptyStateContainer}>
+              <Image
+                source={elementIcon}
+                style={styles.emptyIcon}
+                resizeMode="contain"
+              />
 
-            <Text style={styles.emptyTitle}>You have no new tasks</Text>
+              <Text style={styles.emptyTitle}>You have no new tasks</Text>
 
-            <TouchableOpacity
-              style={styles.emptyButton}
-              onPress={() => router.replace('/(tabs)/available-pick-ups')}
-            >
-              <Text style={styles.emptyButtonText}>Add Task</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+              <TouchableOpacity
+                style={styles.emptyButton}
+                onPress={() => router.replace('/(tabs)/available-pick-ups')}
+              >
+                <Text style={styles.emptyButtonText}>Add Task</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      )}
     </ScrollView>
   );
 }
