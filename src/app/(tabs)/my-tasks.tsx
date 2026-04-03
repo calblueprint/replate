@@ -99,6 +99,23 @@ function formatAddress(task: Task): string {
   return 'Address details in app';
 }
 
+function isTaskComplete(task: Task): boolean {
+  // In our mid-fi, tasks are "complete" when the backend provides an end time.
+  return task.end_time != null;
+}
+
+function isOverdue(task: Task): boolean {
+  // "Overdue" means pickup_date is before today and the task isn't complete yet.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // pickup_date is expected as "YYYY-MM-DD"
+  const pickup = new Date(`${task.pickup_date}T00:00:00`);
+  if (isNaN(pickup.getTime())) return false;
+
+  return pickup.getTime() < today.getTime() && !isTaskComplete(task);
+}
+
 export default function MyTasksPage() {
   const router = useRouter();
   const { driver } = useAuth();
@@ -288,7 +305,13 @@ export default function MyTasksPage() {
               <Text style={styles.sectionHeader}>TODAY ({tasks.length})</Text>
               {tasks.map(task => (
                 <View key={task.id} style={styles.card}>
-                  <View style={styles.cardAccent} />
+                  <View
+                    style={
+                      isOverdue(task)
+                        ? styles.cardAccentOverdue
+                        : styles.cardAccent
+                    }
+                  />
                   <View style={styles.cardContent}>
                     <Text style={styles.cardTitle}>
                       Pickup from {task.location_name || 'Unknown Location'}

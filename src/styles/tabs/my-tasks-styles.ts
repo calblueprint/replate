@@ -95,6 +95,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 18,
     borderBottomLeftRadius: 18,
   },
+  cardAccentOverdue: {
+    width: 5,
+    backgroundColor: '#F59E0B',
+    alignSelf: 'center',
+    height: '60%',
+    borderTopLeftRadius: 18,
+    borderBottomLeftRadius: 18,
+  },
   cardContent: {
     flex: 1,
     paddingHorizontal: 18,
