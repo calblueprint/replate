@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getPartners, getTask, submitCompletionDetails } from 'api/config';
 import dateIcon from 'assets/date.png';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
+import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
 import PhotoUpload from '../../components/PhotoUpload/PhotoUpload';
 import { styles } from '../../styles/pages/donation-details-styles';
 
@@ -36,55 +37,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseOptionalString(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
-}
-
-function formatPickupDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr + 'T00:00:00');
-    const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const day = date.getDate();
-    return `${weekday} ${month} ${day}`;
-  } catch {
-    return dateStr;
-  }
-}
-
-function fmt12(h: number, m: number) {
-  const ap = h >= 12 ? 'PM' : 'AM';
-  const hr12 = h % 12 || 12;
-  return `${hr12}:${String(m).padStart(2, '0')} ${ap}`;
-}
-
-function parseHMAny(ts: string): { h: number; m: number } | null {
-  const s = ts.trim();
-
-  if (s.includes('UTC')) {
-    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-
-  if (s.includes('T')) {
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-
-  const m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
-  if (!m) return null;
-  return { h: Number(m[1]), m: Number(m[2]) };
-}
-
-function formatTimeRangeAny(
-  startTime: string | null,
-  endTime: string | null,
-): string {
-  if (!startTime || !endTime) return 'Time TBD';
-  const s = parseHMAny(startTime);
-  const e = parseHMAny(endTime);
-  if (!s || !e) return 'Time TBD';
-  return `${fmt12(s.h, s.m)} - ${fmt12(e.h, e.m)}`;
 }
 
 export default function DonationLayout() {

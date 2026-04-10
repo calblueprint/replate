@@ -466,7 +466,10 @@ export async function submitCompletionDetails(
     const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
     const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg';
 
-    // React Native's FormData accepts this {uri, name, type} shape
+    // React Native's FormData accepts a {uri, name, type} object as a file
+    // value, but TypeScript's DOM types only know about Blob | string. The
+    // double-cast is the standard RN workaround. fetch on RN serializes this
+    // shape into a real multipart file part at runtime.
     form.append('task[photo]', {
       uri: data.photoUri,
       name: filename,

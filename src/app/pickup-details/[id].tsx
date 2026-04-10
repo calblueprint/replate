@@ -18,6 +18,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import checkIcon from 'assets/check-icon.png';
 import dateIcon from 'assets/date.png';
 import { useAuth } from '@/utils/AuthContext';
+import {
+  fmt12,
+  formatPickupDate,
+  formatTimeRangeAny,
+  parseHMAny,
+} from '@/utils/dateHelpers';
 import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
 import { styles } from '../../styles/pages/pickup-details-styles';
@@ -77,55 +83,6 @@ function formatPhoneNumber(phone: string): string {
     return `${match[1]}-${match[2]}-${match[3]}`;
   }
   return phone;
-}
-
-function formatPickupDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr + 'T00:00:00');
-    const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const day = date.getDate();
-    return `${weekday} ${month} ${day}`;
-  } catch {
-    return dateStr;
-  }
-}
-
-function parseHMAny(ts: string): { h: number; m: number } | null {
-  const s = ts.trim();
-
-  // "YYYY-MM-DD HH:MM:SS UTC"
-  if (s.includes('UTC')) {
-    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-
-  // ISO "YYYY-MM-DDTHH:MM:SSZ"
-  if (s.includes('T')) {
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-
-  // "HH:MM" or "HH:MM:SS"
-  const m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
-  if (!m) return null;
-  return { h: Number(m[1]), m: Number(m[2]) };
-}
-
-function fmt12(h: number, m: number) {
-  const ap = h >= 12 ? 'PM' : 'AM';
-  const hr12 = h % 12 || 12;
-  return `${hr12}:${String(m).padStart(2, '0')} ${ap}`;
-}
-
-function formatTimeRangeAny(startTime: string | null, endTime: string | null) {
-  if (!startTime || !endTime) return 'Time TBD';
-  const s = parseHMAny(startTime);
-  const e = parseHMAny(endTime);
-  if (!s || !e) return 'Time TBD';
-  return `${fmt12(s.h, s.m)} - ${fmt12(e.h, e.m)}`;
 }
 
 export default function PickupDetails() {
