@@ -40,6 +40,7 @@ export default function DonationDetailsPage() {
   const [weight, setWeight] = useState('');
   const [selectedNPO, setSelectedNPO] = useState('');
   const [notes, setNotes] = useState('');
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [task, setTask] = useState<TaskPickupInfo | null>(null);
@@ -136,6 +137,7 @@ export default function DonationDetailsPage() {
       await submitCompletionDetails(params.id, {
         total_pounds_entered: weight,
         description: notes || undefined,
+        photoUri,
       });
       Toast.show({ type: 'success', text1: 'Donation recorded!' });
       router.replace('/(tabs)/my-tasks');
@@ -222,7 +224,7 @@ export default function DonationDetailsPage() {
               Add Pick-up Image
             </Text>
             <View className="border border-neutral-200 rounded-2xl justify-center pb-4 shadow-sm">
-              <PhotoUpload onSelect={() => {}} />
+              <PhotoUpload onSelect={setPhotoUri} />
 
               {/* Notes */}
               <Text className="font-body text-xs text-neutral-500 px-4 pt-6">
