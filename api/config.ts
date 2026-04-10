@@ -261,6 +261,18 @@ export async function updateDriverPartner(
   }
 }
 
+export async function getTask(encryptedTaskId: string) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+
+  return apiRequest(`${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+}
+
 export async function claimTask(encryptedTaskId: string, driverId: number) {
   const safeId = encodeURIComponent(encryptedTaskId);
 

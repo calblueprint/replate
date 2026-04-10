@@ -11,12 +11,27 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getPartners, submitCompletionDetails } from 'api/config';
+import { getPartners, getTask, submitCompletionDetails } from 'api/config';
 import dateIcon from 'assets/date.png';
 import AnimatedPressable from '@/components/AnimatedPressable';
 import PhotoUpload from '@/components/PhotoUpload/PhotoUpload';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import colors from '@/styles/colors';
+import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
+
+interface TaskPickupInfo {
+  pickup_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function parseOptionalString(value: unknown): string | null {
+  return typeof value === 'string' ? value : null;
+}
 
 export default function DonationDetailsPage() {
   const params = useLocalSearchParams<{ id?: string; location?: string }>();
@@ -26,35 +41,93 @@ export default function DonationDetailsPage() {
   const [selectedNPO, setSelectedNPO] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [task, setTask] = useState<TaskPickupInfo | null>(null);
   const [npoOptions, setNpoOptions] = useState<
     { label: string; value: string }[]
   >([]);
   const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
 
   useEffect(() => {
-    const fetchPartners = async () => {
-      try {
-        const partnersList = await getPartners();
-        const safe: [number, string][] = Array.isArray(partnersList)
-          ? (partnersList as unknown[]).filter(
-              (x): x is [number, string] =>
-                Array.isArray(x) &&
-                typeof x[0] === 'number' &&
-                typeof x[1] === 'string',
-            )
-          : [];
-        setNpoOptions(
-          safe.map(([id, name]) => ({ label: name, value: String(id) })),
-        );
-      } catch {
-        Toast.show({
-          type: 'error',
-          text1: 'Could not load recipients.',
-        });
-      }
+    let cancelled = false;
+
+    const loadData = async () => {
+      setIsFetching(true);
+
+      const partnersPromise = (async () => {
+        try {
+          const partnersList = await getPartners();
+          const safe: [number, string][] = Array.isArray(partnersList)
+            ? (partnersList as unknown[]).filter(
+                (x): x is [number, string] =>
+                  Array.isArray(x) &&
+                  typeof x[0] === 'number' &&
+                  typeof x[1] === 'string',
+              )
+            : [];
+          if (!cancelled) {
+            setNpoOptions(
+              safe.map(([id, name]) => ({ label: name, value: String(id) })),
+            );
+          }
+        } catch {
+          if (!cancelled) {
+            Toast.show({
+              type: 'error',
+              text1: 'Could not load recipients.',
+            });
+          }
+        }
+      })();
+
+      const taskPromise = (async () => {
+        if (!params.id) return;
+        try {
+          const data = await getTask(params.id);
+          if (cancelled || !isRecord(data)) return;
+          setTask({
+            pickup_date:
+              parseOptionalString(data.pickup_date) ??
+              parseOptionalString(data.scheduled_date),
+            start_time:
+              parseOptionalString(data.start_time) ??
+              parseOptionalString(data.activity_start_time),
+            end_time:
+              parseOptionalString(data.end_time) ??
+              parseOptionalString(data.activity_end_time),
+          });
+        } catch {
+          if (!cancelled) {
+            Toast.show({
+              type: 'error',
+              text1: 'Could not load pickup details.',
+            });
+          }
+        }
+      })();
+
+      await Promise.all([partnersPromise, taskPromise]);
+      if (!cancelled) setIsFetching(false);
     };
-    fetchPartners();
-  }, []);
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [params.id]);
+
+  const pickupTimeLabel = task
+    ? (() => {
+        const datePart = task.pickup_date
+          ? formatPickupDate(task.pickup_date)
+          : null;
+        const timePart = formatTimeRangeAny(task.start_time, task.end_time);
+        if (datePart && timePart !== 'Time TBD')
+          return `${datePart}, ${timePart}`;
+        return datePart ?? timePart;
+      })()
+    : null;
 
   const handleComplete = async () => {
     if (!params.id) return;
@@ -110,7 +183,7 @@ export default function DonationDetailsPage() {
                   resizeMode="contain"
                 />
                 <Text className="text-sm text-neutral-500 font-body text-center">
-                  Today, 10:00 AM
+                  {pickupTimeLabel ?? (isFetching ? 'Loading…' : 'Time TBD')}
                 </Text>
               </View>
               <AnimatedPressable
