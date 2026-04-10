@@ -415,6 +415,18 @@ export async function updateDriverPartner(
   }
 }
 
+export async function getTask(encryptedTaskId: string) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+
+  return apiRequest(`${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+}
+
 export async function claimTask(encryptedTaskId: string, driverId: number) {
   const safeId = encodeURIComponent(encryptedTaskId);
 
@@ -425,5 +437,54 @@ export async function claimTask(encryptedTaskId: string, driverId: number) {
       Accept: 'application/json',
     },
     body: JSON.stringify({ driver_id: driverId }),
+  });
+}
+
+export async function submitCompletionDetails(
+  encryptedTaskId: string,
+  data: {
+    total_pounds_entered: string;
+    description?: string;
+    photoUri?: string | null;
+  },
+) {
+  const safeId = encodeURIComponent(encryptedTaskId);
+  const url = `${BASE_URL}/api/tasks/${safeId}/update_completion_details`;
+
+  if (data.photoUri) {
+    // Multipart: can't send a file as JSON. Use FormData and let fetch
+    // set the Content-Type with the correct boundary automatically.
+    const form = new FormData();
+    form.append('task[total_pounds_entered]', data.total_pounds_entered);
+    if (data.description) {
+      form.append('task[description]', data.description);
+    }
+
+    // Infer filename + mime from the URI (expo-image-picker gives file://...)
+    const filename = data.photoUri.split('/').pop() || 'photo.jpg';
+    const extMatch = /\.(\w+)$/.exec(filename);
+    const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+    const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg';
+
+    // React Native's FormData accepts this {uri, name, type} shape
+    form.append('task[photo]', {
+      uri: data.photoUri,
+      name: filename,
+      type: mimeType,
+    } as unknown as Blob);
+
+    return apiRequest(url, {
+      method: 'PATCH',
+      body: form,
+    });
+  }
+
+  return apiRequest(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      total_pounds_entered: data.total_pounds_entered,
+      description: data.description,
+    }),
   });
 }
