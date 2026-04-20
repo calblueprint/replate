@@ -177,8 +177,15 @@ export async function apiRequest<T = unknown>(
         );
       }
 
-      // Parse successful response
-      let data = await response.json();
+      // Parse successful response. Endpoints that return 204 No Content (or
+      // any successful response with an empty body) have nothing to parse —
+      // calling response.json() on them throws SyntaxError, which then gets
+      // swallowed by callers' try/catch and silently looks like a network
+      // failure even though the request succeeded. Treat empty bodies as
+      // undefined and skip JSON parsing.
+      const contentLength = response.headers.get('content-length');
+      const hasEmptyBody = response.status === 204 || contentLength === '0';
+      let data: unknown = hasEmptyBody ? undefined : await response.json();
 
       // Sanitize response to prevent prototype pollution
       if (sanitize && typeof data === 'object' && data !== null) {
@@ -193,8 +200,10 @@ export async function apiRequest<T = unknown>(
         }
       }
 
-      // Validate response structure if validator provided
-      if (customValidator && !customValidator(data)) {
+      // Validate response structure if validator provided. Skip validation
+      // for empty-body responses — validators are written assuming a body
+      // exists, and a 204 isn't a structural failure.
+      if (!hasEmptyBody && customValidator && !customValidator(data)) {
         throw new ApiError(
           'Invalid response structure from server',
           response.status,
