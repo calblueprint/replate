@@ -40,7 +40,9 @@ interface ProfileProviderProps {
 
 export function ProfileProvider({ children }: ProfileProviderProps) {
   const [profile, setProfileState] = useState<DriverProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Start as true so index.tsx waits for the first profile fetch before routing.
+  // clearProfile() sets this back to false when there's no authenticated driver.
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { driver } = useAuth();
 
@@ -92,6 +94,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
   const clearProfile = () => {
     setProfileState(null);
     setError(null);
+    setLoading(false);
   };
 
   useEffect(() => {

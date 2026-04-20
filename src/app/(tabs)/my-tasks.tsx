@@ -183,15 +183,17 @@ export default function MyTasksPage() {
         <View style={styles.headerTopRow}>
           <Text style={styles.date}>{today}</Text>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarLetter}>{driver?.first_name[0]}</Text>
+            <Text style={styles.avatarLetter}>
+              {(driver?.first_name || '?')[0]}
+            </Text>
           </View>
         </View>
         <Text style={styles.greeting}>
-          Welcome Back, {driver?.first_name || ''}
+          Welcome Back, {driver?.first_name || 'Driver'}
         </Text>
         <Text style={styles.subtext}>
           You have <Text style={styles.bold}>{tasks.length} tasks</Text> in
-          progress today
+          progress
         </Text>
       </View>
 
@@ -217,7 +219,7 @@ export default function MyTasksPage() {
       <View style={styles.taskSection}>
         {hasTasks ? (
           <>
-            <Text style={styles.sectionHeader}>TODAY ({tasks.length})</Text>
+            <Text style={styles.sectionHeader}>TASKS ({tasks.length})</Text>
             {tasks.map(task => (
               <View key={task.id} style={styles.card}>
                 <View style={styles.cardAccent} />

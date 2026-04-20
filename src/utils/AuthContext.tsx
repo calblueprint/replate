@@ -71,13 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (driverData: DriverSignupData, staySignedIn = false) => {
+  const signup = async (driverData: DriverSignupData) => {
     const newDriver = await driverAPI.signup(driverData);
     setDriver(newDriver);
-
-    if (staySignedIn) {
-      await AsyncStorage.setItem('driver', JSON.stringify(newDriver));
-    }
+    // Always persist after signup so cold starts can detect incomplete onboarding
+    await AsyncStorage.setItem('driver', JSON.stringify(newDriver));
   };
 
   const logout = async () => {
