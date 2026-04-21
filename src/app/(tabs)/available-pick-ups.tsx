@@ -202,13 +202,8 @@ export default function AvailablePickupsPage() {
   const source = remote ?? [];
   const filtered = React.useMemo(() => {
     const base = source.filter(p => p.pickup_date === selectedISO);
-
-    // Only show mock card on TODAY
-    if (__DEV__ && selectedISO === todayISO) {
-      return [...base];
-    }
     return base;
-  }, [source, selectedISO, todayISO]);
+  }, [source, selectedISO]);
 
   // Show loading indicator on initial load
   if (isLoading && !remote) {

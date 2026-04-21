@@ -53,28 +53,6 @@ type TaskDetails = {
   tray_count?: number | null;
 };
 
-// Mock data for testing — remove before merge
-const MOCK_TASK: TaskDetails = {
-  id: 1,
-  pickup_date: '2026-02-04',
-  start_time: '13:00',
-  end_time: '16:00',
-  location_name: 'Rock Ridge Cafe',
-  address: {
-    number: '5492',
-    street: 'College Ave',
-    city: 'Oakland',
-    state: 'CA',
-    zip: '94618',
-  },
-  location: { comments: 'Call when you arrive - ask for manager on duty' },
-  contact_name: 'Davina Chan',
-  contact_phone: '669-222-7871',
-  contact_email: 'rockridgecafehere@gmail.com',
-  tray_type: 'Sandwiches & Salad',
-  tray_count: 15,
-};
-
 function formatPhoneNumber(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
@@ -174,10 +152,11 @@ export default function PickupDetails() {
         };
 
         setTask(taskData);
-      } catch {
+      } catch (e: unknown) {
         if (!cancelled) {
-          // Use mock data for development
-          setTask(MOCK_TASK);
+          const msg =
+            e instanceof Error ? e.message : 'Failed to load pickup details';
+          setErr(msg);
         }
       } finally {
         if (!cancelled) {
