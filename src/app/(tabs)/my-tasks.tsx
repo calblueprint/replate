@@ -1,3 +1,4 @@
+import type { TaskStatus } from '@/components/TaskCard';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,13 +13,13 @@ import {
 import { useRouter } from 'expo-router';
 import elementIcon from 'assets/elements.png';
 import headerWave from 'assets/header-wave.png';
-import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
-import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import QuickActionsSheet from '@/components/QuickActionsSheet';
-import TaskCard, { type TaskStatus } from '@/components/TaskCard';
+import TaskCard from '@/components/TaskCard';
 import UnderlineTabBar from '@/components/UnderlineTabBar';
 import Colors from '@/styles/colors';
+import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
+import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import styles from '../../styles/tabs/my-tasks-styles';
 import { useAuth } from '../../utils/AuthContext';
 
@@ -49,7 +50,7 @@ function formatTimeRange(
 
   try {
     const parseTime = (timeStr: string) => {
-      const [hours, minutes] = timeStr.split(':').map((n) => parseInt(n, 10));
+      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
       if (isNaN(hours) || isNaN(minutes)) return null;
 
       const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -94,12 +95,14 @@ function formatAddress(task: Task): string {
 }
 
 function deriveTaskStatus(task: Task): TaskStatus {
-  // Use API status if available
-  if (task.status === 'completed' || task.completed_at) return 'completed';
-  if (task.status === 'missed' || task.missed_at) return 'missed';
-  if (task.status === 'missing') return 'missing';
+  // Backend status enum: incomplete, complete, cancelled, in_progress, failed, cancelled_late
+  // Note: GET /my_tasks only returns 'incomplete' tasks, so completed/failed won't appear
+  // from that endpoint. We derive overdue from dates for incomplete tasks.
+  if (task.status === 'complete' || task.completed_at) return 'completed';
+  if (task.status === 'failed') return 'missed';
+  if (task.status === 'in_progress') return 'active';
 
-  // Derive overdue from pickup_date
+  // For 'incomplete' tasks, derive overdue from pickup_date
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const pickupDate = new Date(task.pickup_date);
@@ -152,12 +155,19 @@ export default function MyTasksPage() {
         if (!isRefresh) setIsLoading(true);
         setError(null);
 
-        const data = await apiRequest<Task[]>(
-          `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}`,
-          { method: 'GET', validateResponse: validateArrayResponse },
-        );
+        // Fetch active (incomplete) and completed/failed tasks in parallel
+        const [activeTasks, historyTasks] = await Promise.all([
+          apiRequest<Task[]>(
+            `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}`,
+            { method: 'GET', validateResponse: validateArrayResponse },
+          ),
+          apiRequest<Task[]>(
+            `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}&status=complete,failed`,
+            { method: 'GET', validateResponse: validateArrayResponse },
+          ),
+        ]);
 
-        setTasks(data);
+        setTasks([...activeTasks, ...historyTasks]);
       } catch (e: unknown) {
         const errorMessage =
           e instanceof ApiError ? e.message : 'Failed to load tasks';
@@ -201,8 +211,7 @@ export default function MyTasksPage() {
     };
   }, [tasks]);
 
-  const displayedTasks =
-    activeTab === 'active' ? activeTasks : completedTasks;
+  const displayedTasks = activeTab === 'active' ? activeTasks : completedTasks;
 
   const handleCardPress = useCallback(
     (task: Task) => {
@@ -228,34 +237,20 @@ export default function MyTasksPage() {
     setSelectedTask(null);
   }, []);
 
-  // Mark as delivered
-  const handleMarkDelivered = useCallback(async () => {
-    if (!selectedTask || !driver?.id) return;
+  // Mark as delivered -> navigate to donation details to enter poundage/logs
+  const handleMarkDelivered = useCallback(() => {
+    if (!selectedTask) return;
 
     setQuickActionsVisible(false);
-    try {
-      const safeId = encodeURIComponent(selectedTask.encrypted_id);
-      await apiRequest(
-        `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/deliver`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ driver_id: driver.id }),
-        },
-      );
-      // Refresh the task list
-      fetchTasks(true);
-    } catch (e: unknown) {
-      const errorMessage =
-        e instanceof ApiError ? e.message : 'Failed to mark as delivered';
-      setError(errorMessage);
-    } finally {
-      setSelectedTask(null);
-    }
-  }, [selectedTask, driver?.id, fetchTasks]);
+    setSelectedTask(null);
+    router.push({
+      pathname: '/donation-details/[id]',
+      params: {
+        id: selectedTask.encrypted_id,
+        location: selectedTask.location_name ?? '',
+      },
+    });
+  }, [selectedTask, router]);
 
   // Mark as missing: show confirmation first
   const handleMarkMissingPrompt = useCallback(() => {
@@ -270,9 +265,9 @@ export default function MyTasksPage() {
     try {
       const safeId = encodeURIComponent(selectedTask.encrypted_id);
       await apiRequest(
-        `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/missing`,
+        `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/driver_mark_as_failed`,
         {
-          method: 'POST',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
@@ -309,11 +304,7 @@ export default function MyTasksPage() {
   return (
     <View style={styles.container}>
       {/* Header wave background */}
-      <Image
-        source={headerWave}
-        style={styles.headerWave}
-        resizeMode="cover"
-      />
+      <Image source={headerWave} style={styles.headerWave} resizeMode="cover" />
 
       {/* Profile icon */}
       <View style={styles.profileCircle}>
@@ -340,9 +331,8 @@ export default function MyTasksPage() {
             Welcome Back, {driver?.first_name || ''}
           </Text>
           <Text style={styles.subtext}>
-            You have{' '}
-            <Text style={styles.subtextBold}>{activeCount} tasks</Text> in
-            progress today
+            You have <Text style={styles.subtextBold}>{activeCount} tasks</Text>{' '}
+            in progress today
           </Text>
         </View>
 

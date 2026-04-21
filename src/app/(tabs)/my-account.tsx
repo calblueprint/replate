@@ -61,14 +61,10 @@ export default function MyAccountPage() {
             <Text style={styles.fieldLabel}>Name</Text>
             <View style={styles.nameRow}>
               <View style={styles.nameFieldBox}>
-                <Text style={styles.fieldText}>
-                  {driver?.first_name || ''}
-                </Text>
+                <Text style={styles.fieldText}>{driver?.first_name || ''}</Text>
               </View>
               <View style={styles.nameFieldBox}>
-                <Text style={styles.fieldText}>
-                  {driver?.last_name || ''}
-                </Text>
+                <Text style={styles.fieldText}>{driver?.last_name || ''}</Text>
               </View>
             </View>
           </View>
@@ -98,10 +94,7 @@ export default function MyAccountPage() {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity
-          onPress={handleLogout}
-          style={styles.logoutButton}
-        >
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>

@@ -9,10 +9,10 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import headerWave from 'assets/header-wave.png';
-import { useAuth } from '@/utils/AuthContext';
 import AvailableTaskCard from '@/components/AvailableTaskCard';
 import DayCarousel from '@/components/DayCarousel';
 import Colors from '@/styles/colors';
+import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import { styles } from '../../styles/tabs/available-pick-ups-styles';
@@ -47,7 +47,7 @@ function formatTimeRange(
   const parseTime = (timeStr: string) => {
     // Handle "HH:MM" format
     if (/^\d{2}:\d{2}$/.test(timeStr)) {
-      const [hours, minutes] = timeStr.split(':').map((n) => parseInt(n, 10));
+      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
       if (isNaN(hours) || isNaN(minutes)) return null;
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const displayHours = hours % 12 || 12;
@@ -55,7 +55,9 @@ function formatTimeRange(
       return `${displayHours}:${displayMinutes} ${ampm}`;
     }
     // Handle full datetime strings
-    const d = new Date(timeStr.includes('T') ? timeStr : `${dateISO}T${timeStr}`);
+    const d = new Date(
+      timeStr.includes('T') ? timeStr : `${dateISO}T${timeStr}`,
+    );
     if (isNaN(d.getTime())) return null;
     const h = d.getHours();
     const m = d.getMinutes();
@@ -135,7 +137,7 @@ export default function AvailablePickupsPage() {
   }, [fetchTasks]);
 
   const filteredTasks = useMemo(
-    () => tasks.filter((t) => t.pickup_date === selectedDate),
+    () => tasks.filter(t => t.pickup_date === selectedDate),
     [tasks, selectedDate],
   );
 
@@ -151,11 +153,7 @@ export default function AvailablePickupsPage() {
   return (
     <View style={styles.container}>
       {/* Header wave */}
-      <Image
-        source={headerWave}
-        style={styles.headerWave}
-        resizeMode="cover"
-      />
+      <Image source={headerWave} style={styles.headerWave} resizeMode="cover" />
 
       {/* Profile icon */}
       <View style={styles.profileCircle}>

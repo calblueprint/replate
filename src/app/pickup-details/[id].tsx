@@ -10,16 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import dateIcon from 'assets/date.png';
-import { useAuth } from '@/utils/AuthContext';
 import DirectionsSheet from '@/components/DirectionsSheet';
 import TaskNotification from '@/components/TaskNotification';
 import Colors from '@/styles/colors';
+import { useAuth } from '@/utils/AuthContext';
 import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
 import { styles } from '../../styles/pages/pickup-details-styles';
@@ -104,7 +103,9 @@ function formatPickupWindow(task: TaskDetails): string {
   const end = task.end_time ? parseHM(task.end_time) : null;
 
   const timeStr =
-    start && end ? `${fmt12(start.h, start.m)} - ${fmt12(end.h, end.m)}` : 'Time TBD';
+    start && end
+      ? `${fmt12(start.h, start.m)} - ${fmt12(end.h, end.m)}`
+      : 'Time TBD';
 
   return `${weekday}, ${month} ${day}: ${timeStr}`;
 }
@@ -139,7 +140,7 @@ export default function PickupDetails() {
 
         const data = await apiRequest<TaskDetails>(url, {
           method: 'GET',
-          validateResponse: (r) => {
+          validateResponse: r => {
             if (!r || typeof r !== 'object' || Array.isArray(r)) return false;
             return typeof (r as Record<string, unknown>).id === 'number';
           },
@@ -151,12 +152,20 @@ export default function PickupDetails() {
           id: raw.id as number,
           encrypted_id: raw.encrypted_id as string | undefined,
           driver_id: (raw.driver_id as number | null) ?? null,
-          pickup_date: (raw.pickup_date as string) ?? (raw.scheduled_date as string) ?? '',
-          start_time: (raw.start_time as string | null) ?? (raw.activity_start_time as string | null) ?? null,
-          end_time: (raw.end_time as string | null) ?? (raw.activity_end_time as string | null) ?? null,
+          pickup_date:
+            (raw.pickup_date as string) ?? (raw.scheduled_date as string) ?? '',
+          start_time:
+            (raw.start_time as string | null) ??
+            (raw.activity_start_time as string | null) ??
+            null,
+          end_time:
+            (raw.end_time as string | null) ??
+            (raw.activity_end_time as string | null) ??
+            null,
           location_name: (raw.location_name as string | null) ?? null,
           address: (raw.address as TaskDetails['address']) ?? null,
-          building_access_instructions: (raw.building_access_instructions as string | null) ?? null,
+          building_access_instructions:
+            (raw.building_access_instructions as string | null) ?? null,
           description: (raw.description as string | null) ?? null,
           contact_name: (raw.contact_name as string | null) ?? null,
           contact_phone: (raw.contact_phone as string | null) ?? null,
@@ -217,9 +226,9 @@ export default function PickupDetails() {
   const openInAppleMaps = useCallback(() => {
     const addressStr = getAddressString();
     if (!addressStr) return;
-    Linking.openURL(`maps://maps.apple.com/?q=${encodeURIComponent(addressStr)}`).catch(() =>
-      Alert.alert('Error', 'Could not open Apple Maps'),
-    );
+    Linking.openURL(
+      `maps://maps.apple.com/?q=${encodeURIComponent(addressStr)}`,
+    ).catch(() => Alert.alert('Error', 'Could not open Apple Maps'));
     setShowDirections(false);
   }, [getAddressString]);
 
@@ -287,7 +296,11 @@ export default function PickupDetails() {
 
   const addr = task.address;
   const displayAddress = addr
-    ? [addr.number, addr.street, addr.city && `${addr.city}, ${addr.state ?? ''}`]
+    ? [
+        addr.number,
+        addr.street,
+        addr.city && `${addr.city}, ${addr.state ?? ''}`,
+      ]
         .filter(Boolean)
         .join(' ')
     : 'Address not available';
@@ -338,12 +351,14 @@ export default function PickupDetails() {
 
         {/* Schedule */}
         <View style={styles.scheduleSection}>
-          <Image source={dateIcon} style={styles.scheduleIcon} resizeMode="contain" />
+          <Image
+            source={dateIcon}
+            style={styles.scheduleIcon}
+            resizeMode="contain"
+          />
           <View style={styles.scheduleContent}>
             <Text style={styles.scheduleLabel}>Pick-Up Window</Text>
-            <Text style={styles.scheduleValue}>
-              {formatPickupWindow(task)}
-            </Text>
+            <Text style={styles.scheduleValue}>{formatPickupWindow(task)}</Text>
           </View>
         </View>
 
@@ -363,7 +378,11 @@ export default function PickupDetails() {
                       style={styles.actionButton}
                       onPress={() => handleMessage(task.contact_phone!)}
                     >
-                      <Ionicons name="chatbubble" size={18} color={Colors.white} />
+                      <Ionicons
+                        name="chatbubble"
+                        size={18}
+                        color={Colors.white}
+                      />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.actionButton}
@@ -397,9 +416,7 @@ export default function PickupDetails() {
 
           <View style={styles.descriptionRow}>
             <Text style={styles.descriptionLabel}>Tray type</Text>
-            <Text style={styles.descriptionValue}>
-              {task.tray_type || '—'}
-            </Text>
+            <Text style={styles.descriptionValue}>{task.tray_type || '—'}</Text>
           </View>
 
           <View style={styles.descriptionRow}>
