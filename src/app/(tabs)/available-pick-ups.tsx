@@ -1,16 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { RefreshControl, Text, View } from 'react-native';
+import Animated, {
+  FadeIn,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { router } from 'expo-router';
 import headerWave from 'assets/header-wave.png';
 import AvailableTaskCard from '@/components/AvailableTaskCard';
 import DayCarousel from '@/components/DayCarousel';
+import { AvailableListSkeleton } from '@/components/SkeletonLoader';
 import Colors from '@/styles/colors';
 import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
@@ -143,24 +144,65 @@ export default function AvailablePickupsPage() {
 
   if (isLoading && tasks.length === 0) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primaryGreen} />
-        <Text style={styles.loadingText}>Loading tasks...</Text>
+      <View style={styles.container}>
+        <Animated.Image
+          source={headerWave}
+          style={styles.headerWave}
+          resizeMode="cover"
+        />
+        <Animated.Text entering={FadeIn.duration(500)} style={styles.pageTitle}>
+          Today's Available Tasks
+        </Animated.Text>
+        <AvailableListSkeleton count={4} />
       </View>
     );
   }
 
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: event => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const headerStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(scrollY.value, [0, 200], [0, -60], 'clamp'),
+      },
+      {
+        scale: interpolate(scrollY.value, [-100, 0], [1.3, 1], 'clamp'),
+      },
+    ],
+  }));
+
+  const profileStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 80], [1, 0], 'clamp'),
+    transform: [
+      {
+        translateY: interpolate(scrollY.value, [0, 80], [0, -20], 'clamp'),
+      },
+    ],
+  }));
+
   return (
     <View style={styles.container}>
-      {/* Header wave */}
-      <Image source={headerWave} style={styles.headerWave} resizeMode="cover" />
+      {/* Header wave with parallax */}
+      <Animated.Image
+        source={headerWave}
+        style={[styles.headerWave, headerStyle]}
+        resizeMode="cover"
+      />
 
-      {/* Profile icon */}
-      <View style={styles.profileCircle}>
+      {/* Profile icon with fade */}
+      <Animated.View style={[styles.profileCircle, profileStyle]}>
         <Text style={styles.profileLetter}>{driver?.first_name?.[0]}</Text>
-      </View>
+      </Animated.View>
 
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 140 }}
         refreshControl={
@@ -173,7 +215,9 @@ export default function AvailablePickupsPage() {
         }
       >
         {/* Page title */}
-        <Text style={styles.pageTitle}>Today's Available Tasks</Text>
+        <Animated.Text entering={FadeIn.duration(500)} style={styles.pageTitle}>
+          Today's Available Tasks
+        </Animated.Text>
 
         {/* Day carousel */}
         <DayCarousel
@@ -222,7 +266,7 @@ export default function AvailablePickupsPage() {
             </View>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

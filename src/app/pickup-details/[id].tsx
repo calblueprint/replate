@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -310,12 +311,12 @@ export default function PickupDetails() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <Animated.View entering={FadeInUp.duration(300)} style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color={Colors.black} />
         </Pressable>
         <Text style={styles.headerTitle}>Pick-Up</Text>
-      </View>
+      </Animated.View>
 
       {/* Notification */}
       <TaskNotification
@@ -330,7 +331,10 @@ export default function PickupDetails() {
         showsVerticalScrollIndicator={false}
       >
         {/* Location */}
-        <View style={styles.locationSection}>
+        <Animated.View
+          entering={FadeInDown.delay(100).duration(350).springify()}
+          style={styles.locationSection}
+        >
           <Ionicons name="location-sharp" size={24} color={Colors.black} />
           <View style={styles.locationContent}>
             <Text style={styles.locationTitle}>
@@ -345,12 +349,15 @@ export default function PickupDetails() {
               <Text style={styles.openMapsText}>Open in Maps</Text>
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
 
         <View style={styles.separator} />
 
         {/* Schedule */}
-        <View style={styles.scheduleSection}>
+        <Animated.View
+          entering={FadeInDown.delay(200).duration(350).springify()}
+          style={styles.scheduleSection}
+        >
           <Image
             source={dateIcon}
             style={styles.scheduleIcon}
@@ -360,11 +367,14 @@ export default function PickupDetails() {
             <Text style={styles.scheduleLabel}>Pick-Up Window</Text>
             <Text style={styles.scheduleValue}>{formatPickupWindow(task)}</Text>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Contact */}
         {(task.contact_name || task.contact_phone) && (
-          <View style={styles.contactSection}>
+          <Animated.View
+            entering={FadeInDown.delay(300).duration(350).springify()}
+            style={styles.contactSection}
+          >
             <Ionicons name="person-outline" size={22} color={Colors.black} />
             <View style={styles.contactContent}>
               {task.contact_name && (
@@ -394,24 +404,31 @@ export default function PickupDetails() {
                 </>
               )}
             </View>
-          </View>
+          </Animated.View>
         )}
 
         {/* Email */}
         {task.contact_email && (
-          <Pressable
-            style={styles.emailSection}
-            onPress={() => handleEmail(task.contact_email!)}
+          <Animated.View
+            entering={FadeInDown.delay(400).duration(350).springify()}
           >
-            <Ionicons name="mail-outline" size={20} color="#4D1B1B" />
-            <Text style={styles.emailText}>{task.contact_email}</Text>
-          </Pressable>
+            <Pressable
+              style={styles.emailSection}
+              onPress={() => handleEmail(task.contact_email!)}
+            >
+              <Ionicons name="mail-outline" size={20} color="#4D1B1B" />
+              <Text style={styles.emailText}>{task.contact_email}</Text>
+            </Pressable>
+          </Animated.View>
         )}
 
         <View style={styles.separator} />
 
         {/* Description */}
-        <View style={styles.descriptionSection}>
+        <Animated.View
+          entering={FadeInDown.delay(500).duration(350).springify()}
+          style={styles.descriptionSection}
+        >
           <Text style={styles.descriptionTitle}>Description</Text>
 
           <View style={styles.descriptionRow}>
@@ -436,11 +453,14 @@ export default function PickupDetails() {
                 '—'}
             </Text>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
 
       {/* Bottom button */}
-      <View style={styles.bottomContainer}>
+      <Animated.View
+        entering={FadeInDown.delay(600).duration(400)}
+        style={styles.bottomContainer}
+      >
         {isInProgress ? (
           <View style={styles.progressButton}>
             <Ionicons name="time-outline" size={24} color={Colors.white} />
@@ -453,7 +473,7 @@ export default function PickupDetails() {
             </Text>
           </TouchableOpacity>
         )}
-      </View>
+      </Animated.View>
 
       {/* Directions sheet */}
       <DirectionsSheet

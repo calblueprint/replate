@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { getPartners } from '../../../api/config';
@@ -45,19 +46,28 @@ export default function MyAccountPage() {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile header with avatar + name */}
-        <View style={styles.profileHeader}>
+        <Animated.View
+          entering={FadeInUp.duration(400).springify().damping(16)}
+          style={styles.profileHeader}
+        >
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{getInitial()}</Text>
           </View>
           <Text style={styles.nameDisplay}>
             {driver?.first_name} {driver?.last_name}
           </Text>
-        </View>
+        </Animated.View>
 
         {/* White card with form fields */}
-        <View style={styles.formCard}>
+        <Animated.View
+          entering={FadeInDown.delay(150).duration(400).springify().damping(16)}
+          style={styles.formCard}
+        >
           {/* Name Field */}
-          <View style={styles.fieldContainer}>
+          <Animated.View
+            entering={FadeInDown.delay(250).duration(300)}
+            style={styles.fieldContainer}
+          >
             <Text style={styles.fieldLabel}>Name</Text>
             <View style={styles.nameRow}>
               <View style={styles.nameFieldBox}>
@@ -67,36 +77,47 @@ export default function MyAccountPage() {
                 <Text style={styles.fieldText}>{driver?.last_name || ''}</Text>
               </View>
             </View>
-          </View>
+          </Animated.View>
 
           {/* Email Field */}
-          <View style={styles.fieldContainer}>
+          <Animated.View
+            entering={FadeInDown.delay(350).duration(300)}
+            style={styles.fieldContainer}
+          >
             <Text style={styles.fieldLabel}>Email</Text>
             <View style={styles.fieldBox}>
               <Text style={styles.fieldText}>{driver?.email || ''}</Text>
             </View>
-          </View>
+          </Animated.View>
 
           {/* Phone Field */}
-          <View style={styles.fieldContainer}>
+          <Animated.View
+            entering={FadeInDown.delay(450).duration(300)}
+            style={styles.fieldContainer}
+          >
             <Text style={styles.fieldLabel}>Phone</Text>
             <View style={styles.fieldBox}>
               <Text style={styles.fieldText}>{driver?.phone || ''}</Text>
             </View>
-          </View>
+          </Animated.View>
 
           {/* NPO Field */}
-          <View style={styles.fieldContainerLast}>
+          <Animated.View
+            entering={FadeInDown.delay(550).duration(300)}
+            style={styles.fieldContainerLast}
+          >
             <Text style={styles.fieldLabel}>NPO</Text>
             <View style={styles.fieldBox} />
             <Text style={styles.npoText}>{partnerName}</Text>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
 
         {/* Logout Button */}
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
+        <Animated.View entering={FadeInDown.delay(650).duration(400)}>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

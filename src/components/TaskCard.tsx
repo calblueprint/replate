@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import AnimatedCard from '@/components/AnimatedCard';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import ScalePress from '@/components/ScalePress';
 import Colors from '@/styles/colors';
 
 export type TaskStatus =
@@ -87,7 +88,6 @@ export default function TaskCard({
   const config = STATUS_CONFIG[status];
   const isFinished = status === 'completed' || status === 'missed';
 
-  // Build the time/date label
   const timeLabel = (() => {
     if (status === 'completed' && completedDate) {
       return `Completed on ${completedDate}`;
@@ -98,11 +98,8 @@ export default function TaskCard({
     return timeRange;
   })();
 
-  const cardContent = (
-    <AnimatedCard
-      style={[styles.card, isFinished && styles.cardFinished]}
-      delay={index * 80}
-    >
+  const cardInner = (
+    <View style={[styles.card, isFinished && styles.cardFinished]}>
       {/* Left accent bar */}
       <View
         style={[styles.accentBar, { backgroundColor: config.accentColor }]}
@@ -163,22 +160,28 @@ export default function TaskCard({
           </Text>
         </View>
       )}
-    </AnimatedCard>
+    </View>
   );
 
-  if (isFinished) {
-    return cardContent;
-  }
-
   return (
-    <Pressable
-      onPress={onPress}
-      onLongPress={onLongPress}
-      delayLongPress={400}
-      style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+    <Animated.View
+      entering={FadeInDown.delay(index * 60)
+        .duration(400)
+        .springify()
+        .damping(18)}
     >
-      {cardContent}
-    </Pressable>
+      {isFinished ? (
+        cardInner
+      ) : (
+        <ScalePress
+          onPress={onPress}
+          onLongPress={onLongPress}
+          delayLongPress={400}
+        >
+          {cardInner}
+        </ScalePress>
+      )}
+    </Animated.View>
   );
 }
 

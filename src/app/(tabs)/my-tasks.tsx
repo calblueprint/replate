@@ -1,20 +1,35 @@
 import type { TaskStatus } from '@/components/TaskCard';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
-  ActivityIndicator,
   Image,
   Pressable,
   RefreshControl,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInLeft,
+  FadeInRight,
+  FadeOut,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import elementIcon from 'assets/elements.png';
 import headerWave from 'assets/header-wave.png';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import QuickActionsSheet from '@/components/QuickActionsSheet';
+import { TaskListSkeleton } from '@/components/SkeletonLoader';
 import TaskCard from '@/components/TaskCard';
 import UnderlineTabBar from '@/components/UnderlineTabBar';
 import Colors from '@/styles/colors';
@@ -291,27 +306,79 @@ export default function MyTasksPage() {
     setSelectedTask(null);
   }, []);
 
-  // Loading state
+  // Loading state with skeleton
   if (isLoading && tasks.length === 0) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primaryGreen} />
-        <Text style={styles.loadingText}>Loading your tasks...</Text>
+      <View style={styles.container}>
+        <Image
+          source={headerWave}
+          style={styles.headerWave}
+          resizeMode="cover"
+        />
+        <View style={styles.welcomeSection}>
+          <Text style={styles.date}>{today}</Text>
+          <Text style={styles.greeting}>
+            Welcome Back, {driver?.first_name || ''}
+          </Text>
+        </View>
+        <TaskListSkeleton count={3} />
       </View>
     );
   }
 
+  // Parallax scroll
+  const scrollY = useSharedValue(0);
+  const prevTab = useRef(activeTab);
+  const tabDirection = useRef<'left' | 'right'>('right');
+
+  if (prevTab.current !== activeTab) {
+    tabDirection.current = activeTab === 'completed' ? 'left' : 'right';
+    prevTab.current = activeTab;
+  }
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: event => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const headerStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(scrollY.value, [0, 200], [0, -60], 'clamp'),
+      },
+      {
+        scale: interpolate(scrollY.value, [-100, 0], [1.3, 1], 'clamp'),
+      },
+    ],
+  }));
+
+  const profileStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 80], [1, 0], 'clamp'),
+    transform: [
+      {
+        translateY: interpolate(scrollY.value, [0, 80], [0, -20], 'clamp'),
+      },
+    ],
+  }));
+
   return (
     <View style={styles.container}>
-      {/* Header wave background */}
-      <Image source={headerWave} style={styles.headerWave} resizeMode="cover" />
+      {/* Header wave background with parallax */}
+      <Animated.Image
+        source={headerWave}
+        style={[styles.headerWave, headerStyle]}
+        resizeMode="cover"
+      />
 
-      {/* Profile icon */}
-      <View style={styles.profileCircle}>
+      {/* Profile icon with fade */}
+      <Animated.View style={[styles.profileCircle, profileStyle]}>
         <Text style={styles.profileLetter}>{driver?.first_name?.[0]}</Text>
-      </View>
+      </Animated.View>
 
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 140 }}
         scrollEnabled={!quickActionsVisible && !confirmModalVisible}
@@ -325,7 +392,10 @@ export default function MyTasksPage() {
         }
       >
         {/* Welcome section */}
-        <View style={styles.welcomeSection}>
+        <Animated.View
+          entering={FadeIn.duration(500)}
+          style={styles.welcomeSection}
+        >
           <Text style={styles.date}>{today}</Text>
           <Text style={styles.greeting}>
             Welcome Back, {driver?.first_name || ''}
@@ -334,7 +404,7 @@ export default function MyTasksPage() {
             You have <Text style={styles.subtextBold}>{activeCount} tasks</Text>{' '}
             in progress today
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Tab navigation */}
         <UnderlineTabBar
@@ -359,8 +429,17 @@ export default function MyTasksPage() {
           </View>
         )}
 
-        {/* Task cards */}
-        <View style={styles.taskListContainer}>
+        {/* Task cards with tab transition */}
+        <Animated.View
+          key={activeTab}
+          entering={
+            tabDirection.current === 'left'
+              ? FadeInLeft.duration(250).springify().damping(20)
+              : FadeInRight.duration(250).springify().damping(20)
+          }
+          exiting={FadeOut.duration(150)}
+          style={styles.taskListContainer}
+        >
           {displayedTasks.length > 0 ? (
             displayedTasks.map((task, index) => (
               <TaskCard
@@ -397,8 +476,8 @@ export default function MyTasksPage() {
               )}
             </View>
           )}
-        </View>
-      </ScrollView>
+        </Animated.View>
+      </Animated.ScrollView>
 
       {/* Quick Actions Bottom Sheet */}
       <QuickActionsSheet

@@ -1,5 +1,12 @@
 import React, { useMemo, useRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
+import Animated, {
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import ScalePress from '@/components/ScalePress';
 import Colors from '@/styles/colors';
 
 interface DayCarouselProps {
@@ -12,6 +19,59 @@ function localISODate(d: Date): string {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
     .toISOString()
     .slice(0, 10);
+}
+
+function DayItem({
+  month,
+  weekday,
+  day,
+  isSelected,
+  onPress,
+  index,
+}: {
+  month: string;
+  weekday: string;
+  day: number;
+  isSelected: boolean;
+  onPress: () => void;
+  index: number;
+}) {
+  const scale = useSharedValue(isSelected ? 1 : 0.92);
+  const borderWidth = useSharedValue(isSelected ? 1 : 0);
+
+  React.useEffect(() => {
+    scale.value = withSpring(isSelected ? 1 : 0.92, {
+      damping: 14,
+      stiffness: 200,
+    });
+    borderWidth.value = withSpring(isSelected ? 1 : 0, {
+      damping: 14,
+      stiffness: 200,
+    });
+  }, [isSelected, scale, borderWidth]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    borderWidth: borderWidth.value,
+    backgroundColor: isSelected ? Colors.profileBg : Colors.white,
+    borderColor: Colors.primaryGreen,
+  }));
+
+  return (
+    <Animated.View
+      entering={FadeInUp.delay(index * 40)
+        .duration(300)
+        .springify()}
+    >
+      <ScalePress onPress={onPress} scaleValue={0.9}>
+        <Animated.View style={[styles.dayItem, animatedStyle]}>
+          <Text style={styles.monthText}>{month}</Text>
+          <Text style={styles.weekdayText}>{weekday}</Text>
+          <Text style={styles.dayNumber}>{day}</Text>
+        </Animated.View>
+      </ScalePress>
+    </Animated.View>
+  );
 }
 
 export default function DayCarousel({
@@ -50,38 +110,15 @@ export default function DayCarousel({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
-      {days.map(item => {
-        const isSelected = item.iso === selectedDate;
-        return (
-          <Pressable
-            key={item.iso}
-            style={[
-              styles.dayItem,
-              isSelected ? styles.dayItemSelected : styles.dayItemUnselected,
-            ]}
-            onPress={() => onSelectDate(item.iso)}
-          >
-            <Text
-              style={[styles.monthText, isSelected && styles.monthTextSelected]}
-            >
-              {item.month}
-            </Text>
-            <Text
-              style={[
-                styles.weekdayText,
-                isSelected && styles.weekdayTextSelected,
-              ]}
-            >
-              {item.weekday}
-            </Text>
-            <Text
-              style={[styles.dayNumber, isSelected && styles.dayNumberSelected]}
-            >
-              {item.day}
-            </Text>
-          </Pressable>
-        );
-      })}
+      {days.map((item, index) => (
+        <DayItem
+          key={item.iso}
+          {...item}
+          isSelected={item.iso === selectedDate}
+          onPress={() => onSelectDate(item.iso)}
+          index={index}
+        />
+      ))}
     </ScrollView>
   );
 }
@@ -90,30 +127,15 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    gap: 0,
+    gap: 6,
+    alignItems: 'center',
   },
   dayItem: {
+    width: 65,
+    height: 85,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
-    marginRight: 4,
-  },
-  dayItemUnselected: {
-    width: 61,
-    height: 80,
-    backgroundColor: Colors.white,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 32,
-    elevation: 2,
-  },
-  dayItemSelected: {
-    width: 71,
-    height: 92,
-    backgroundColor: Colors.profileBg,
-    borderWidth: 1,
-    borderColor: Colors.primaryGreen,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
@@ -126,24 +148,15 @@ const styles = StyleSheet.create({
     color: Colors.black,
     marginBottom: 2,
   },
-  monthTextSelected: {
-    color: Colors.black,
-  },
   weekdayText: {
     fontSize: 10,
     fontFamily: 'LatoBold',
     color: Colors.black,
     marginBottom: 4,
   },
-  weekdayTextSelected: {
-    color: Colors.black,
-  },
   dayNumber: {
     fontSize: 18,
     fontFamily: 'LatoBold',
-    color: Colors.secondaryGreen,
-  },
-  dayNumberSelected: {
     color: Colors.secondaryGreen,
   },
 });
