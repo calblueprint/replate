@@ -21,6 +21,8 @@ export interface DriverProfile {
   last_name: string;
   phone?: string;
   partner_id?: number;
+  push_token: string | null;
+  notifications_enabled: boolean;
 }
 
 interface ProfileContextType {

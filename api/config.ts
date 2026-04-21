@@ -49,6 +49,8 @@ export interface DriverResponse {
   first_name: string;
   last_name: string;
   phone?: string;
+  push_token: string | null;
+  notifications_enabled: boolean;
 }
 
 // Error types for better error handling
@@ -369,6 +371,14 @@ interface UpdateDriverResponse {
   id: number;
   email: string;
   partner_id: number | null;
+  push_token?: string | null;
+  notifications_enabled?: boolean;
+}
+
+interface UpdateDriverPayload {
+  partner_id?: number | null;
+  push_token?: string | null;
+  notifications_enabled?: boolean;
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -380,24 +390,9 @@ export async function updateDriverPartner(
   selectedNPOId: number,
 ): Promise<UpdateDriverResponse | null> {
   try {
-    const responseData = await apiRequest<
-      UpdateDriverResponse | { driver: UpdateDriverResponse }
-    >(`${BASE_URL}${API_ENDPOINTS.DRIVERS}/${driverId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        driver: { partner_id: selectedNPOId },
-      }),
+    const driverObj = await updateDriver(driverId, {
+      partner_id: selectedNPOId,
     });
-
-    // supports both { driver: {...} } and {...}
-    const driverObj =
-      isObject(responseData) && 'driver' in responseData
-        ? (responseData.driver as UpdateDriverResponse)
-        : (responseData as UpdateDriverResponse);
 
     Alert.alert(
       'Success',
@@ -413,6 +408,29 @@ export async function updateDriverPartner(
     Alert.alert('Error', errorMsg);
     return null;
   }
+}
+
+export async function updateDriver(
+  driverId: number,
+  payload: UpdateDriverPayload,
+): Promise<UpdateDriverResponse> {
+  const responseData = await apiRequest<
+    UpdateDriverResponse | { driver: UpdateDriverResponse }
+  >(`${BASE_URL}${API_ENDPOINTS.DRIVERS}/${driverId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      driver: payload,
+    }),
+  });
+
+  // supports both { driver: {...} } and {...}
+  return isObject(responseData) && 'driver' in responseData
+    ? (responseData.driver as UpdateDriverResponse)
+    : (responseData as UpdateDriverResponse);
 }
 
 export async function getTask(encryptedTaskId: string) {
