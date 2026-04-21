@@ -109,11 +109,11 @@ export default function PickupDetails() {
       Toast.show({ type: 'success', text1: 'Pickup claimed!' });
       router.replace('/(tabs)/my-tasks');
     } catch (e: unknown) {
-      const err = e as { message?: string; errors?: string[] };
-      const message = err?.message ?? 'Unknown error';
+      const claimErr = e as { message?: string; errors?: string[] };
+      const message = claimErr?.message ?? 'Unknown error';
       const extra =
-        Array.isArray(err?.errors) && err.errors.length
-          ? ` • ${err.errors.join(', ')}`
+        Array.isArray(claimErr?.errors) && claimErr.errors.length
+          ? ` • ${claimErr.errors.join(', ')}`
           : '';
       Toast.show({
         type: 'error',
