@@ -147,30 +147,30 @@ export default function PickupDetails() {
         });
 
         const raw = data as Record<string, unknown>;
+        const str = (v: unknown) => (typeof v === 'string' ? v : null);
+        const num = (v: unknown) => (typeof v === 'number' ? v : null);
 
-        const pickupDate = raw.pickup_date ?? raw.scheduled_date ?? null;
-
-        const startHM = raw.start_time ?? raw.activity_start_time ?? null;
-        const endHM = raw.end_time ?? raw.activity_end_time ?? null;
+        const pickupDate = str(raw.pickup_date) ?? str(raw.scheduled_date);
+        const startHM = str(raw.start_time) ?? str(raw.activity_start_time);
+        const endHM = str(raw.end_time) ?? str(raw.activity_end_time);
 
         const taskData: TaskDetails = {
-          id: raw.id,
-          encrypted_id: raw.encrypted_id,
-          driver_id: raw.driver_id ?? null,
+          id: raw.id as number,
+          encrypted_id: str(raw.encrypted_id) ?? undefined,
+          driver_id: num(raw.driver_id),
           pickup_date: pickupDate ?? '',
           start_time: startHM,
           end_time: endHM,
-          location_name: raw.location_name ?? null,
-          address: raw.address ?? null,
-          building_access_instructions:
-            raw.building_access_instructions ?? null,
-          description: raw.description ?? null,
-          contact_name: raw.contact_name ?? null,
-          contact_phone: raw.contact_phone ?? null,
-          contact_email: raw.contact_email ?? null,
-          tray_type: raw.tray_type ?? null,
-          tray_count: raw.tray_count ?? null,
-          location: raw.location ?? null,
+          location_name: str(raw.location_name),
+          address: (raw.address as TaskDetails['address']) ?? null,
+          building_access_instructions: str(raw.building_access_instructions),
+          description: str(raw.description),
+          contact_name: str(raw.contact_name),
+          contact_phone: str(raw.contact_phone),
+          contact_email: str(raw.contact_email),
+          tray_type: str(raw.tray_type),
+          tray_count: num(raw.tray_count),
+          location: (raw.location as TaskDetails['location']) ?? undefined,
         };
 
         setTask(taskData);
