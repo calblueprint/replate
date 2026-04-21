@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   RefreshControl,
   ScrollView,
   Text,
@@ -10,18 +11,27 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import elementIcon from 'assets/elements.png';
+import headerWave from 'assets/header-wave.png';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import QuickActionsSheet from '@/components/QuickActionsSheet';
+import TaskCard, { type TaskStatus } from '@/components/TaskCard';
+import UnderlineTabBar from '@/components/UnderlineTabBar';
+import Colors from '@/styles/colors';
 import styles from '../../styles/tabs/my-tasks-styles';
 import { useAuth } from '../../utils/AuthContext';
 
-type Task = {
+interface Task {
   id: number;
   encrypted_id: string;
   pickup_date: string;
   start_time: string | null;
   end_time: string | null;
   location_name: string | null;
+  status?: string;
+  completed_at?: string | null;
+  missed_at?: string | null;
   address?: {
     number?: string | null;
     street?: string | null;
@@ -29,7 +39,7 @@ type Task = {
     state?: string | null;
     zip?: string | null;
   } | null;
-};
+}
 
 function formatTimeRange(
   startTime: string | null,
@@ -38,9 +48,8 @@ function formatTimeRange(
   if (!startTime || !endTime) return 'Time TBD';
 
   try {
-    // Parse time strings like "09:00" or "14:30"
     const parseTime = (timeStr: string) => {
-      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
+      const [hours, minutes] = timeStr.split(':').map((n) => parseInt(n, 10));
       if (isNaN(hours) || isNaN(minutes)) return null;
 
       const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -61,40 +70,54 @@ function formatTimeRange(
 }
 
 function formatAddress(task: Task): string {
-  // If we have address data from API, use it
   if (task.address) {
-    const { street, city, state, zip } = task.address;
+    const { street, city } = task.address;
     const parts = [];
-
     if (street) parts.push(street);
     if (city) parts.push(city);
-    if (state) parts.push(state);
-    if (zip) parts.push(zip);
-
-    if (parts.length > 0) {
-      return parts.join(', ');
-    }
+    if (parts.length > 0) return parts.join(', ');
   }
 
-  // Fallback to location name parsing
   if (task.location_name) {
-    // Return a generic Oakland/Berkeley address based on the location name
-    if (task.location_name.includes('Oakland')) {
-      return 'Oakland, CA';
-    } else if (task.location_name.includes('Berkeley')) {
-      return 'Berkeley, CA';
-    } else if (
+    if (task.location_name.includes('Oakland')) return 'Oakland, CA';
+    if (task.location_name.includes('Berkeley')) return 'Berkeley, CA';
+    if (
       task.location_name.includes('San Francisco') ||
       task.location_name.includes('SF')
-    ) {
+    )
       return 'San Francisco, CA';
-    } else if (task.location_name.includes('San Jose')) {
-      return 'San Jose, CA';
-    }
+    if (task.location_name.includes('San Jose')) return 'San Jose, CA';
     return 'Bay Area, CA';
   }
 
   return 'Address details in app';
+}
+
+function deriveTaskStatus(task: Task): TaskStatus {
+  // Use API status if available
+  if (task.status === 'completed' || task.completed_at) return 'completed';
+  if (task.status === 'missed' || task.missed_at) return 'missed';
+  if (task.status === 'missing') return 'missing';
+
+  // Derive overdue from pickup_date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const pickupDate = new Date(task.pickup_date);
+  pickupDate.setHours(0, 0, 0, 0);
+
+  if (pickupDate < today) return 'overdue';
+  return 'active';
+}
+
+function formatStatusDate(task: Task): string | undefined {
+  const dateStr = task.completed_at ?? task.missed_at;
+  if (!dateStr) return undefined;
+  try {
+    const date = new Date(dateStr);
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  } catch {
+    return undefined;
+  }
 }
 
 export default function MyTasksPage() {
@@ -104,11 +127,17 @@ export default function MyTasksPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('active');
 
-  const today = new Date().toLocaleDateString('en-US', {
+  // Quick actions state
+  const [quickActionsVisible, setQuickActionsVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
-    month: 'long',
     day: 'numeric',
+    month: 'long',
   });
 
   const fetchTasks = useCallback(
@@ -150,150 +179,253 @@ export default function MyTasksPage() {
     fetchTasks(true);
   }, [fetchTasks]);
 
-  const hasTasks = tasks.length > 0;
+  // Derive statuses and split into active/completed+missed
+  const { activeTasks, completedTasks, activeCount } = useMemo(() => {
+    const active: (Task & { derivedStatus: TaskStatus })[] = [];
+    const completed: (Task & { derivedStatus: TaskStatus })[] = [];
 
-  // Show loading indicator on initial load
+    for (const task of tasks) {
+      const status = deriveTaskStatus(task);
+      const enriched = { ...task, derivedStatus: status };
+      if (status === 'completed' || status === 'missed') {
+        completed.push(enriched);
+      } else {
+        active.push(enriched);
+      }
+    }
+
+    return {
+      activeTasks: active,
+      completedTasks: completed,
+      activeCount: active.length,
+    };
+  }, [tasks]);
+
+  const displayedTasks =
+    activeTab === 'active' ? activeTasks : completedTasks;
+
+  const handleCardPress = useCallback(
+    (task: Task) => {
+      router.push({
+        pathname: '/pickup-details/[id]',
+        params: {
+          id: task.encrypted_id,
+          location: task.location_name ?? '',
+        },
+      });
+    },
+    [router],
+  );
+
+  // Quick actions: long press on active card
+  const handleCardLongPress = useCallback((task: Task) => {
+    setSelectedTask(task);
+    setQuickActionsVisible(true);
+  }, []);
+
+  const handleCloseQuickActions = useCallback(() => {
+    setQuickActionsVisible(false);
+    setSelectedTask(null);
+  }, []);
+
+  // Mark as delivered
+  const handleMarkDelivered = useCallback(async () => {
+    if (!selectedTask || !driver?.id) return;
+
+    setQuickActionsVisible(false);
+    try {
+      const safeId = encodeURIComponent(selectedTask.encrypted_id);
+      await apiRequest(
+        `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/deliver`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ driver_id: driver.id }),
+        },
+      );
+      // Refresh the task list
+      fetchTasks(true);
+    } catch (e: unknown) {
+      const errorMessage =
+        e instanceof ApiError ? e.message : 'Failed to mark as delivered';
+      setError(errorMessage);
+    } finally {
+      setSelectedTask(null);
+    }
+  }, [selectedTask, driver?.id, fetchTasks]);
+
+  // Mark as missing: show confirmation first
+  const handleMarkMissingPrompt = useCallback(() => {
+    setQuickActionsVisible(false);
+    setConfirmModalVisible(true);
+  }, []);
+
+  const handleConfirmMissing = useCallback(async () => {
+    if (!selectedTask || !driver?.id) return;
+
+    setConfirmModalVisible(false);
+    try {
+      const safeId = encodeURIComponent(selectedTask.encrypted_id);
+      await apiRequest(
+        `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/missing`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ driver_id: driver.id }),
+        },
+      );
+      // Refresh the task list
+      fetchTasks(true);
+    } catch (e: unknown) {
+      const errorMessage =
+        e instanceof ApiError ? e.message : 'Failed to mark as missing';
+      setError(errorMessage);
+    } finally {
+      setSelectedTask(null);
+    }
+  }, [selectedTask, driver?.id, fetchTasks]);
+
+  const handleCancelMissing = useCallback(() => {
+    setConfirmModalVisible(false);
+    setSelectedTask(null);
+  }, []);
+
+  // Loading state
   if (isLoading && tasks.length === 0) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#58ad85" />
-        <Text style={{ marginTop: 12, color: '#6b7280' }}>
-          Loading your tasks...
-        </Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primaryGreen} />
+        <Text style={styles.loadingText}>Loading your tasks...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 140 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          colors={['#58ad85']}
-          tintColor="#58ad85"
-        />
-      }
-    >
-      {/* HEADER SECTION */}
-      <View style={styles.headerContainer}>
-        <View style={styles.headerTopRow}>
-          <Text style={styles.date}>{today}</Text>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarLetter}>
-              {(driver?.first_name || '?')[0]}
-            </Text>
-          </View>
-        </View>
-        <Text style={styles.greeting}>
-          Welcome Back, {driver?.first_name || 'Driver'}
-        </Text>
-        <Text style={styles.subtext}>
-          You have <Text style={styles.bold}>{tasks.length} tasks</Text> in
-          progress
-        </Text>
+    <View style={styles.container}>
+      {/* Header wave background */}
+      <Image
+        source={headerWave}
+        style={styles.headerWave}
+        resizeMode="cover"
+      />
+
+      {/* Profile icon */}
+      <View style={styles.profileCircle}>
+        <Text style={styles.profileLetter}>{driver?.first_name?.[0]}</Text>
       </View>
 
-      {/* ERROR MESSAGE */}
-      {error && (
-        <View
-          style={{
-            backgroundColor: '#fee2e2',
-            padding: 12,
-            marginHorizontal: 20,
-            marginBottom: 16,
-            borderRadius: 8,
-          }}
-        >
-          <Text style={{ color: '#991b1b' }}>{error}</Text>
-          <Text style={{ color: '#6b7280', marginTop: 4, fontSize: 12 }}>
-            Pull down to retry
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 140 }}
+        scrollEnabled={!quickActionsVisible && !confirmModalVisible}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={[Colors.primaryGreen]}
+            tintColor={Colors.primaryGreen}
+          />
+        }
+      >
+        {/* Welcome section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.date}>{today}</Text>
+          <Text style={styles.greeting}>
+            Welcome Back, {driver?.first_name || ''}
+          </Text>
+          <Text style={styles.subtext}>
+            You have{' '}
+            <Text style={styles.subtextBold}>{activeCount} tasks</Text> in
+            progress today
           </Text>
         </View>
-      )}
 
-      {/* TASKS SECTION */}
-      <View style={styles.taskSection}>
-        {hasTasks ? (
-          <>
-            <Text style={styles.sectionHeader}>TASKS ({tasks.length})</Text>
-            {tasks.map(task => (
-              <View key={task.id} style={styles.card}>
-                <View style={styles.cardAccent} />
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>
-                    Pickup from {task.location_name || 'Unknown Location'}
-                  </Text>
-                  <Text style={styles.cardAddress}>{formatAddress(task)}</Text>
-                  <Text style={styles.cardTime}>
-                    {formatTimeRange(task.start_time, task.end_time)}
-                  </Text>
+        {/* Tab navigation */}
+        <UnderlineTabBar
+          tabs={[
+            { key: 'active', label: `Active (${activeCount})` },
+            { key: 'completed', label: 'Completed' },
+          ]}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
 
-                  <View style={styles.buttonRow}>
-                    <TouchableOpacity
-                      style={[styles.button, styles.buttonOutline]}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/pickup-details/[id]',
-                          params: {
-                            id: task.encrypted_id,
-                            location: task.location_name ?? '',
-                          },
-                        })
-                      }
-                    >
-                      <Text
-                        style={[styles.buttonText, styles.buttonOutlineText]}
-                      >
-                        View pickup details
-                      </Text>
-                    </TouchableOpacity>
+        {/* Filter row */}
+        <Pressable style={styles.filterRow}>
+          <Text style={styles.filterText}>filter</Text>
+        </Pressable>
 
-                    <TouchableOpacity
-                      style={[styles.button, styles.buttonFilled]}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/donation-details/[id]',
-                          params: {
-                            id: task.encrypted_id,
-                            location: task.location_name ?? '',
-                          },
-                        })
-                      }
-                    >
-                      <Text
-                        style={[styles.buttonText, styles.buttonFilledText]}
-                      >
-                        Enter donation details
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </>
-        ) : (
-          <View style={styles.emptyStateContainer}>
-            <Image
-              source={elementIcon}
-              style={styles.emptyIcon}
-              resizeMode="contain"
-            />
-
-            <Text style={styles.emptyTitle}>You have no new tasks</Text>
-
-            <TouchableOpacity
-              style={styles.emptyButton}
-              onPress={() => router.replace('/(tabs)/available-pick-ups')}
-            >
-              <Text style={styles.emptyButtonText}>Add Task</Text>
-            </TouchableOpacity>
+        {/* Error message */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Text style={styles.errorHint}>Pull down to retry</Text>
           </View>
         )}
-      </View>
-    </ScrollView>
+
+        {/* Task cards */}
+        <View style={styles.taskListContainer}>
+          {displayedTasks.length > 0 ? (
+            displayedTasks.map((task, index) => (
+              <TaskCard
+                key={task.id}
+                locationName={task.location_name || 'Unknown Location'}
+                address={formatAddress(task)}
+                timeRange={formatTimeRange(task.start_time, task.end_time)}
+                status={task.derivedStatus}
+                completedDate={formatStatusDate(task)}
+                index={index}
+                onPress={() => handleCardPress(task)}
+                onLongPress={() => handleCardLongPress(task)}
+              />
+            ))
+          ) : (
+            <View style={styles.emptyStateContainer}>
+              <Image
+                source={elementIcon}
+                style={styles.emptyIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.emptyTitle}>
+                {activeTab === 'active'
+                  ? 'You have no active tasks'
+                  : 'No completed tasks yet'}
+              </Text>
+              {activeTab === 'active' && (
+                <TouchableOpacity
+                  style={styles.emptyButton}
+                  onPress={() => router.replace('/(tabs)/available-pick-ups')}
+                >
+                  <Text style={styles.emptyButtonText}>Add Task</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Quick Actions Bottom Sheet */}
+      <QuickActionsSheet
+        visible={quickActionsVisible}
+        onClose={handleCloseQuickActions}
+        onMarkDelivered={handleMarkDelivered}
+        onMarkMissing={handleMarkMissingPrompt}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        visible={confirmModalVisible}
+        title="Mark task as missing?"
+        subtitle="This task will be removed."
+        onBack={handleCancelMissing}
+        onConfirm={handleConfirmMissing}
+      />
+    </View>
   );
 }
