@@ -77,6 +77,18 @@ export const myAccountStyles = StyleSheet.create({
     fontFamily: REGULAR,
     color: '#131414',
   },
+  remindersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  remindersDescription: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: REGULAR,
+    color: '#2c2c2c',
+  },
   logoutButton: {
     backgroundColor: '#58ad85',
     padding: 13,

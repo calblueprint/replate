@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Linking,
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
-import { getPartners } from '../../../api/config';
+import { ApiError } from '../../../api/apiUtils';
+import { getPartners, updateDriver } from '../../../api/config';
 import { myAccountStyles } from '../../styles/tabs/my-account-styles';
 import { useAuth } from '../../utils/AuthContext';
 import { useProfile } from '../../utils/ProfileContext';
 
 export default function MyAccountPage() {
   const { driver, logout } = useAuth();
-  const { profile } = useProfile();
+  const { profile, setProfile, refreshProfile } = useProfile();
   const [partners, setPartners] = useState<[number, string][]>([]);
+  const [savingReminders, setSavingReminders] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -29,6 +40,54 @@ export default function MyAccountPage() {
   const handleLogout = () => {
     logout();
     router.replace('/landing');
+  };
+
+  const handlePickupRemindersChange = async (next: boolean) => {
+    if (!driver?.id) {
+      Alert.alert(
+        'Account unavailable',
+        'We could not verify your account. Please sign out and sign in again.',
+      );
+      return;
+    }
+
+    if (next) {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Notification access needed',
+          'Pickup Reminders require notification access. Enable notifications in Settings to turn this on.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Open Settings',
+              onPress: () => {
+                void Linking.openSettings();
+              },
+            },
+          ],
+        );
+        return;
+      }
+    }
+
+    setSavingReminders(true);
+    try {
+      await updateDriver(driver.id, { notifications_enabled: next });
+      if (profile) {
+        setProfile({ ...profile, notifications_enabled: next });
+      } else {
+        await refreshProfile(driver.id);
+      }
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : 'Unable to update pickup reminders. Please try again.';
+      Alert.alert('Error', message);
+    } finally {
+      setSavingReminders(false);
+    }
   };
 
   // Get initials for avatar
@@ -94,10 +153,25 @@ export default function MyAccountPage() {
         </View>
 
         {/* NPO Field */}
-        <View style={myAccountStyles.fieldContainerLast}>
+        <View style={myAccountStyles.fieldContainer}>
           <Text style={myAccountStyles.fieldLabel}>NPO</Text>
           <View style={myAccountStyles.fieldBox}>
             <Text style={myAccountStyles.fieldTextDark}>{partnerName}</Text>
+          </View>
+        </View>
+
+        {/* Pickup Reminders */}
+        <View style={myAccountStyles.fieldContainerLast}>
+          <Text style={myAccountStyles.fieldLabel}>Pickup Reminders</Text>
+          <View style={myAccountStyles.remindersRow}>
+            <Text style={myAccountStyles.remindersDescription}>
+              Get notified about upcoming pickups.
+            </Text>
+            <Switch
+              value={profile?.notifications_enabled ?? false}
+              onValueChange={handlePickupRemindersChange}
+              disabled={savingReminders}
+            />
           </View>
         </View>
 
