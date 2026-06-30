@@ -3,7 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { getPartners } from '../../../api/config';
-import { myAccountStyles } from '../../styles/tabs/my-account-styles';
+import { myAccountStyles as styles } from '../../styles/tabs/my-account-styles';
 import { useAuth } from '../../utils/AuthContext';
 import { useProfile } from '../../utils/ProfileContext';
 
@@ -31,11 +31,7 @@ export default function MyAccountPage() {
     router.replace('/landing');
   };
 
-  // Get initials for avatar
-  const getInitials = () => {
-    if (driver?.first_name && driver?.last_name) {
-      return `${driver.first_name[0]}${driver.last_name[0]}`.toUpperCase();
-    }
+  const getInitial = () => {
     if (driver?.first_name) {
       return driver.first_name[0].toUpperCase();
     }
@@ -43,71 +39,49 @@ export default function MyAccountPage() {
   };
 
   return (
-    <SafeAreaView style={myAccountStyles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={myAccountStyles.scrollContent}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* User Image/Avatar */}
-        <View style={myAccountStyles.avatarContainer}>
-          <View style={myAccountStyles.avatar}>
-            <Text style={myAccountStyles.avatarText}>{getInitials()}</Text>
+        {/* Profile header */}
+        <View style={styles.profileHeader}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{getInitial()}</Text>
           </View>
+          <Text style={styles.nameDisplay}>
+            {driver?.first_name} {driver?.last_name}
+          </Text>
         </View>
 
-        {/* Name Display */}
-        <Text style={myAccountStyles.nameDisplay}>
-          {driver?.first_name} {driver?.last_name}
-        </Text>
-
-        {/* Name Field */}
-        <View style={myAccountStyles.fieldContainer}>
-          <Text style={myAccountStyles.fieldLabel}>Name</Text>
-          <View style={myAccountStyles.nameRow}>
-            <View style={myAccountStyles.nameFieldBox}>
-              <Text style={myAccountStyles.fieldText}>
-                {driver?.first_name || ''}
-              </Text>
-            </View>
-            <View style={myAccountStyles.nameFieldBox}>
-              <Text style={myAccountStyles.fieldText}>
-                {driver?.last_name || ''}
-              </Text>
-            </View>
+        {/* White card with fields + logout */}
+        <View style={styles.formCard}>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Name</Text>
+            <Text style={[styles.fieldText, styles.fieldTextCapitalize]}>
+              {driver?.first_name} {driver?.last_name}
+            </Text>
           </View>
-        </View>
 
-        {/* Email Field */}
-        <View style={myAccountStyles.fieldContainer}>
-          <Text style={myAccountStyles.fieldLabel}>Email</Text>
-          <View style={myAccountStyles.fieldBox}>
-            <Text style={myAccountStyles.fieldText}>{driver?.email || ''}</Text>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Email</Text>
+            <Text style={styles.fieldText}>{driver?.email || ''}</Text>
           </View>
-        </View>
 
-        {/* Phone Field */}
-        <View style={myAccountStyles.fieldContainer}>
-          <Text style={myAccountStyles.fieldLabel}>Phone</Text>
-          <View style={myAccountStyles.fieldBox}>
-            <Text style={myAccountStyles.fieldText}>{driver?.phone || ''}</Text>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Phone</Text>
+            <Text style={styles.fieldText}>{driver?.phone || ''}</Text>
           </View>
-        </View>
 
-        {/* NPO Field */}
-        <View style={myAccountStyles.fieldContainerLast}>
-          <Text style={myAccountStyles.fieldLabel}>NPO</Text>
-          <View style={myAccountStyles.fieldBox}>
-            <Text style={myAccountStyles.fieldTextDark}>{partnerName}</Text>
+          <View style={styles.fieldContainerLast}>
+            <Text style={styles.fieldLabel}>NPO</Text>
+            <Text style={styles.fieldText}>{partnerName}</Text>
           </View>
-        </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity
-          onPress={handleLogout}
-          style={myAccountStyles.logoutButton}
-        >
-          <Text style={myAccountStyles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import Colors from '@/styles/colors';
 
 const REGULAR = 'Lato';
 const BOLD = 'LatoBold';
@@ -6,87 +7,87 @@ const BOLD = 'LatoBold';
 export const myAccountStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
-  avatarContainer: {
+
+  /** PROFILE HEADER **/
+  profileHeader: {
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 16,
+    paddingTop: 38,
+    paddingBottom: 28,
+    backgroundColor: Colors.background,
   },
   avatar: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#1d3557',
+    backgroundColor: Colors.profileBg,
+    borderWidth: 2.5,
+    borderColor: Colors.primaryGreen,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    fontSize: 24,
-    fontFamily: BOLD,
-    color: '#fff',
+    fontSize: 28,
+    fontFamily: REGULAR,
+    color: Colors.primaryGreen,
   },
   nameDisplay: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: REGULAR,
     textAlign: 'center',
-    color: '#000',
-    marginBottom: 32,
+    color: Colors.black,
+    marginTop: 12,
+    textTransform: 'capitalize',
   },
+
+  /** WHITE CARD AREA **/
+  formCard: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 40,
+    flex: 1,
+  },
+
+  /** FORM FIELDS **/
   fieldContainer: {
     marginBottom: 24,
   },
   fieldContainerLast: {
-    marginBottom: 32,
+    marginBottom: 0,
   },
   fieldLabel: {
     fontSize: 12,
     fontFamily: BOLD,
-    color: '#525454',
+    color: Colors.secondaryGreen,
     textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  nameFieldBox: {
-    flex: 1,
-    borderWidth: 0.7,
-    borderColor: '#1d3557',
-    borderRadius: 5,
-    padding: 12,
-  },
-  fieldBox: {
-    borderWidth: 0.7,
-    borderColor: '#111111',
-    borderRadius: 5,
-    padding: 12,
+    marginBottom: 6,
   },
   fieldText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: REGULAR,
-    color: '#2c2c2c',
+    color: Colors.black,
+    lineHeight: 22,
   },
-  fieldTextDark: {
-    fontSize: 15,
-    fontFamily: REGULAR,
-    color: '#131414',
+  fieldTextCapitalize: {
+    textTransform: 'capitalize',
   },
+
+  /** LOGOUT BUTTON **/
   logoutButton: {
-    backgroundColor: '#58ad85',
-    padding: 13,
+    backgroundColor: Colors.primaryGreen,
+    paddingVertical: 16,
     borderRadius: 10,
     alignItems: 'center',
-    width: '100%',
+    marginTop: 40,
   },
   logoutButtonText: {
-    color: 'white',
+    color: Colors.white,
     fontSize: 16,
-    fontFamily: BOLD,
+    fontFamily: 'LatoBlack',
   },
 });

@@ -1,33 +1,30 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Image,
   Linking,
-  Modal,
+  Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import dateIcon from 'assets/date.png';
+import DirectionsSheet from '@/components/DirectionsSheet';
+import TaskNotification from '@/components/TaskNotification';
+import Colors from '@/styles/colors';
 import { useAuth } from '@/utils/AuthContext';
-import {
-  fmt12,
-  formatPickupDate,
-  formatTimeRangeAny,
-  parseHMAny,
-} from '@/utils/dateHelpers';
 import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
 import { styles } from '../../styles/pages/pickup-details-styles';
 
-type TaskDetails = {
+interface TaskDetails {
   id: number;
   encrypted_id?: string;
   driver_id?: number | null;
@@ -51,15 +48,53 @@ type TaskDetails = {
   description?: string | null;
   tray_type?: string | null;
   tray_count?: number | null;
-};
+}
 
-function formatPhoneNumber(phone: string): string {
-  const cleaned = phone.replace(/\D/g, '');
-  const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-  if (match) {
-    return `${match[1]}-${match[2]}-${match[3]}`;
+function parseHM(ts: string): { h: number; m: number } | null {
+  const s = ts.trim();
+  if (s.includes('UTC')) {
+    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
+    if (isNaN(d.getTime())) return null;
+    return { h: d.getHours(), m: d.getMinutes() };
   }
-  return phone;
+  if (s.includes('T')) {
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return null;
+    return { h: d.getHours(), m: d.getMinutes() };
+  }
+  const match = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (!match) return null;
+  return { h: Number(match[1]), m: Number(match[2]) };
+}
+
+function fmt12(h: number, m: number): string {
+  const ap = h >= 12 ? 'pm' : 'am';
+  const hr12 = h % 12 || 12;
+  return `${hr12}:${String(m).padStart(2, '0')}${ap}`;
+}
+
+function formatPickupWindow(task: TaskDetails): string {
+  const d = new Date(task.pickup_date + 'T00:00:00');
+  const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
+  const month = d.toLocaleDateString('en-US', { month: 'short' });
+  const day = d.getDate();
+
+  const start = task.start_time ? parseHM(task.start_time) : null;
+  const end = task.end_time ? parseHM(task.end_time) : null;
+
+  const timeStr =
+    start && end
+      ? `${fmt12(start.h, start.m)} - ${fmt12(end.h, end.m)}`
+      : 'Time TBD';
+
+  return `${weekday}, ${month} ${day}: ${timeStr}`;
+}
+
+function formatClaimTime(endTime: string | null): string {
+  if (!endTime) return '';
+  const hm = parseHM(endTime);
+  if (!hm) return '';
+  return fmt12(hm.h, hm.m);
 }
 
 export default function PickupDetails() {
@@ -67,41 +102,9 @@ export default function PickupDetails() {
   const [task, setTask] = useState<TaskDetails | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showMapModal, setShowMapModal] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(false);
+  const [isTaskAdded, setIsTaskAdded] = useState(false);
+  const [showDirections, setShowDirections] = useState(false);
   const { driver } = useAuth();
-
-  const handleClaim = async () => {
-    if (isClaiming) return;
-    const driverId = driver?.id;
-    const token = Array.isArray(id) ? id[0] : id;
-
-    try {
-      setIsClaiming(true);
-      if (!driverId) throw new Error('No driver session');
-      if (!token) throw new Error('Missing task id');
-
-      await claimTask(token, driverId);
-      await AsyncStorage.removeItem('tasks');
-
-      Toast.show({ type: 'success', text1: 'Pickup claimed!' });
-      router.replace('/(tabs)/my-tasks');
-    } catch (e: unknown) {
-      const claimErr = e as { message?: string; errors?: string[] };
-      const message = claimErr?.message ?? 'Unknown error';
-      const extra =
-        Array.isArray(claimErr?.errors) && claimErr.errors.length
-          ? ` • ${claimErr.errors.join(', ')}`
-          : '';
-      Toast.show({
-        type: 'error',
-        text1: 'Could not claim pickup',
-        text2: `${message}${extra}`,
-      });
-    } finally {
-      setIsClaiming(false);
-    }
-  };
 
   React.useEffect(() => {
     let cancelled = false;
@@ -119,49 +122,44 @@ export default function PickupDetails() {
           method: 'GET',
           validateResponse: r => {
             if (!r || typeof r !== 'object' || Array.isArray(r)) return false;
-            const obj = r as Record<string, unknown>;
-            return typeof obj.id === 'number';
+            return typeof (r as Record<string, unknown>).id === 'number';
           },
         });
 
-        const raw = data as Record<string, unknown>;
-        const str = (v: unknown) => (typeof v === 'string' ? v : null);
-        const num = (v: unknown) => (typeof v === 'number' ? v : null);
-
-        const pickupDate = str(raw.pickup_date) ?? str(raw.scheduled_date);
-        const startHM = str(raw.start_time) ?? str(raw.activity_start_time);
-        const endHM = str(raw.end_time) ?? str(raw.activity_end_time);
+        const raw = data as unknown as Record<string, unknown>;
 
         const taskData: TaskDetails = {
           id: raw.id as number,
-          encrypted_id: str(raw.encrypted_id) ?? undefined,
-          driver_id: num(raw.driver_id),
-          pickup_date: pickupDate ?? '',
-          start_time: startHM,
-          end_time: endHM,
-          location_name: str(raw.location_name),
+          encrypted_id: raw.encrypted_id as string | undefined,
+          driver_id: (raw.driver_id as number | null) ?? null,
+          pickup_date:
+            (raw.pickup_date as string) ?? (raw.scheduled_date as string) ?? '',
+          start_time:
+            (raw.start_time as string | null) ??
+            (raw.activity_start_time as string | null) ??
+            null,
+          end_time:
+            (raw.end_time as string | null) ??
+            (raw.activity_end_time as string | null) ??
+            null,
+          location_name: (raw.location_name as string | null) ?? null,
           address: (raw.address as TaskDetails['address']) ?? null,
-          building_access_instructions: str(raw.building_access_instructions),
-          description: str(raw.description),
-          contact_name: str(raw.contact_name),
-          contact_phone: str(raw.contact_phone),
-          contact_email: str(raw.contact_email),
-          tray_type: str(raw.tray_type),
-          tray_count: num(raw.tray_count),
+          building_access_instructions:
+            (raw.building_access_instructions as string | null) ?? null,
+          description: (raw.description as string | null) ?? null,
+          contact_name: (raw.contact_name as string | null) ?? null,
+          contact_phone: (raw.contact_phone as string | null) ?? null,
+          contact_email: (raw.contact_email as string | null) ?? null,
+          tray_type: (raw.tray_type as string | null) ?? null,
+          tray_count: (raw.tray_count as number | null) ?? null,
           location: (raw.location as TaskDetails['location']) ?? undefined,
         };
 
-        setTask(taskData);
-      } catch (e: unknown) {
-        if (!cancelled) {
-          const msg =
-            e instanceof Error ? e.message : 'Failed to load pickup details';
-          setErr(msg);
-        }
+        if (!cancelled) setTask(taskData);
+      } catch {
+        if (!cancelled) setErr('Failed to load pickup details');
       } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        if (!cancelled) setIsLoading(false);
       }
     })();
 
@@ -170,82 +168,81 @@ export default function PickupDetails() {
     };
   }, [id]);
 
-  const handleOpenMaps = () => {
-    setShowMapModal(true);
-  };
+  const handleClaim = useCallback(async () => {
+    const driverId = driver?.id;
+    const token = Array.isArray(id) ? id[0] : id;
 
-  const openInAppleMaps = () => {
-    if (!task?.address) return;
+    try {
+      if (!driverId) throw new Error('No driver session');
+      if (!token) throw new Error('Missing task id');
+
+      await claimTask(token, driverId);
+      await AsyncStorage.removeItem('tasks');
+
+      setIsTaskAdded(true);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      Toast.show({
+        type: 'error',
+        text1: 'Could not claim pickup',
+        text2: message,
+      });
+    }
+  }, [driver?.id, id]);
+
+  const handleUndoAdd = useCallback(() => {
+    setIsTaskAdded(false);
+    Toast.show({ type: 'info', text1: 'Removed from My Tasks' });
+  }, []);
+
+  const getAddressString = useCallback(() => {
+    if (!task?.address) return '';
     const addr = task.address;
-    const addressStr = [
-      addr.number,
-      addr.street,
-      addr.city,
-      addr.state,
-      addr.zip,
-    ]
+    return [addr.number, addr.street, addr.city, addr.state, addr.zip]
       .filter(Boolean)
       .join(' ');
-    const url = `maps://maps.apple.com/?q=${encodeURIComponent(addressStr)}`;
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open Apple Maps');
-    });
-    setShowMapModal(false);
-  };
+  }, [task]);
 
-  const openInGoogleMaps = () => {
-    if (!task?.address) return;
-    const addr = task.address;
-    const addressStr = [
-      addr.number,
-      addr.street,
-      addr.city,
-      addr.state,
-      addr.zip,
-    ]
-      .filter(Boolean)
-      .join(' ');
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressStr)}`;
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open Google Maps');
-    });
-    setShowMapModal(false);
-  };
+  const openInAppleMaps = useCallback(() => {
+    const addressStr = getAddressString();
+    if (!addressStr) return;
+    Linking.openURL(
+      `maps://maps.apple.com/?q=${encodeURIComponent(addressStr)}`,
+    ).catch(() => Alert.alert('Error', 'Could not open Apple Maps'));
+    setShowDirections(false);
+  }, [getAddressString]);
 
-  const copyAddress = () => {
-    // In a real app, you'd use Clipboard API
-    Toast.show({
-      type: 'success',
-      text1: 'Address copied to clipboard',
-    });
-    setShowMapModal(false);
-  };
+  const openInGoogleMaps = useCallback(() => {
+    const addressStr = getAddressString();
+    if (!addressStr) return;
+    Linking.openURL(
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressStr)}`,
+    ).catch(() => Alert.alert('Error', 'Could not open Google Maps'));
+    setShowDirections(false);
+  }, [getAddressString]);
 
-  const handleCall = (phone: string) => {
-    const phoneUrl = `tel:${phone.replace(/[^0-9]/g, '')}`;
-    Linking.openURL(phoneUrl).catch(() => {
-      Alert.alert('Error', 'Could not open phone app');
-    });
-  };
+  const handleCall = useCallback((phone: string) => {
+    Linking.openURL(`tel:${phone.replace(/[^0-9]/g, '')}`).catch(() =>
+      Alert.alert('Error', 'Could not open phone app'),
+    );
+  }, []);
 
-  const handleMessage = (phone: string) => {
-    const smsUrl = `sms:${phone.replace(/[^0-9]/g, '')}`;
-    Linking.openURL(smsUrl).catch(() => {
-      Alert.alert('Error', 'Could not open messages app');
-    });
-  };
+  const handleMessage = useCallback((phone: string) => {
+    Linking.openURL(`sms:${phone.replace(/[^0-9]/g, '')}`).catch(() =>
+      Alert.alert('Error', 'Could not open messages app'),
+    );
+  }, []);
 
-  const handleEmail = (email: string) => {
-    const mailUrl = `mailto:${email}`;
-    Linking.openURL(mailUrl).catch(() => {
-      Alert.alert('Error', 'Could not open email app');
-    });
-  };
+  const handleEmail = useCallback((email: string) => {
+    Linking.openURL(`mailto:${email}`).catch(() =>
+      Alert.alert('Error', 'Could not open email app'),
+    );
+  }, []);
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#58ad85" />
+        <ActivityIndicator size="large" color={Colors.primaryGreen} />
         <Text style={styles.loadingText}>Loading pickup details...</Text>
       </View>
     );
@@ -277,131 +274,141 @@ export default function PickupDetails() {
     );
   }
 
-  const addr = task.address ?? null;
-  const fullAddress = [
-    addr?.number,
-    addr?.street,
-    addr?.city && addr?.state
-      ? `${addr.city}, ${addr.state}`
-      : addr?.city || addr?.state,
-    addr?.zip,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const addr = task.address;
+  const displayAddress = addr
+    ? [
+        addr.number,
+        addr.street,
+        addr.city && `${addr.city}, ${addr.state ?? ''}`,
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : 'Address not available';
+
+  const isInProgress = isTaskAdded || !!task.driver_id;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <View style={styles.container}>
+      {/* Header */}
+      <Animated.View entering={FadeInUp.duration(300)} style={styles.header}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color={Colors.black} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Pick-Up</Text>
+      </Animated.View>
+
+      {/* Notification */}
+      <TaskNotification
+        visible={isTaskAdded}
+        message="Added to Active Tasks"
+        onUndo={handleUndoAdd}
+      />
+
+      {/* Content */}
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={styles.contentCard}
         showsVerticalScrollIndicator={false}
       >
-        {/* Location Section */}
-        <View style={styles.locationSection}>
-          <Ionicons
-            name="location-sharp"
-            size={24}
-            color="#000"
-            style={{ marginTop: 4 }}
-          />
+        {/* Location */}
+        <Animated.View
+          entering={FadeInDown.delay(100).duration(350).springify()}
+          style={styles.locationSection}
+        >
+          <Ionicons name="location-sharp" size={24} color={Colors.black} />
           <View style={styles.locationContent}>
             <Text style={styles.locationTitle}>
-              {task.location_name || 'Pickup Location'} pickup details
+              {task.location_name ?? 'Pickup Location'} Details
             </Text>
-            <Text style={styles.locationAddress}>
-              {fullAddress || 'Address not available'}
-            </Text>
-            <TouchableOpacity
-              style={styles.openMapsButton}
-              onPress={handleOpenMaps}
+            <Text style={styles.locationAddress}>{displayAddress}</Text>
+            <Pressable
+              style={styles.openMapsRow}
+              onPress={() => setShowDirections(true)}
             >
-              <Text style={styles.openMapsButtonText}>Open in maps</Text>
-            </TouchableOpacity>
+              <Ionicons name="map-outline" size={20} color={Colors.black} />
+              <Text style={styles.openMapsText}>Open in Maps</Text>
+            </Pressable>
           </View>
-        </View>
+        </Animated.View>
 
-        {/* Pickup Window */}
-        <View style={styles.infoSection}>
-          <View style={styles.infoRow}>
-            <Image source={dateIcon} style={styles.infoIcon} />
-            <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Pick-up Window</Text>
-              <Text style={styles.infoValue}>
-                {formatPickupDate(task.pickup_date)}:{' '}
-                {formatTimeRangeAny(task.start_time, task.end_time)}
-              </Text>
-            </View>
+        <View style={styles.separator} />
+
+        {/* Schedule */}
+        <Animated.View
+          entering={FadeInDown.delay(200).duration(350).springify()}
+          style={styles.scheduleSection}
+        >
+          <Image
+            source={dateIcon}
+            style={styles.scheduleIcon}
+            resizeMode="contain"
+          />
+          <View style={styles.scheduleContent}>
+            <Text style={styles.scheduleLabel}>Pick-Up Window</Text>
+            <Text style={styles.scheduleValue}>{formatPickupWindow(task)}</Text>
           </View>
-        </View>
+        </Animated.View>
 
-        {/* Contact Section */}
-        {(task.contact_name || task.contact_email || task.contact_phone) && (
-          <View style={styles.contactSection}>
-            <Text
-              style={[
-                styles.descriptionTitle,
-                { marginBottom: 24, fontSize: 18 },
-              ]}
-            >
-              Onsite Contact
-            </Text>
-            {/* Contact Name with Actions */}
-            {task.contact_name && (
-              <View style={[styles.contactRow, { marginBottom: 16 }]}>
-                <Ionicons name="person-outline" size={20} color="#525454" />
-                <View style={[styles.contactInfo, { marginLeft: 16 }]}>
-                  <Text style={styles.contactName}>{task.contact_name}</Text>
-                </View>
-                {task.contact_phone && (
+        {/* Contact */}
+        {(task.contact_name || task.contact_phone) && (
+          <Animated.View
+            entering={FadeInDown.delay(300).duration(350).springify()}
+            style={styles.contactSection}
+          >
+            <Ionicons name="person-outline" size={22} color={Colors.black} />
+            <View style={styles.contactContent}>
+              {task.contact_name && (
+                <Text style={styles.contactName}>{task.contact_name}</Text>
+              )}
+              {task.contact_phone && (
+                <>
+                  <Text style={styles.contactPhone}>{task.contact_phone}</Text>
                   <View style={styles.contactActions}>
                     <TouchableOpacity
                       style={styles.actionButton}
                       onPress={() => handleMessage(task.contact_phone!)}
                     >
-                      <Ionicons name="chatbubble" size={20} color="#FFF" />
+                      <Ionicons
+                        name="chatbubble"
+                        size={18}
+                        color={Colors.white}
+                      />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.actionButton}
                       onPress={() => handleCall(task.contact_phone!)}
                     >
-                      <Ionicons name="call" size={20} color="#FFF" />
+                      <Ionicons name="call" size={18} color={Colors.white} />
                     </TouchableOpacity>
                   </View>
-                )}
-              </View>
-            )}
-
-            {/* Phone Number */}
-            {task.contact_phone && !task.contact_name && (
-              <View style={styles.contactRow}>
-                <Ionicons name="call-outline" size={20} color="#525454" />
-                <View style={[styles.contactInfo, { marginLeft: 16 }]}>
-                  <Text style={styles.contactPhone}>
-                    {formatPhoneNumber(task.contact_phone)}
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            {/* Email */}
-            {task.contact_email && (
-              <View style={[styles.contactRow, { marginBottom: 0 }]}>
-                <Ionicons name="mail-outline" size={20} color="#525454" />
-                <TouchableOpacity
-                  style={[styles.contactInfo, { marginLeft: 16 }]}
-                  onPress={() => handleEmail(task.contact_email!)}
-                >
-                  <Text style={styles.contactEmail}>{task.contact_email}</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+                </>
+              )}
+            </View>
+          </Animated.View>
         )}
 
-        {/* Pickup Description */}
-        <View style={styles.descriptionSection}>
-          <Text style={[styles.descriptionTitle, { fontSize: 18 }]}>
-            Pickup Description
-          </Text>
+        {/* Email */}
+        {task.contact_email && (
+          <Animated.View
+            entering={FadeInDown.delay(400).duration(350).springify()}
+          >
+            <Pressable
+              style={styles.emailSection}
+              onPress={() => handleEmail(task.contact_email!)}
+            >
+              <Ionicons name="mail-outline" size={20} color="#4D1B1B" />
+              <Text style={styles.emailText}>{task.contact_email}</Text>
+            </Pressable>
+          </Animated.View>
+        )}
+
+        <View style={styles.separator} />
+
+        {/* Description */}
+        <Animated.View
+          entering={FadeInDown.delay(500).duration(350).springify()}
+          style={styles.descriptionSection}
+        >
+          <Text style={styles.descriptionTitle}>Description</Text>
 
           <View style={styles.descriptionRow}>
             <Text style={styles.descriptionLabel}>Tray type</Text>
@@ -411,7 +418,7 @@ export default function PickupDetails() {
           <View style={styles.descriptionRow}>
             <Text style={styles.descriptionLabel}>Tray count</Text>
             <Text style={styles.descriptionValue}>
-              {task.tray_count || '—'}
+              {task.tray_count ?? '—'}
             </Text>
           </View>
 
@@ -420,97 +427,40 @@ export default function PickupDetails() {
               Building access instructions
             </Text>
             <Text style={styles.descriptionValue}>
-              {task.building_access_instructions ?? '—'}
+              {task.building_access_instructions ??
+                task.location?.comments ??
+                '—'}
             </Text>
           </View>
-
-          <View style={styles.descriptionRow}>
-            <Text style={styles.descriptionLabel}>Additional notes</Text>
-            <Text style={styles.descriptionValue}>
-              {task.description || '—'}
-            </Text>
-          </View>
-        </View>
+        </Animated.View>
       </ScrollView>
 
-      {/* Bottom Button */}
-      <View style={styles.bottomContainer}>
-        <View style={styles.bottomContainer}>
-          {task.driver_id ? (
-            <View style={styles.progressButton}>
-              <Ionicons
-                name="time-outline"
-                size={20}
-                color="#059669"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.progressButtonText}>Task in progress</Text>
-            </View>
-          ) : (
-            <TouchableOpacity style={styles.claimButton} onPress={handleClaim}>
-              <Text style={styles.claimButtonText}>
-                Claim by{' '}
-                {task.end_time
-                  ? (() => {
-                      const hm = parseHMAny(task.end_time);
-                      return hm ? fmt12(hm.h, hm.m) : '';
-                    })()
-                  : ''}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      {/* Map Options Modal */}
-      <Modal
-        visible={showMapModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowMapModal(false)}
+      {/* Bottom button */}
+      <Animated.View
+        entering={FadeInDown.delay(600).duration(400)}
+        style={styles.bottomContainer}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowMapModal(false)}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>Get directions</Text>
-
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={openInAppleMaps}
-            >
-              <Ionicons name="navigate-outline" size={24} color="#525454" />
-              <Text style={styles.modalOptionText}>Open in Apple Maps</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={openInGoogleMaps}
-            >
-              <Ionicons name="map-outline" size={24} color="#525454" />
-              <Text style={styles.modalOptionText}>Open in Google Maps</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalOption, { borderBottomWidth: 0 }]}
-              onPress={copyAddress}
-            >
-              <Ionicons name="copy-outline" size={24} color="#525454" />
-              <Text style={styles.modalOptionText}>Copy Address</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalCancelButton}
-              onPress={() => setShowMapModal(false)}
-            >
-              <Text style={styles.modalCancelText}>Cancel</Text>
-            </TouchableOpacity>
+        {isInProgress ? (
+          <View style={styles.progressButton}>
+            <Ionicons name="time-outline" size={24} color={Colors.white} />
+            <Text style={styles.progressButtonText}>Task in progress</Text>
           </View>
-        </TouchableOpacity>
-      </Modal>
-    </SafeAreaView>
+        ) : (
+          <TouchableOpacity style={styles.claimButton} onPress={handleClaim}>
+            <Text style={styles.claimButtonText}>
+              Claim before {formatClaimTime(task.end_time)}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </Animated.View>
+
+      {/* Directions sheet */}
+      <DirectionsSheet
+        visible={showDirections}
+        onClose={() => setShowDirections(false)}
+        onAppleMaps={openInAppleMaps}
+        onGoogleMaps={openInGoogleMaps}
+      />
+    </View>
   );
 }

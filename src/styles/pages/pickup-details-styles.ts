@@ -4,17 +4,15 @@ import Colors from '@/styles/colors';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.background,
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 140,
-  },
+
+  /** LOADING / ERROR **/
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: Colors.background,
   },
   loadingText: {
     marginTop: 12,
@@ -26,6 +24,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: Colors.background,
   },
   errorTitle: {
     color: '#991b1b',
@@ -40,156 +39,161 @@ export const styles = StyleSheet.create({
     fontFamily: 'Lato',
   },
   retryButton: {
-    backgroundColor: '#58ad85',
+    backgroundColor: Colors.primaryGreen,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: 'white',
+    color: Colors.white,
     fontWeight: '600',
     fontFamily: 'LatoBold',
   },
 
-  // Location section
+  /** HEADER **/
+  header: {
+    backgroundColor: Colors.white,
+    paddingTop: 50,
+    paddingBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+    top: 54,
+    padding: 4,
+  },
+  backArrow: {
+    fontSize: 22,
+    color: Colors.black,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'LatoBold',
+    color: Colors.black,
+    lineHeight: 28,
+  },
+
+  /** WHITE CONTENT CARD **/
+  contentCard: {
+    backgroundColor: Colors.white,
+    marginTop: 0,
+    paddingHorizontal: 19,
+    paddingTop: 28,
+    paddingBottom: 120,
+    flex: 1,
+  },
+
+  /** LOCATION SECTION **/
   locationSection: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-    paddingBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    alignItems: 'flex-start',
+    marginBottom: 28,
+    gap: 14,
   },
   locationIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 20,
-    tintColor: '#000',
-  },
-  sectionIcon: {
-    marginTop: 4,
-    marginRight: 16,
-  },
-  rowIcon: {
-    marginRight: 16,
-    marginTop: 1,
+    fontSize: 24,
+    marginTop: 2,
   },
   locationContent: {
     flex: 1,
   },
   locationTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: 'LatoBold',
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 8,
+    color: Colors.black,
+    lineHeight: 24,
+    marginBottom: 6,
   },
   locationAddress: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Lato',
-    color: '#525454',
-    marginBottom: 16,
+    fontWeight: '600',
+    color: Colors.dateGray,
+    marginBottom: 12,
   },
-  openMapsButton: {
-    backgroundColor: Colors.jasmine,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  openMapsButtonText: {
-    color: '#FFFFFF',
-    fontFamily: 'LatoBold',
-    fontSize: 14,
-  },
-
-  // Info section
-  infoSection: {
-    marginBottom: 24,
-    paddingBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  infoRow: {
+  openMapsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
-  infoIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 20,
-    tintColor: '#525454',
+  openMapsText: {
+    fontSize: 13,
+    fontFamily: 'Lato',
+    fontWeight: '500',
+    color: Colors.black,
+    textDecorationLine: 'underline',
   },
-  infoContent: {
+
+  /** SEPARATOR **/
+  separator: {
+    height: 1,
+    backgroundColor: Colors.missedGray,
+    marginBottom: 20,
+  },
+
+  /** SCHEDULE SECTION **/
+  scheduleSection: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    gap: 14,
+  },
+  scheduleIcon: {
+    width: 26,
+    height: 25,
+    tintColor: '#D9D9D9',
+    marginTop: 2,
+  },
+  scheduleContent: {
     flex: 1,
   },
-  infoLabel: {
-    fontSize: 14,
+  scheduleLabel: {
+    fontSize: 15,
     fontFamily: 'LatoBold',
-    color: '#525454',
+    color: Colors.black,
     marginBottom: 4,
   },
-  infoValue: {
-    fontSize: 14,
+  scheduleValue: {
+    fontSize: 13,
     fontFamily: 'Lato',
-    color: '#000',
-    flexWrap: 'wrap',
+    fontWeight: '500',
+    color: Colors.dateGray,
   },
 
-  // Contact section
+  /** CONTACT SECTION **/
   contactSection: {
-    marginBottom: 0,
-    paddingBottom: 28,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  contactRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    gap: 14,
   },
   contactIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 20,
-    tintColor: '#525454',
+    fontSize: 22,
+    marginTop: 2,
   },
   contactContent: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  contactInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  contactLabel: {
-    fontSize: 12,
-    fontFamily: 'Lato',
-    color: '#696969',
-  },
-  contactValue: {
-    fontSize: 14,
-    fontFamily: 'LatoBold',
-    color: '#000',
   },
   contactName: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'LatoBold',
-    fontWeight: '600',
-    color: '#000',
+    color: Colors.black,
+    marginBottom: 4,
   },
   contactPhone: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: 'Lato',
-    color: '#525454',
-  },
-  contactEmail: {
-    fontSize: 15,
-    fontFamily: 'Lato',
-    color: '#58ad85',
-    textDecorationLine: 'underline',
+    fontWeight: '500',
+    color: Colors.dateGray,
+    marginBottom: 8,
   },
   contactActions: {
     flexDirection: 'row',
@@ -198,84 +202,67 @@ export const styles = StyleSheet.create({
   actionButton: {
     width: 44,
     height: 36,
-    backgroundColor: Colors.jasmine,
+    backgroundColor: Colors.primaryGreen,
     borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#FFFFFF',
-  },
 
-  // Description section
-  descriptionSection: {
-    marginTop: 24,
-  },
-  descriptionTitle: {
-    fontSize: 17,
-    fontFamily: 'LatoBold',
-    color: '#000',
-    marginBottom: 20,
-  },
-  descriptionRow: {
-    marginBottom: 12,
-  },
-  descriptionLabel: {
-    fontSize: 13,
-    fontFamily: 'Lato',
-    color: '#696969',
-    marginBottom: 4,
-  },
-  descriptionValue: {
-    fontSize: 14,
-    fontFamily: 'Lato',
-    color: '#000',
-  },
-
-  // Success banner
-  successBanner: {
+  /** EMAIL SECTION **/
+  emailSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#D4F4E4',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 20,
-    borderRadius: 8,
+    marginBottom: 28,
+    gap: 14,
   },
-  successIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 8,
-    tintColor: '#059669',
+  emailIcon: {
+    fontSize: 20,
+    color: '#4D1B1B',
   },
-  successText: {
-    fontSize: 14,
-    fontFamily: 'LatoBold',
-    color: '#059669',
-  },
-  undoButton: {
-    marginLeft: 'auto',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  undoText: {
-    fontSize: 12,
+  emailText: {
+    fontSize: 13,
     fontFamily: 'Lato',
-    color: '#059669',
-    textDecorationLine: 'underline',
+    fontWeight: '500',
+    color: Colors.dateGray,
   },
 
-  // Bottom button
+  /** DESCRIPTION SECTION **/
+  descriptionSection: {
+    marginBottom: 24,
+  },
+  descriptionTitle: {
+    fontSize: 15,
+    fontFamily: 'Lato',
+    color: Colors.black,
+    marginBottom: 24,
+  },
+  descriptionRow: {
+    marginBottom: 24,
+  },
+  descriptionLabel: {
+    fontSize: 14,
+    fontFamily: 'Lato',
+    fontWeight: '500',
+    color: '#132429',
+    lineHeight: 14,
+    marginBottom: 6,
+  },
+  descriptionValue: {
+    fontSize: 13,
+    fontFamily: 'Lato',
+    color: '#4B5558',
+  },
+
+  /** BOTTOM BUTTON **/
   bottomContainer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
+    paddingHorizontal: 13,
     paddingVertical: 16,
+    paddingBottom: 40,
+    backgroundColor: Colors.white,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -283,101 +270,38 @@ export const styles = StyleSheet.create({
         shadowRadius: 10,
         shadowOffset: { width: 0, height: -4 },
       },
-      android: {
-        elevation: 10,
-      },
+      android: { elevation: 10 },
     }),
   },
   claimButton: {
-    backgroundColor: Colors.jasmine,
-    paddingVertical: 16,
-    borderRadius: 10,
+    backgroundColor: Colors.primaryGreen,
+    height: 47,
+    borderRadius: 4,
     alignItems: 'center',
-  },
-  claimButtonText: {
-    fontSize: 16,
-    fontFamily: 'LatoBold',
-    color: '#FFFFFF',
-  },
-  claimButtonDisabled: {
-    backgroundColor: '#E5E5E5',
-  },
-  claimButtonTextDisabled: {
-    color: '#999',
-  },
-  progressButton: {
-    backgroundColor: '#D4F4E4',
-    paddingVertical: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
     justifyContent: 'center',
   },
-  progressButtonText: {
-    fontSize: 16,
+  claimButtonText: {
+    fontSize: 14,
     fontFamily: 'LatoBold',
-    color: '#059669',
+    color: Colors.white,
   },
-
-  // Map modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 34,
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#D1D5DB',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: 'LatoBold',
-    color: '#000',
-    marginBottom: 20,
-  },
-  modalOption: {
+  progressButton: {
+    backgroundColor: Colors.filterGray,
+    height: 47,
+    borderRadius: 4,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    justifyContent: 'center',
+    gap: 4,
   },
-  modalOptionIcon: {
+  progressButtonText: {
+    fontSize: 14,
+    fontFamily: 'LatoBold',
+    color: Colors.white,
+  },
+  progressIcon: {
     width: 24,
     height: 24,
-    marginRight: 16,
-    tintColor: '#525454',
-    marginTop: 1,
-  },
-  modalOptionText: {
-    fontSize: 16,
-    fontFamily: 'Lato',
-    color: '#000',
-    flex: 1,
-  },
-  modalCancelButton: {
-    marginTop: 20,
-    paddingVertical: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
-    alignItems: 'center',
-  },
-  modalCancelText: {
-    fontSize: 16,
-    fontFamily: 'LatoBold',
-    color: '#525454',
+    tintColor: Colors.white,
   },
 });

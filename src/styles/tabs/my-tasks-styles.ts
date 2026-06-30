@@ -1,166 +1,81 @@
 import { StyleSheet } from 'react-native';
+import Colors from '@/styles/colors';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ECEFF0',
+    backgroundColor: Colors.background,
   },
 
-  /** HEADER **/
-  headerContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 22,
-    paddingTop: 58,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#D8E0E9',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 10,
-    elevation: 4,
-    fontFamily: 'Lato',
-  },
-  headerTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  /** WHITE HEADER (fixed) **/
+  header: {
+    backgroundColor: Colors.white,
+    paddingTop: 56,
+    paddingBottom: 0,
   },
   date: {
     fontSize: 15,
-    color: '#525454',
+    color: Colors.dateGray,
     fontFamily: 'Lato',
-  },
-  avatarCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#aeddc4',
-    borderWidth: 2,
-    borderColor: '#3ea377',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarLetter: {
-    fontSize: 16,
-    color: '#3EA377',
-    fontWeight: '600',
-    fontFamily: 'LatoBold',
+    marginBottom: 7,
+    marginHorizontal: 21,
   },
   greeting: {
-    color: '#427B60',
-    textAlign: 'left',
-    fontFamily: 'LatoBold',
     fontSize: 27,
-    height: 32,
+    color: Colors.secondaryGreen,
+    fontFamily: 'LatoBold',
+    marginBottom: 10,
+    marginHorizontal: 21,
   },
   subtext: {
-    textAlign: 'left',
-    color: '#2D8A60',
     fontSize: 15,
-    marginTop: 12,
+    color: Colors.cardTitle,
     fontFamily: 'Lato',
-  },
-  bold: {
     fontWeight: '600',
+    lineHeight: 21,
+    marginHorizontal: 21,
+    marginBottom: 4,
+  },
+  subtextBold: {
+    fontSize: 16,
+    fontFamily: 'LatoBlack',
+    color: Colors.secondaryGreen,
   },
 
-  /** TASK SECTION **/
-  taskSection: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
+  /** SCROLLABLE CONTENT **/
+  scrollContent: {
+    flexGrow: 1,
     paddingBottom: 32,
   },
-  sectionHeader: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#939393',
-    marginBottom: 10,
-    fontFamily: 'Lato',
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+
+  /** FILTER ROW **/
+  filterRow: {
     flexDirection: 'row',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.07,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  cardAccent: {
-    width: 5,
-    backgroundColor: '#71C79F',
-    alignSelf: 'center',
-    height: '60%',
-    borderTopLeftRadius: 18,
-    borderBottomLeftRadius: 18,
-  },
-  cardContent: {
-    flex: 1,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#151515',
-    marginBottom: 6,
-    fontFamily: 'Lato',
-  },
-  cardAddress: {
-    color: '#969696',
-    fontSize: 15,
-    marginBottom: 8,
-    fontFamily: 'Lato',
-  },
-  cardTime: {
-    color: '#000000',
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 16,
-    fontFamily: 'Lato',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  button: {
-    flex: 1,
-    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 36,
+    paddingHorizontal: 21,
+    paddingTop: 16,
+    paddingBottom: 8,
+    gap: 8,
   },
-  buttonText: {
-    fontSize: 12,
-    fontWeight: '700',
+  filterText: {
+    fontSize: 13,
     fontFamily: 'LatoBold',
-    textAlign: 'center',
-    color: '#58AD85',
+    color: Colors.filterGray,
+    textTransform: 'uppercase',
   },
-  buttonOutline: {
-    borderWidth: 1,
-    borderColor: '#59AF84',
-    backgroundColor: '#FFFFFF',
+
+  /** TASK CARDS CONTAINER **/
+  taskListContainer: {
+    paddingHorizontal: 20,
   },
-  buttonOutlineText: {
-    color: '#3C7A59',
-  },
-  buttonFilled: {
-    backgroundColor: '#71C79F',
-    borderRadius: 12,
-  },
-  buttonFilledText: {
-    color: '#FFFFFF',
-  },
+
+  /** EMPTY STATE **/
   emptyStateContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 60,
-    marginTop: 70,
+    marginTop: 20,
   },
   emptyIcon: {
     width: 115,
@@ -178,7 +93,7 @@ const styles = StyleSheet.create({
     height: 41,
     paddingHorizontal: 32,
     borderRadius: 10,
-    backgroundColor: '#58AD85',
+    backgroundColor: Colors.primaryGreen,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
@@ -189,11 +104,29 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   emptyButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontWeight: '700',
     fontSize: 16,
     fontFamily: 'LatoBold',
     textAlign: 'center',
+  },
+
+  /** ERROR **/
+  errorContainer: {
+    backgroundColor: '#fee2e2',
+    padding: 12,
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 8,
+    borderRadius: 8,
+  },
+  errorText: {
+    color: '#991b1b',
+  },
+  errorHint: {
+    color: '#6b7280',
+    marginTop: 4,
+    fontSize: 12,
   },
 });
 
