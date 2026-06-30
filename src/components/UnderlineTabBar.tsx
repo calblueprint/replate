@@ -92,10 +92,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     marginHorizontal: 35,
-    marginBottom: 16,
-    borderRadius: 8,
-    gap: 32,
     position: 'relative',
+    justifyContent: 'space-between',
   },
   tab: {
     paddingVertical: 10,

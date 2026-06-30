@@ -50,27 +50,6 @@ interface TaskDetails {
   tray_count?: number | null;
 }
 
-const MOCK_TASK: TaskDetails = {
-  id: 1,
-  pickup_date: '2026-02-04',
-  start_time: '13:00',
-  end_time: '16:00',
-  location_name: 'Rockridge Cafe',
-  address: {
-    number: '5492',
-    street: 'College Ave',
-    city: 'Oakland',
-    state: 'CA',
-    zip: '94618',
-  },
-  location: { comments: 'Call when you arrive -- ask for manager on duty' },
-  contact_name: 'Davina Chan',
-  contact_phone: '669-222-7878',
-  contact_email: 'rockridgecafehere@gmail.com',
-  tray_type: 'Sandwiches & Salad',
-  tray_count: 15,
-};
-
 function parseHM(ts: string): { h: number; m: number } | null {
   const s = ts.trim();
   if (s.includes('UTC')) {
@@ -178,7 +157,7 @@ export default function PickupDetails() {
 
         if (!cancelled) setTask(taskData);
       } catch {
-        if (!cancelled) setTask(MOCK_TASK);
+        if (!cancelled) setErr('Failed to load pickup details');
       } finally {
         if (!cancelled) setIsLoading(false);
       }

@@ -1,7 +1,5 @@
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Colors from '@/styles/colors';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -9,54 +7,25 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
 
-  /** HEADER WAVE **/
-  headerWave: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: screenWidth,
-    height: 200,
-  },
-
-  /** PROFILE ICON **/
-  profileCircle: {
-    position: 'absolute',
-    top: 71,
-    right: 22,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.profileBg,
-    borderWidth: 2,
-    borderColor: Colors.primaryGreen,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-  profileLetter: {
-    fontSize: 12,
-    color: Colors.primaryGreen,
-    fontFamily: 'Lato',
-  },
-
-  /** WELCOME SECTION **/
-  welcomeSection: {
-    paddingHorizontal: 21,
-    paddingTop: 70,
-    marginBottom: 12,
-    zIndex: 1,
+  /** WHITE HEADER (fixed) **/
+  header: {
+    backgroundColor: Colors.white,
+    paddingTop: 56,
+    paddingBottom: 0,
   },
   date: {
     fontSize: 15,
     color: Colors.dateGray,
     fontFamily: 'Lato',
     marginBottom: 7,
+    marginHorizontal: 21,
   },
   greeting: {
     fontSize: 27,
     color: Colors.secondaryGreen,
     fontFamily: 'LatoBold',
     marginBottom: 10,
+    marginHorizontal: 21,
   },
   subtext: {
     fontSize: 15,
@@ -64,26 +33,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Lato',
     fontWeight: '600',
     lineHeight: 21,
+    marginHorizontal: 21,
+    marginBottom: 4,
   },
   subtextBold: {
     fontSize: 16,
-    fontFamily: 'LatoBold',
-    fontWeight: '800',
+    fontFamily: 'LatoBlack',
     color: Colors.secondaryGreen,
+  },
+
+  /** SCROLLABLE CONTENT **/
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
   },
 
   /** FILTER ROW **/
   filterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 25,
-    marginBottom: 16,
+    paddingHorizontal: 21,
+    paddingTop: 16,
+    paddingBottom: 8,
     gap: 8,
-  },
-  filterIcon: {
-    width: 12,
-    height: 12,
-    tintColor: Colors.filterGray,
   },
   filterText: {
     fontSize: 13,
@@ -95,7 +67,6 @@ const styles = StyleSheet.create({
   /** TASK CARDS CONTAINER **/
   taskListContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 32,
   },
 
   /** EMPTY STATE **/
@@ -104,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 60,
-    marginTop: 40,
+    marginTop: 20,
   },
   emptyIcon: {
     width: 115,
@@ -145,7 +116,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fee2e2',
     padding: 12,
     marginHorizontal: 20,
-    marginBottom: 16,
+    marginTop: 16,
+    marginBottom: 8,
     borderRadius: 8,
   },
   errorText: {
@@ -155,18 +127,6 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginTop: 4,
     fontSize: 12,
-  },
-
-  /** LOADING **/
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-  },
-  loadingText: {
-    marginTop: 12,
-    color: '#6b7280',
   },
 });
 

@@ -17,7 +17,8 @@ export const myAccountStyles = StyleSheet.create({
   profileHeader: {
     alignItems: 'center',
     paddingTop: 38,
-    paddingBottom: 20,
+    paddingBottom: 28,
+    backgroundColor: Colors.background,
   },
   avatar: {
     width: 72,
@@ -30,30 +31,25 @@ export const myAccountStyles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarText: {
-    fontSize: 30,
+    fontSize: 28,
     fontFamily: REGULAR,
     color: Colors.primaryGreen,
   },
   nameDisplay: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: REGULAR,
     textAlign: 'center',
     color: Colors.black,
-    marginTop: 10,
+    marginTop: 12,
+    textTransform: 'capitalize',
   },
 
   /** WHITE CARD AREA **/
   formCard: {
     backgroundColor: Colors.white,
-    marginTop: 20,
     paddingHorizontal: 24,
-    paddingTop: 30,
+    paddingTop: 28,
     paddingBottom: 40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
     flex: 1,
   },
 
@@ -65,59 +61,33 @@ export const myAccountStyles = StyleSheet.create({
     marginBottom: 0,
   },
   fieldLabel: {
-    fontSize: 15,
+    fontSize: 12,
     fontFamily: BOLD,
     color: Colors.secondaryGreen,
     textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    gap: 19,
-  },
-  nameFieldBox: {
-    flex: 1,
-    borderWidth: 0.7,
-    borderColor: Colors.black,
-    borderRadius: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-  },
-  fieldBox: {
-    borderWidth: 0.7,
-    borderColor: Colors.black,
-    borderRadius: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
+    marginBottom: 6,
   },
   fieldText: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: REGULAR,
-    fontWeight: '500',
     color: Colors.black,
-    lineHeight: 16,
+    lineHeight: 22,
   },
-  npoText: {
-    fontSize: 17,
-    fontFamily: REGULAR,
-    fontWeight: '500',
-    color: Colors.black,
-    lineHeight: 20,
+  fieldTextCapitalize: {
+    textTransform: 'capitalize',
   },
 
   /** LOGOUT BUTTON **/
   logoutButton: {
     backgroundColor: Colors.primaryGreen,
-    paddingVertical: 13,
+    paddingVertical: 16,
     borderRadius: 10,
     alignItems: 'center',
-    marginHorizontal: 24,
     marginTop: 40,
   },
   logoutButtonText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '800',
-    lineHeight: 30,
+    fontFamily: 'LatoBlack',
   },
 });

@@ -65,9 +65,15 @@ function DayItem({
     >
       <ScalePress onPress={onPress} scaleValue={0.9}>
         <Animated.View style={[styles.dayItem, animatedStyle]}>
-          <Text style={styles.monthText}>{month}</Text>
-          <Text style={styles.weekdayText}>{weekday}</Text>
-          <Text style={styles.dayNumber}>{day}</Text>
+          <Text style={[styles.monthText, isSelected && styles.selectedText]}>
+            {month}
+          </Text>
+          <Text style={[styles.dayNumber, isSelected && styles.selectedText]}>
+            {day}
+          </Text>
+          <Text style={[styles.weekdayText, isSelected && styles.selectedText]}>
+            {weekday}
+          </Text>
         </Animated.View>
       </ScalePress>
     </Animated.View>
@@ -145,18 +151,21 @@ const styles = StyleSheet.create({
   monthText: {
     fontSize: 10,
     fontFamily: 'LatoBold',
-    color: Colors.black,
+    color: Colors.dateGray,
+    marginBottom: 2,
+  },
+  dayNumber: {
+    fontSize: 18,
+    fontFamily: 'LatoBold',
+    color: Colors.secondaryGreen,
     marginBottom: 2,
   },
   weekdayText: {
     fontSize: 10,
     fontFamily: 'LatoBold',
-    color: Colors.black,
-    marginBottom: 4,
+    color: Colors.dateGray,
   },
-  dayNumber: {
-    fontSize: 18,
-    fontFamily: 'LatoBold',
+  selectedText: {
     color: Colors.secondaryGreen,
   },
 });

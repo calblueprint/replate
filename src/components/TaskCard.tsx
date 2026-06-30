@@ -20,6 +20,7 @@ interface TaskCardProps {
   index: number;
   onPress: () => void;
   onLongPress?: () => void;
+  onAddDetails?: () => void;
 }
 
 const STATUS_CONFIG: Record<
@@ -27,51 +28,63 @@ const STATUS_CONFIG: Record<
   {
     accentColor: string;
     badgeText: string | null;
+    badgeBg: string;
     badgeColor: string;
     timeColor: string;
     dotColor: string;
-    viewDetailsBg: string;
+    actionBg: string;
+    actionText: string;
   }
 > = {
   active: {
     accentColor: Colors.primaryGreen,
     badgeText: null,
+    badgeBg: 'transparent',
     badgeColor: 'transparent',
     timeColor: Colors.secondaryGreen,
     dotColor: Colors.primaryGreen,
-    viewDetailsBg: Colors.primaryGreen,
+    actionBg: Colors.primaryGreen,
+    actionText: 'Add Details',
   },
   overdue: {
     accentColor: Colors.overdueYellow,
     badgeText: 'Overdue',
+    badgeBg: '#FEFCE8',
     badgeColor: Colors.overdueYellow,
     timeColor: Colors.overdueYellow,
     dotColor: Colors.overdueYellow,
-    viewDetailsBg: Colors.overdueYellow,
+    actionBg: Colors.overdueYellow,
+    actionText: 'Add Details',
   },
   missing: {
     accentColor: Colors.missingRed,
     badgeText: 'Missing',
+    badgeBg: '#FEF2F2',
     badgeColor: Colors.missingRed,
     timeColor: Colors.missingRed,
     dotColor: Colors.missingRed,
-    viewDetailsBg: Colors.missingRed,
+    actionBg: Colors.missingRed,
+    actionText: 'Add Details',
   },
   completed: {
     accentColor: Colors.primaryGreen,
-    badgeText: 'Completed',
-    badgeColor: Colors.dateGray,
+    badgeText: 'Complete',
+    badgeBg: Colors.profileBg,
+    badgeColor: Colors.secondaryGreen,
     timeColor: Colors.secondaryGreen,
     dotColor: Colors.primaryGreen,
-    viewDetailsBg: Colors.primaryGreen,
+    actionBg: Colors.primaryGreen,
+    actionText: 'View Details',
   },
   missed: {
     accentColor: Colors.missedGray,
     badgeText: 'Missed',
-    badgeColor: Colors.dateGray,
-    timeColor: Colors.dateGray,
+    badgeBg: Colors.background,
+    badgeColor: Colors.slateGray,
+    timeColor: Colors.filterGray,
     dotColor: Colors.missedGray,
-    viewDetailsBg: Colors.missedGray,
+    actionBg: Colors.missedGray,
+    actionText: 'View Details',
   },
 };
 
@@ -84,6 +97,7 @@ export default function TaskCard({
   index,
   onPress,
   onLongPress,
+  onAddDetails,
 }: TaskCardProps) {
   const config = STATUS_CONFIG[status];
   const isFinished = status === 'completed' || status === 'missed';
@@ -98,15 +112,17 @@ export default function TaskCard({
     return timeRange;
   })();
 
+  const handleActionPress = isFinished ? onPress : (onAddDetails ?? onPress);
+
   const cardInner = (
-    <View style={[styles.card, isFinished && styles.cardFinished]}>
+    <View style={styles.card}>
       {/* Left accent bar */}
       <View
         style={[styles.accentBar, { backgroundColor: config.accentColor }]}
       />
 
       <View style={styles.cardBody}>
-        {/* Top row: time info + badge */}
+        {/* Top row: time info + badge pill */}
         <View style={styles.topRow}>
           <View style={styles.timeRow}>
             <View style={[styles.dot, { backgroundColor: config.dotColor }]} />
@@ -122,9 +138,11 @@ export default function TaskCard({
             </Text>
           </View>
           {config.badgeText && (
-            <Text style={[styles.badge, { color: config.badgeColor }]}>
-              {config.badgeText}
-            </Text>
+            <View style={[styles.badge, { backgroundColor: config.badgeBg }]}>
+              <Text style={[styles.badgeText, { color: config.badgeColor }]}>
+                {config.badgeText}
+              </Text>
+            </View>
           )}
         </View>
 
@@ -138,28 +156,14 @@ export default function TaskCard({
           {address}
         </Text>
 
-        {/* Finished cards: View Details button */}
-        {isFinished && (
-          <Pressable
-            style={[
-              styles.viewDetailsBtn,
-              { backgroundColor: config.viewDetailsBg },
-            ]}
-            onPress={onPress}
-          >
-            <Text style={styles.viewDetailsBtnText}>View Details</Text>
-          </Pressable>
-        )}
+        {/* Action button */}
+        <Pressable
+          style={[styles.actionBtn, { backgroundColor: config.actionBg }]}
+          onPress={handleActionPress}
+        >
+          <Text style={styles.actionBtnText}>{config.actionText}</Text>
+        </Pressable>
       </View>
-
-      {/* Active cards: arrow on right */}
-      {!isFinished && (
-        <View style={styles.arrowContainer}>
-          <Text style={[styles.arrow, { color: config.accentColor }]}>
-            {'\u203A'}
-          </Text>
-        </View>
-      )}
     </View>
   );
 
@@ -191,23 +195,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     flexDirection: 'row',
     marginBottom: 24,
-    minHeight: 110,
-    overflow: 'hidden',
-  },
-  cardFinished: {
     minHeight: 131,
+    overflow: 'hidden',
   },
   accentBar: {
     width: 4,
     borderRadius: 20,
-    marginLeft: 14,
+    marginLeft: 18,
     marginVertical: 20,
   },
   cardBody: {
     flex: 1,
     paddingLeft: 12,
     paddingRight: 16,
-    paddingVertical: 16,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   topRow: {
     flexDirection: 'row',
@@ -234,8 +236,14 @@ const styles = StyleSheet.create({
     fontFamily: 'LatoBold',
   },
   badge: {
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+  },
+  badgeText: {
     fontSize: 12,
-    fontFamily: 'LatoBold',
+    fontFamily: 'Lato',
+    fontWeight: '600',
     lineHeight: 24,
   },
   title: {
@@ -252,26 +260,17 @@ const styles = StyleSheet.create({
     color: Colors.dateGray,
     lineHeight: 16,
   },
-  viewDetailsBtn: {
+  actionBtn: {
     borderRadius: 8,
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
   },
-  viewDetailsBtnText: {
+  actionBtnText: {
     color: Colors.white,
     fontSize: 12,
     fontFamily: 'LatoBold',
     lineHeight: 24,
-  },
-  arrowContainer: {
-    justifyContent: 'center',
-    paddingRight: 16,
-  },
-  arrow: {
-    fontSize: 28,
-    fontWeight: '300',
-    lineHeight: 28,
   },
 });

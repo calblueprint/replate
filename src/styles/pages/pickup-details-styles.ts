@@ -75,8 +75,8 @@ export const styles = StyleSheet.create({
     color: Colors.black,
   },
   headerTitle: {
-    fontSize: 24,
-    fontFamily: 'Lato',
+    fontSize: 20,
+    fontFamily: 'LatoBold',
     color: Colors.black,
     lineHeight: 28,
   },

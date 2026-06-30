@@ -1,14 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefreshControl, Text, View } from 'react-native';
-import Animated, {
-  FadeIn,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated';
+import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import headerWave from 'assets/header-wave.png';
+import elementIcon from 'assets/elements.png';
 import AvailableTaskCard from '@/components/AvailableTaskCard';
 import DayCarousel from '@/components/DayCarousel';
 import { AvailableListSkeleton } from '@/components/SkeletonLoader';
@@ -46,7 +39,6 @@ function formatTimeRange(
   if (!startTime || !endTime) return 'Time TBD';
 
   const parseTime = (timeStr: string) => {
-    // Handle "HH:MM" format
     if (/^\d{2}:\d{2}$/.test(timeStr)) {
       const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
       if (isNaN(hours) || isNaN(minutes)) return null;
@@ -55,7 +47,6 @@ function formatTimeRange(
       const displayMinutes = minutes.toString().padStart(2, '0');
       return `${displayHours}:${displayMinutes} ${ampm}`;
     }
-    // Handle full datetime strings
     const d = new Date(
       timeStr.includes('T') ? timeStr : `${dateISO}T${timeStr}`,
     );
@@ -145,66 +136,35 @@ export default function AvailablePickupsPage() {
   if (isLoading && tasks.length === 0) {
     return (
       <View style={styles.container}>
-        <Animated.Image
-          source={headerWave}
-          style={styles.headerWave}
-          resizeMode="cover"
-        />
-        <Animated.Text entering={FadeIn.duration(500)} style={styles.pageTitle}>
-          Today's Available Tasks
-        </Animated.Text>
+        <View style={styles.header}>
+          <Text style={styles.pageTitle}>Today's Available Tasks</Text>
+          <DayCarousel
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            dayCount={5}
+          />
+        </View>
         <AvailableListSkeleton count={4} />
       </View>
     );
   }
 
-  const scrollY = useSharedValue(0);
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: event => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
-  const headerStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(scrollY.value, [0, 200], [0, -60], 'clamp'),
-      },
-      {
-        scale: interpolate(scrollY.value, [-100, 0], [1.3, 1], 'clamp'),
-      },
-    ],
-  }));
-
-  const profileStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(scrollY.value, [0, 80], [1, 0], 'clamp'),
-    transform: [
-      {
-        translateY: interpolate(scrollY.value, [0, 80], [0, -20], 'clamp'),
-      },
-    ],
-  }));
-
   return (
     <View style={styles.container}>
-      {/* Header wave with parallax */}
-      <Animated.Image
-        source={headerWave}
-        style={[styles.headerWave, headerStyle]}
-        resizeMode="cover"
-      />
+      {/* Fixed white header */}
+      <View style={styles.header}>
+        <Text style={styles.pageTitle}>Today's Available Tasks</Text>
+        <DayCarousel
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          dayCount={5}
+        />
+      </View>
 
-      {/* Profile icon with fade */}
-      <Animated.View style={[styles.profileCircle, profileStyle]}>
-        <Text style={styles.profileLetter}>{driver?.first_name?.[0]}</Text>
-      </Animated.View>
-
-      <Animated.ScrollView
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
+      {/* Scrollable content */}
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -214,21 +174,8 @@ export default function AvailablePickupsPage() {
           />
         }
       >
-        {/* Page title */}
-        <Animated.Text entering={FadeIn.duration(500)} style={styles.pageTitle}>
-          Today's Available Tasks
-        </Animated.Text>
-
-        {/* Day carousel */}
-        <DayCarousel
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-        />
-
-        {/* Section title */}
         <Text style={styles.sectionTitle}>Available Pick-Ups</Text>
 
-        {/* Error */}
         {error && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
@@ -236,10 +183,9 @@ export default function AvailablePickupsPage() {
           </View>
         )}
 
-        {/* Task cards */}
-        <View style={styles.taskList}>
-          {filteredTasks.length > 0 ? (
-            filteredTasks.map((task, index) => (
+        {filteredTasks.length > 0 ? (
+          <View style={styles.taskList}>
+            {filteredTasks.map((task, index) => (
               <AvailableTaskCard
                 key={task.encrypted_id}
                 locationName={task.location_name ?? 'Unknown Location'}
@@ -257,16 +203,19 @@ export default function AvailablePickupsPage() {
                   })
                 }
               />
-            ))
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>
-                No pickups available for this date.
-              </Text>
-            </View>
-          )}
-        </View>
-      </Animated.ScrollView>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Image
+              source={elementIcon}
+              style={styles.emptyIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.emptyText}>There are no tasks today</Text>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }
