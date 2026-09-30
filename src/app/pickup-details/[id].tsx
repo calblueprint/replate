@@ -13,8 +13,8 @@ import {
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
-import Ionicons from "@react-native-vector-icons/ionicons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import dateIcon from 'assets/date.png';
 import DirectionsSheet from '@/components/DirectionsSheet';
 import TaskNotification from '@/components/TaskNotification';
