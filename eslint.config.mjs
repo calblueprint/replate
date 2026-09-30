@@ -8,6 +8,7 @@ export default [
   ...tsEslint.configs.recommended,
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
+    ignores: ['vendor/'],
     plugins: {
       prettier: eslintPluginPrettier,
     },

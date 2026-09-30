@@ -116,7 +116,7 @@ export default function ConfirmationModal({
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: Colors.overlayGray,
   },
   centerContainer: {
