@@ -107,7 +107,7 @@ export default function QuickActionsSheet({
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: Colors.overlayGray,
   },
   sheet: {

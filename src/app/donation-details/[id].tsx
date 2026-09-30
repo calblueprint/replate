@@ -13,15 +13,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import dateIcon from 'assets/date.png';
+import RequiredInput from '@/components/RequiredInput/RequiredInput';
+import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
 import {
   getPartners,
   getTask,
   submitCompletionDetails,
   submitTaskMissed,
-} from 'api/config';
-import dateIcon from 'assets/date.png';
-import RequiredInput from '@/components/RequiredInput/RequiredInput';
-import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
+} from '~/api/config';
 import PhotoUpload from '../../components/PhotoUpload/PhotoUpload';
 import { styles } from '../../styles/pages/donation-details-styles';
 
