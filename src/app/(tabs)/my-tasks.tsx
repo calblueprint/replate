@@ -1,6 +1,7 @@
 import type { TaskStatus } from '@/components/TaskCard';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   Image,
   Pressable,
   RefreshControl,
@@ -21,6 +22,7 @@ import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import styles from '../../styles/tabs/my-tasks-styles';
 import { useAuth } from '../../utils/AuthContext';
+import { deriveTaskStatus } from '../../utils/taskStatus';
 
 interface Task {
   id: number;
@@ -93,20 +95,6 @@ function formatAddress(task: Task): string {
   return 'Address details in app';
 }
 
-function deriveTaskStatus(task: Task): TaskStatus {
-  if (task.status === 'complete' || task.completed_at) return 'completed';
-  if (task.status === 'failed') return 'missed';
-  if (task.status === 'in_progress') return 'active';
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const pickupDate = new Date(task.pickup_date);
-  pickupDate.setHours(0, 0, 0, 0);
-
-  if (pickupDate < today) return 'overdue';
-  return 'active';
-}
-
 function formatStatusDate(task: Task): string | undefined {
   const dateStr = task.completed_at ?? task.missed_at;
   if (!dateStr) return undefined;
@@ -122,6 +110,7 @@ export default function MyTasksPage() {
   const router = useRouter();
   const { driver } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [now, setNow] = useState(() => new Date());
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,7 +149,13 @@ export default function MyTasksPage() {
           ),
         ]);
 
-        setTasks([...activeTasks, ...historyTasks]);
+        setTasks(
+          Array.from(
+            new Map(
+              [...activeTasks, ...historyTasks].map(task => [task.id, task]),
+            ).values(),
+          ),
+        );
       } catch (e: unknown) {
         const errorMessage =
           e instanceof ApiError ? e.message : 'Failed to load tasks';
@@ -176,6 +171,16 @@ export default function MyTasksPage() {
   useFocusEffect(
     useCallback(() => {
       fetchTasks();
+      const updateClock = () => setNow(new Date());
+      updateClock();
+      const timer = setInterval(updateClock, 1000);
+      const subscription = AppState.addEventListener('change', state => {
+        if (state === 'active') updateClock();
+      });
+      return () => {
+        clearInterval(timer);
+        subscription.remove();
+      };
     }, [fetchTasks]),
   );
 
@@ -184,15 +189,15 @@ export default function MyTasksPage() {
     fetchTasks(true);
   }, [fetchTasks]);
 
-  const { activeTasks, completedTasks, activeCount } = useMemo(() => {
+  const { activeTasks, historyTasks, activeCount } = useMemo(() => {
     const active: (Task & { derivedStatus: TaskStatus })[] = [];
-    const completed: (Task & { derivedStatus: TaskStatus })[] = [];
+    const history: (Task & { derivedStatus: TaskStatus })[] = [];
 
     for (const task of tasks) {
-      const status = deriveTaskStatus(task);
+      const status = deriveTaskStatus(task, now);
       const enriched = { ...task, derivedStatus: status };
       if (status === 'completed' || status === 'missed') {
-        completed.push(enriched);
+        history.push(enriched);
       } else {
         active.push(enriched);
       }
@@ -200,12 +205,12 @@ export default function MyTasksPage() {
 
     return {
       activeTasks: active,
-      completedTasks: completed,
+      historyTasks: history,
       activeCount: active.length,
     };
-  }, [tasks]);
+  }, [tasks, now]);
 
-  const displayedTasks = activeTab === 'active' ? activeTasks : completedTasks;
+  const displayedTasks = activeTab === 'active' ? activeTasks : historyTasks;
 
   const handleCardPress = useCallback(
     (task: Task) => {
@@ -335,7 +340,7 @@ export default function MyTasksPage() {
               key: 'active',
               label: activeCount > 0 ? `Active (${activeCount})` : 'Active',
             },
-            { key: 'completed', label: 'Completed' },
+            { key: 'history', label: 'History' },
           ]}
           activeKey={activeTab}
           onChange={setActiveTab}
@@ -393,7 +398,7 @@ export default function MyTasksPage() {
             <Text style={styles.emptyTitle}>
               {activeTab === 'active'
                 ? 'You have no active tasks'
-                : 'No completed tasks yet'}
+                : 'No task history yet'}
             </Text>
             {activeTab === 'active' && (
               <TouchableOpacity

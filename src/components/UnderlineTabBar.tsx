@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from 'react';
-import { LayoutChangeEvent, Pressable, StyleSheet, Text } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -26,47 +26,38 @@ export default function UnderlineTabBar({
   activeKey,
   onChange,
 }: UnderlineTabBarProps) {
-  const tabLayouts = useSharedValue<
-    Record<string, { x: number; width: number }>
-  >({});
-  const underlineX = useSharedValue(0);
-  const underlineWidth = useSharedValue(0);
-
-  const handleLayout = useCallback(
-    (key: string) => (e: LayoutChangeEvent) => {
-      const { x, width } = e.nativeEvent.layout;
-      tabLayouts.value = { ...tabLayouts.value, [key]: { x, width } };
-
-      if (key === activeKey) {
-        underlineX.value = withSpring(x, SPRING_CONFIG);
-        underlineWidth.value = withSpring(width, SPRING_CONFIG);
-      }
-    },
-    [activeKey, tabLayouts, underlineX, underlineWidth],
+  const containerWidth = useSharedValue(0);
+  const tabCount = Math.max(tabs.length, 1);
+  const activeIndex = Math.max(
+    tabs.findIndex(tab => tab.key === activeKey),
+    0,
   );
 
-  useEffect(() => {
-    const layout = tabLayouts.value[activeKey];
-    if (layout) {
-      underlineX.value = withSpring(layout.x, SPRING_CONFIG);
-      underlineWidth.value = withSpring(layout.width, SPRING_CONFIG);
-    }
-  }, [activeKey, tabLayouts, underlineX, underlineWidth]);
-
   const underlineStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: underlineX.value }],
-    width: underlineWidth.value,
+    transform: [
+      {
+        translateX: withSpring(
+          (containerWidth.value / tabCount) * activeIndex,
+          SPRING_CONFIG,
+        ),
+      },
+    ],
   }));
 
   return (
-    <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
+    <Animated.View
+      entering={FadeIn.duration(300)}
+      style={styles.container}
+      onLayout={event => {
+        containerWidth.value = event.nativeEvent.layout.width;
+      }}
+    >
       {tabs.map(tab => {
         const isActive = tab.key === activeKey;
         return (
           <Pressable
             key={tab.key}
             style={styles.tab}
-            onLayout={handleLayout(tab.key)}
             onPress={() => onChange(tab.key)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
@@ -83,7 +74,14 @@ export default function UnderlineTabBar({
       })}
 
       {/* Sliding underline */}
-      <Animated.View style={[styles.underline, underlineStyle]} />
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.underline,
+          { width: `${100 / tabCount}%` },
+          underlineStyle,
+        ]}
+      />
     </Animated.View>
   );
 }
@@ -93,19 +91,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 35,
     position: 'relative',
-    justifyContent: 'space-between',
   },
   tab: {
+    flex: 1,
+    alignItems: 'center',
     paddingVertical: 10,
   },
   underline: {
     position: 'absolute',
+    left: 0,
     bottom: 0,
     height: 2,
     backgroundColor: Colors.primaryGreen,
     borderRadius: 1,
   },
   tabLabel: {
+    textAlign: 'center',
     fontSize: 14,
     fontFamily: 'Lato',
     lineHeight: 20,
