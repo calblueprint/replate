@@ -14,6 +14,7 @@ import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import dateIcon from 'assets/date.png';
+import ConfirmationModal from '@/components/ConfirmationModal';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
 import {
@@ -54,6 +55,8 @@ export default function DonationLayout() {
   const [task, setTask] = useState<TaskPickupInfo | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [missedModalVisible, setMissedModalVisible] = useState(false);
   const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
 
   useEffect(() => {
@@ -146,10 +149,11 @@ export default function DonationLayout() {
       });
       Toast.show({ type: 'success', text1: 'Donation recorded!' });
       router.replace('/(tabs)/my-tasks');
-    } catch {
+    } catch (e) {
+      console.log(JSON.stringify(e));
       Toast.show({
         type: 'error',
-        text1: 'Could not save. Please try again.',
+        text1: `Could not save. Please try again.`,
       });
     } finally {
       setIsSubmitting(false);
@@ -167,7 +171,8 @@ export default function DonationLayout() {
         text2: `${params.location || 'Task'} marked as missed.`,
       });
       router.replace('/(tabs)/my-tasks');
-    } catch {
+    } catch (e) {
+      console.log(JSON.stringify(e));
       Toast.show({
         type: 'error',
         text1: 'Could not mark as missed. Please try again.',
@@ -275,7 +280,7 @@ export default function DonationLayout() {
             styles.missedButton,
             isSubmitting && styles.missedButtonDisabled,
           ]}
-          onPress={handleMissed}
+          onPress={() => setMissedModalVisible(true)}
           disabled={isSubmitting}
         >
           <Text
@@ -289,12 +294,28 @@ export default function DonationLayout() {
             styles.completeButton,
             (!isFormValid || isSubmitting) && styles.completeButtonDisabled,
           ]}
-          onPress={handleComplete}
+          onPress={() => setConfirmModalVisible(true)}
           disabled={!isFormValid || isSubmitting}
         >
           <Text style={[styles.completeText]}>Complete</Text>
         </TouchableOpacity>
       </View>
+
+      <ConfirmationModal
+        visible={confirmModalVisible}
+        title="Mark task as completed?"
+        subtitle="This action cannot be undone."
+        onBack={() => setConfirmModalVisible(false)}
+        onConfirm={handleComplete}
+      />
+
+      <ConfirmationModal
+        visible={missedModalVisible}
+        title="Mark task as missed?"
+        subtitle="This action cannot be undone."
+        onBack={() => setMissedModalVisible(false)}
+        onConfirm={handleMissed}
+      />
     </SafeAreaView>
   );
 }

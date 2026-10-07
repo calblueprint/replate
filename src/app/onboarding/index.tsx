@@ -45,6 +45,7 @@ export default function OnboardingFlow() {
 
         setPartners(safePartners);
       } catch (err) {
+        console.log(JSON.stringify(err));
         const errorMessage =
           err instanceof ApiError ? err.message : 'Failed to load partners';
         setError(errorMessage);
