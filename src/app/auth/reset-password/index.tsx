@@ -4,7 +4,6 @@ import {
   Image,
   Keyboard,
   ScrollView,
-  ScrollViewInstance,
   Text,
   TextInput,
   TouchableOpacity,
@@ -53,7 +52,7 @@ export default function ResetPasswordPage() {
   >(null);
   const [tokenError, setTokenError] = useState<string | null>(null);
 
-  const scrollViewRef = useRef<ScrollViewInstance>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
 
   // Focus states

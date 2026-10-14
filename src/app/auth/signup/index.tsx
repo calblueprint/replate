@@ -4,7 +4,6 @@ import {
   Image,
   Keyboard,
   ScrollView,
-  ScrollViewInstance,
   Text,
   TextInput,
   TouchableOpacity,
@@ -59,7 +58,7 @@ export default function SignupPage() {
     string | null
   >(null);
 
-  const scrollViewRef = useRef<ScrollViewInstance>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
 
   // Focus states
