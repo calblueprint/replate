@@ -25,7 +25,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/**/*"]
+          "fonts": [
+            "./assets/fonts/**/*"
+          ]
         }
       ],
       [
@@ -35,11 +37,14 @@
           "backgroundColor": "#ffffff",
           "imageWidth": 200
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "extra": {
       "EXPO_PUBLIC_BACKEND_URL": "http://localhost:3000"
     },
-    "assetBundlePatterns": ["**/*"]
+    "assetBundlePatterns": [
+      "**/*"
+    ]
   }
 }

@@ -4,30 +4,7 @@ allowBuilds:
   msw: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
-  - expo-constants@57.0.20
-  - expo-modules-core@57.0.20
-  - expo@57.0.26
-  - '@expo/ui@57.0.21'
-  - expo-router@57.0.24
+  - 'expo*'
+  - '@expo/*'
   - 2g@1.0.1
-  - '@expo/cli@58.1.8'
-  - '@expo/config-plugins@58.0.9'
-  - '@expo/config@58.0.6'
-  - '@expo/image-utils@0.12.5'
-  - '@expo/inline-modules@0.2.6'
-  - '@expo/local-build-cache-provider@58.0.6'
-  - '@expo/metro-config@58.0.13'
-  - '@expo/metro-file-map@58.0.5'
-  - '@expo/modules-macros-win32-arm64@0.20.0'
-  - '@expo/modules-macros-win32-x64@0.20.0'
-  - '@expo/prebuild-config@58.0.13'
-  - '@expo/require-utils@58.0.4'
-  - '@expo/router-server@58.0.13'
   - babel-preset-expo@58.0.14
-  - expo-asset@58.0.15
-  - expo-constants@58.0.12
-  - expo-modules-autolinking@58.0.13
-  - expo-modules-core@58.0.18
-  - expo-modules-jsi@58.0.13
-  - expo-modules-macros@0.20.0
-  - expo@58.0.10
