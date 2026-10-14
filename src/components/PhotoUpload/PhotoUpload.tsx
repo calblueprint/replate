@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Image, TouchableOpacity, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import uploadIcon from 'assets/image.png';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { styles } from './styles';
 
 interface PhotoUploadProps {
@@ -87,12 +87,10 @@ export default function PhotoUpload({ onSelect }: PhotoUploadProps) {
       activeOpacity={0.8}
     >
       {image ? (
-        <View style={styles.imageWrapper}>
-          <Image source={{ uri: image }} style={styles.image} />
-        </View>
+        <Image source={{ uri: image }} style={styles.image} />
       ) : (
         <View style={styles.placeholder}>
-          <Image source={uploadIcon} style={styles.icon} resizeMode="contain" />
+          <Ionicons name="image-outline" size={30} color="#FFFFFF" />
         </View>
       )}
     </TouchableOpacity>
