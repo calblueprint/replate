@@ -185,7 +185,7 @@ export default function AvailablePickupsPage() {
 
         {filteredTasks.length > 0 ? (
           <View style={styles.taskList}>
-            {filteredTasks.map((task, index) => (
+            {filteredTasks.map(task => (
               <AvailableTaskCard
                 key={task.encrypted_id}
                 locationName={task.location_name ?? 'Unknown Location'}
@@ -195,7 +195,6 @@ export default function AvailablePickupsPage() {
                   task.start_time,
                   task.end_time,
                 )}
-                index={index}
                 onPress={() =>
                   router.push({
                     pathname: '/pickup-details/[id]',

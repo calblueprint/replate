@@ -1,12 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
-import Animated, {
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
-import ScalePress from '@/components/ScalePress';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import Colors from '@/styles/colors';
 
 interface DayCarouselProps {
@@ -27,56 +20,28 @@ function DayItem({
   day,
   isSelected,
   onPress,
-  index,
 }: {
   month: string;
   weekday: string;
   day: number;
   isSelected: boolean;
   onPress: () => void;
-  index: number;
 }) {
-  const scale = useSharedValue(isSelected ? 1 : 0.92);
-  const borderWidth = useSharedValue(isSelected ? 1 : 0);
-
-  React.useEffect(() => {
-    scale.value = withSpring(isSelected ? 1 : 0.92, {
-      damping: 14,
-      stiffness: 200,
-    });
-    borderWidth.value = withSpring(isSelected ? 1 : 0, {
-      damping: 14,
-      stiffness: 200,
-    });
-  }, [isSelected, scale, borderWidth]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    borderWidth: borderWidth.value,
-    backgroundColor: isSelected ? Colors.profileBg : Colors.white,
-    borderColor: Colors.primaryGreen,
-  }));
-
   return (
-    <Animated.View
-      entering={FadeInUp.delay(index * 40)
-        .duration(300)
-        .springify()}
+    <Pressable
+      onPress={onPress}
+      style={[styles.dayItem, isSelected && styles.selectedDayItem]}
     >
-      <ScalePress onPress={onPress} scaleValue={0.9}>
-        <Animated.View style={[styles.dayItem, animatedStyle]}>
-          <Text style={[styles.monthText, isSelected && styles.selectedText]}>
-            {month}
-          </Text>
-          <Text style={[styles.dayNumber, isSelected && styles.selectedText]}>
-            {day}
-          </Text>
-          <Text style={[styles.weekdayText, isSelected && styles.selectedText]}>
-            {weekday}
-          </Text>
-        </Animated.View>
-      </ScalePress>
-    </Animated.View>
+      <Text style={[styles.monthText, isSelected && styles.selectedText]}>
+        {month}
+      </Text>
+      <Text style={[styles.dayNumber, isSelected && styles.selectedText]}>
+        {day}
+      </Text>
+      <Text style={[styles.weekdayText, isSelected && styles.selectedText]}>
+        {weekday}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -116,13 +81,12 @@ export default function DayCarousel({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
-      {days.map((item, index) => (
+      {days.map(item => (
         <DayItem
           key={item.iso}
           {...item}
           isSelected={item.iso === selectedDate}
           onPress={() => onSelectDate(item.iso)}
-          index={index}
         />
       ))}
     </ScrollView>
@@ -142,11 +106,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    backgroundColor: Colors.white,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 32,
     elevation: 2,
+  },
+  selectedDayItem: {
+    backgroundColor: Colors.profileBg,
+    borderColor: Colors.primaryGreen,
   },
   monthText: {
     fontSize: 10,
