@@ -17,6 +17,7 @@ export default function TabLayout() {
           backgroundColor: '#ffffff',
           borderTopWidth: 0,
           elevation: 12,
+          position: 'absolute',
           shadowOpacity: 0.08,
           shadowRadius: 10,
           shadowColor: '#000000',
@@ -26,19 +27,15 @@ export default function TabLayout() {
           },
           paddingTop: 10,
           paddingBottom: Math.max(insets.bottom - 10, 10), // Ensure minimum padding
-          minHeight: 65,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
+          height: 84,
+          borderTopLeftRadius: 10,
+          borderTopRightRadius: 10,
         },
         tabBarActiveTintColor: '#06B97C',
         tabBarInactiveTintColor: '#A0A0A0',
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 12,
           fontFamily: 'Lato',
-          marginTop: -2,
-        },
-        tabBarIconStyle: {
-          marginTop: 2,
         },
       }}
     >
@@ -84,8 +81,8 @@ export default function TabLayout() {
             <Image
               source={profileIcon}
               style={{
-                width: 27,
-                height: 27,
+                width: 40,
+                height: 40,
                 tintColor: color,
               }}
               resizeMode="contain"
