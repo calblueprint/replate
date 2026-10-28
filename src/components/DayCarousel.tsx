@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Colors from '@/styles/colors';
 
 interface DayCarouselProps {
@@ -27,21 +27,26 @@ function DayItem({
   isSelected: boolean;
   onPress: () => void;
 }) {
+  const dynamicStyle = {
+    borderWidth: isSelected ? 1 : 0,
+    backgroundColor: isSelected ? Colors.profileBg : Colors.white,
+    borderColor: Colors.primaryGreen,
+  };
+
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.dayItem, isSelected && styles.selectedDayItem]}
-    >
-      <Text style={[styles.monthText, isSelected && styles.selectedText]}>
-        {month}
-      </Text>
-      <Text style={[styles.dayNumber, isSelected && styles.selectedText]}>
-        {day}
-      </Text>
-      <Text style={[styles.weekdayText, isSelected && styles.selectedText]}>
-        {weekday}
-      </Text>
-    </Pressable>
+    <TouchableOpacity onPress={onPress}>
+      <View style={[styles.dayItem, dynamicStyle]}>
+        <Text style={[styles.monthText, isSelected && styles.selectedText]}>
+          {month}
+        </Text>
+        <Text style={[styles.dayNumber, isSelected && styles.selectedText]}>
+          {day}
+        </Text>
+        <Text style={[styles.weekdayText, isSelected && styles.selectedText]}>
+          {weekday}
+        </Text>
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -79,6 +84,7 @@ export default function DayCarousel({
       ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={{ flexGrow: 0 }}
       contentContainerStyle={styles.container}
     >
       {days.map(item => (
@@ -106,14 +112,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    backgroundColor: Colors.white,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 32,
-    elevation: 2,
   },
   selectedDayItem: {
     backgroundColor: Colors.profileBg,

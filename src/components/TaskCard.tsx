@@ -4,11 +4,7 @@ import ScalePress from '@/components/ScalePress';
 import Colors from '@/styles/colors';
 
 export type TaskStatus =
-  | 'active'
-  | 'overdue'
-  | 'missing'
-  | 'completed'
-  | 'missed';
+  'active' | 'overdue' | 'missing' | 'completed' | 'missed';
 
 interface TaskCardProps {
   locationName: string;
