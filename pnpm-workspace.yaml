@@ -4,8 +4,7 @@ allowBuilds:
   msw: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
-  - expo-constants@57.0.20
-  - expo-modules-core@57.0.20
-  - expo@57.0.26
-  - '@expo/ui@57.0.21'
-  - expo-router@57.0.24
+  - 'expo*'
+  - '@expo/*'
+  - 2g@1.0.1
+  - babel-preset-expo@58.0.14
