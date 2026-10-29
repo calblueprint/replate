@@ -2,42 +2,43 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 6,
+    gap: 4,
+    marginBottom: 10,
   },
   label: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#525454',
+    fontSize: 14,
+    color: '#000000',
     fontFamily: 'Lato',
   },
   requiredText: {
-    color: '#FC5A61',
-    fontSize: 12,
-    fontWeight: '500',
+    color: '#EF4444',
+    fontSize: 14,
     fontFamily: 'Lato',
   },
   input: {
-    borderWidth: 0.8,
-    borderColor: '#A9A9A980',
-    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    borderRadius: 8,
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     fontSize: 14,
     backgroundColor: 'white',
     fontFamily: 'Lato',
   },
+  placeholderText: {
+    color: '#A3A3A3',
+  },
   dropdownInputOpen: {
-    borderColor: '#2D8A62B2',
+    borderColor: '#58AD85',
   },
   dropdownContainer: {
     borderColor: '#E0E0E0',
-    borderRadius: 7,
+    borderRadius: 8,
   },
   dropdownText: {
     fontSize: 14,
@@ -48,7 +49,7 @@ export const styles = StyleSheet.create({
     borderColor: '#DE3B40',
   },
   focusBorder: {
-    borderColor: '#77C29F',
+    borderColor: '#58AD85',
   },
   selectedItemContainer: {
     backgroundColor: '#AEDDC4',

@@ -120,6 +120,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 14,
   },
+  selectedDayItem: {
+    backgroundColor: Colors.profileBg,
+    borderColor: Colors.primaryGreen,
+  },
   monthText: {
     fontSize: 10,
     fontFamily: 'LatoBold',

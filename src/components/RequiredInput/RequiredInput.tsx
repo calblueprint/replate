@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { styles } from './styles';
+
+const ArrowDownIcon = () => (
+  <Ionicons name="caret-down" size={18} color="#000000" />
+);
+const ArrowUpIcon = () => (
+  <Ionicons name="caret-up" size={18} color="#000000" />
+);
 
 interface RequiredInputProps {
   label: string;
@@ -49,6 +57,9 @@ export default function RequiredInput({
           ]}
           dropDownContainerStyle={styles.dropdownContainer}
           textStyle={styles.dropdownText}
+          placeholderStyle={styles.placeholderText}
+          ArrowDownIconComponent={ArrowDownIcon}
+          ArrowUpIconComponent={ArrowUpIcon}
           selectedItemContainerStyle={styles.selectedItemContainer}
           selectedItemLabelStyle={styles.selectedItemLabel}
           onOpen={() => setFocused(true)}
@@ -57,6 +68,7 @@ export default function RequiredInput({
       ) : (
         <TextInput
           placeholder={placeholder}
+          placeholderTextColor="#A3A3A3"
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setFocused(true)}
