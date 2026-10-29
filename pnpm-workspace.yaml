@@ -7,4 +7,4 @@ minimumReleaseAgeExclude:
   - 'expo*'
   - '@expo/*'
   - 2g@1.0.1
-  - babel-preset-expo@58.0.14
+  - babel-preset-expo@58.0.22
