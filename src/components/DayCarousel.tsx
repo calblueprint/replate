@@ -1,6 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import {
   ScrollView,
+  ScrollViewInstance,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -61,7 +62,7 @@ export default function DayCarousel({
   onSelectDate,
   dayCount = 7,
 }: DayCarouselProps) {
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
   const days = useMemo(() => {
     const result: {
