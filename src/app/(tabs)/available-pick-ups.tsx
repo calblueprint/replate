@@ -152,17 +152,14 @@ export default function AvailablePickupsPage() {
   return (
     <View style={styles.container}>
       {/* Fixed white header */}
-      <View>
-        <View style={styles.header}>
-          <Text style={styles.pageTitle}>Today's Available Tasks</Text>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.pageTitle}>Today's Available Tasks</Text>
+        <DayCarousel
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          dayCount={5}
+        />
       </View>
-
-      <DayCarousel
-        selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
-        dayCount={5}
-      />
 
       {/* Scrollable content */}
       <ScrollView
@@ -214,51 +211,10 @@ export default function AvailablePickupsPage() {
               style={styles.emptyIcon}
               resizeMode="contain"
             />
-          }
-        >
-          <Text style={styles.sectionTitle}>Available Pick-Ups</Text>
-
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-              <Text style={styles.errorHint}>Pull down to retry</Text>
-            </View>
-          )}
-
-          {filteredTasks.length > 0 ? (
-            <View style={styles.taskList}>
-              {filteredTasks.map((task, index) => (
-                <AvailableTaskCard
-                  key={task.encrypted_id}
-                  locationName={task.location_name ?? 'Unknown Location'}
-                  address={formatAddress(task)}
-                  timeRange={formatTimeRange(
-                    task.pickup_date,
-                    task.start_time,
-                    task.end_time,
-                  )}
-                  index={index}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/pickup-details/[id]',
-                      params: { id: task.encrypted_id },
-                    })
-                  }
-                />
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Image
-                source={elementIcon}
-                style={styles.emptyIcon}
-                resizeMode="contain"
-              />
-              <Text style={styles.emptyText}>There are no tasks today</Text>
-            </View>
-          )}
-        </ScrollView>
-      </View>
+            <Text style={styles.emptyText}>There are no tasks today</Text>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }
