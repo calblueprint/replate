@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import dateIcon from 'assets/date.png';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
 import {
@@ -49,6 +47,7 @@ export default function DonationLayout() {
   const [weight, setWeight] = useState('');
   const [selectedNPO, setSelectedNPO] = useState('');
   const [notes, setNotes] = useState('');
+  const [photoDescription, setPhotoDescription] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [npoOptions, setNpoOptions] = useState<NpoOption[]>([]);
   const [task, setTask] = useState<TaskPickupInfo | null>(null);
@@ -135,13 +134,17 @@ export default function DonationLayout() {
     return datePart ?? timePart;
   })();
 
+  const pickupSummaryAddress = params.location || 'Location details';
+
   const handleComplete = async () => {
     if (!params.id || isSubmitting) return;
     setIsSubmitting(true);
     try {
       await submitCompletionDetails(params.id, {
         total_pounds_entered: weight,
-        description: notes || undefined,
+        partner_id: selectedNPO,
+        description: notes.trim() || undefined,
+        photo_description: photoDescription.trim() || undefined,
         photoUri,
       });
       Toast.show({ type: 'success', text1: 'Donation recorded!' });
@@ -195,10 +198,12 @@ export default function DonationLayout() {
             }
           }}
         >
-          <Ionicons name="chevron-back" size={24} color="#525454" />
+          <Ionicons name="arrow-back" size={26} color="#000000" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Enter Donation Data</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {params.location || 'Enter Donation Data'}
+          </Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -211,28 +216,30 @@ export default function DonationLayout() {
           showsVerticalScrollIndicator={false}
         >
           <View>
-            <Text style={styles.sectionTitle}>Enter Details</Text>
+            <Text style={styles.sectionTitle}>Add details</Text>
 
-            {/* Due Date */}
-            <View style={styles.dueDateContainer}>
-              <View style={styles.dueDateRow}>
-                <Image
-                  source={dateIcon}
-                  style={styles.icon}
-                  resizeMode="contain"
+            <View style={styles.pickupSummaryCard}>
+              <View style={styles.pickupSummaryRow}>
+                <Text style={styles.pickupSummaryDateText}>
+                  {pickupTimeLabel}
+                </Text>
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  color="#A0A0A0"
+                  style={styles.pickupSummaryIcon}
                 />
-                <Text style={styles.dueDateText}>{pickupTimeLabel}</Text>
               </View>
-              <TouchableOpacity style={styles.viewButton}>
-                <Text style={styles.viewButtonText}>View pick-up details</Text>
-              </TouchableOpacity>
+              <Text style={styles.pickupSummaryAddressText}>
+                {pickupSummaryAddress}
+              </Text>
             </View>
 
             {/* Weight */}
             <RequiredInput
-              label="Weight (lbs)"
-              placeholder="Enter weight"
+              label="Enter Donation’s Weight (lbs)"
               value={weight}
+              placeholder="Enter weight in pounds"
               onChangeText={text => setWeight(text.replace(/[^0-9.]/g, ''))}
               required
             />
@@ -249,21 +256,29 @@ export default function DonationLayout() {
             />
 
             {/* Image upload */}
-            <Text style={styles.imageText}>Add Pick-up Image</Text>
-            <View style={styles.section}>
+            <Text style={styles.fieldLabel}>Add Pick-up Image</Text>
+            <View style={styles.photoCard}>
               <PhotoUpload onSelect={setPhotoUri} />
-
-              {/* Notes */}
-              <Text style={styles.notesLabel}>Notes</Text>
               <TextInput
-                style={styles.notesInput}
-                multiline
-                numberOfLines={4}
-                placeholder="Optional notes"
-                value={notes}
-                onChangeText={setNotes}
+                style={styles.photoDescriptionInput}
+                placeholder="Add description..."
+                placeholderTextColor="#A3A3A3"
+                value={photoDescription}
+                onChangeText={setPhotoDescription}
               />
             </View>
+
+            {/* Notes */}
+            <Text style={styles.fieldLabel}>Additional notes</Text>
+            <TextInput
+              style={styles.notesInput}
+              multiline
+              numberOfLines={4}
+              placeholder="Type here..."
+              placeholderTextColor="#A3A3A3"
+              value={notes}
+              onChangeText={setNotes}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

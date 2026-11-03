@@ -368,7 +368,7 @@ export default function MyTasksPage() {
             <Pressable style={styles.filterRow}>
               <Text style={styles.filterText}>filter</Text>
             </Pressable>
-            {displayedTasks.map((task, index) => (
+            {displayedTasks.map(task => (
               <TaskCard
                 key={task.id}
                 locationName={task.location_name || 'Unknown Location'}
@@ -376,7 +376,6 @@ export default function MyTasksPage() {
                 timeRange={formatTimeRange(task.start_time, task.end_time)}
                 status={task.derivedStatus}
                 completedDate={formatStatusDate(task)}
-                index={index}
                 onPress={() => handleCardPress(task)}
                 onLongPress={() => handleCardLongPress(task)}
                 onAddDetails={() => handleAddDetails(task)}

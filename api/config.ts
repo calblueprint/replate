@@ -455,7 +455,9 @@ export async function submitCompletionDetails(
   encryptedTaskId: string,
   data: {
     total_pounds_entered: string;
+    partner_id: string;
     description?: string;
+    photo_description?: string;
     photoUri?: string | null;
   },
 ) {
@@ -467,8 +469,12 @@ export async function submitCompletionDetails(
     // set the Content-Type with the correct boundary automatically.
     const form = new FormData();
     form.append('task[total_pounds_entered]', data.total_pounds_entered);
+    form.append('task[partner_id]', data.partner_id);
     if (data.description) {
       form.append('task[description]', data.description);
+    }
+    if (data.photo_description) {
+      form.append('task[photo_description]', data.photo_description);
     }
 
     // Infer filename + mime from the URI (expo-image-picker gives file://...)
@@ -498,6 +504,7 @@ export async function submitCompletionDetails(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       total_pounds_entered: data.total_pounds_entered,
+      partner_id: data.partner_id,
       description: data.description,
     }),
   });
