@@ -17,7 +17,7 @@ export const myAccountStyles = StyleSheet.create({
   profileHeader: {
     alignItems: 'center',
     paddingTop: 38,
-    paddingBottom: 28,
+    paddingBottom: 38,
     backgroundColor: Colors.background,
   },
   avatar: {
@@ -47,10 +47,11 @@ export const myAccountStyles = StyleSheet.create({
   /** WHITE CARD AREA **/
   formCard: {
     backgroundColor: Colors.white,
-    paddingHorizontal: 24,
+    paddingHorizontal: 27,
     paddingTop: 28,
-    paddingBottom: 40,
+    paddingBottom: 50 + 47,
     flex: 1,
+    justifyContent: 'space-between',
   },
 
   /** FORM FIELDS **/
@@ -61,17 +62,17 @@ export const myAccountStyles = StyleSheet.create({
     marginBottom: 0,
   },
   fieldLabel: {
-    fontSize: 12,
+    fontSize: 15,
     fontFamily: BOLD,
     color: Colors.secondaryGreen,
     textTransform: 'uppercase',
     marginBottom: 6,
   },
   fieldText: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: REGULAR,
     color: Colors.black,
-    lineHeight: 22,
+    lineHeight: 16,
   },
   fieldTextCapitalize: {
     textTransform: 'capitalize',
@@ -80,14 +81,14 @@ export const myAccountStyles = StyleSheet.create({
   /** LOGOUT BUTTON **/
   logoutButton: {
     backgroundColor: Colors.primaryGreen,
-    paddingVertical: 16,
+    paddingVertical: 13,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 40,
   },
   logoutButtonText: {
     color: Colors.white,
     fontSize: 16,
-    fontFamily: 'LatoBlack',
+    fontFamily: 'AvenirBold',
+    lineHeight: 30,
   },
 });

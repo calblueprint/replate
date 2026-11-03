@@ -4,6 +4,7 @@ import {
   Image,
   Keyboard,
   ScrollView,
+  ScrollViewInstance,
   Text,
   TextInput,
   TouchableOpacity,
@@ -36,7 +37,7 @@ export default function ForgotPasswordPage() {
   // Error states
   const [emailError, setEmailError] = useState<string | null>(null);
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ScrollViewInstance>(null);
   const insets = useSafeAreaInsets();
 
   // Focus state

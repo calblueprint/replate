@@ -4,6 +4,7 @@ import {
   Image,
   Keyboard,
   ScrollView,
+  ScrollViewInstance,
   Text,
   TextInput,
   TouchableOpacity,
@@ -44,7 +45,7 @@ export default function LoginPage() {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ScrollViewInstance>(null);
   const insets = useSafeAreaInsets();
 
   const emailBorderAnim = useRef(new Animated.Value(0)).current;

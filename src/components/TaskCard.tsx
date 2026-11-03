@@ -1,15 +1,10 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import ScalePress from '@/components/ScalePress';
 import Colors from '@/styles/colors';
 
 export type TaskStatus =
-  | 'active'
-  | 'overdue'
-  | 'missing'
-  | 'completed'
-  | 'missed';
+  'active' | 'overdue' | 'missing' | 'completed' | 'missed';
 
 interface TaskCardProps {
   locationName: string;
@@ -17,7 +12,6 @@ interface TaskCardProps {
   timeRange: string;
   status: TaskStatus;
   completedDate?: string;
-  index: number;
   onPress: () => void;
   onLongPress?: () => void;
   onAddDetails?: () => void;
@@ -94,7 +88,6 @@ export default function TaskCard({
   timeRange,
   status,
   completedDate,
-  index,
   onPress,
   onLongPress,
   onAddDetails,
@@ -168,12 +161,7 @@ export default function TaskCard({
   );
 
   return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 60)
-        .duration(400)
-        .springify()
-        .damping(18)}
-    >
+    <View>
       {isFinished ? (
         cardInner
       ) : (
@@ -185,7 +173,7 @@ export default function TaskCard({
           {cardInner}
         </ScalePress>
       )}
-    </Animated.View>
+    </View>
   );
 }
 

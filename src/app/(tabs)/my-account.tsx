@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { getPartners } from '../../../api/config';
@@ -40,49 +40,43 @@ export default function MyAccountPage() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Profile header */}
-        <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{getInitial()}</Text>
-          </View>
-          <Text style={styles.nameDisplay}>
-            {driver?.first_name} {driver?.last_name}
-          </Text>
+      {/* Profile header */}
+      <View style={styles.profileHeader}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{getInitial()}</Text>
         </View>
+        <Text style={styles.nameDisplay}>
+          {driver?.first_name} {driver?.last_name}
+        </Text>
+      </View>
 
-        {/* White card with fields + logout */}
-        <View style={styles.formCard}>
+      {/* White card with fields + logout */}
+      <View style={styles.formCard}>
+        <View>
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>Name</Text>
             <Text style={[styles.fieldText, styles.fieldTextCapitalize]}>
               {driver?.first_name} {driver?.last_name}
             </Text>
           </View>
-
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>Email</Text>
             <Text style={styles.fieldText}>{driver?.email || ''}</Text>
           </View>
-
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>Phone</Text>
             <Text style={styles.fieldText}>{driver?.phone || ''}</Text>
           </View>
-
           <View style={styles.fieldContainerLast}>
             <Text style={styles.fieldLabel}>NPO</Text>
             <Text style={styles.fieldText}>{partnerName}</Text>
           </View>
-
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </TouchableOpacity>
         </View>
-      </ScrollView>
+
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }

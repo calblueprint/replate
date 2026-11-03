@@ -4,14 +4,23 @@ import Colors from '@/styles/colors';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
+    gap: 21,
     backgroundColor: Colors.background,
   },
 
   /** WHITE HEADER (fixed) **/
   header: {
     backgroundColor: Colors.white,
-    paddingTop: 56,
-    paddingBottom: 8,
+    paddingTop: 73,
+    paddingBottom: 17,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2, // Required for Android
   },
   pageTitle: {
     fontSize: 24,
