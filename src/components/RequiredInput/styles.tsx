@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import colors from '@/styles/colors';
 
 export const styles = StyleSheet.create({
   container: {
@@ -12,17 +13,17 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.black,
     fontFamily: 'Lato',
   },
   requiredText: {
-    color: '#EF4444',
+    color: colors.missingRed,
     fontSize: 14,
     fontFamily: 'Lato',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#FFFFFF',
+    borderColor: colors.white,
     borderRadius: 8,
     paddingVertical: 14,
     paddingHorizontal: 20,
@@ -31,31 +32,31 @@ export const styles = StyleSheet.create({
     fontFamily: 'Lato',
   },
   placeholderText: {
-    color: '#A3A3A3',
+    color: colors.filterGray,
   },
   dropdownInputOpen: {
-    borderColor: '#58AD85',
+    borderColor: colors.jasmine,
   },
   dropdownContainer: {
-    borderColor: '#E0E0E0',
+    borderColor: colors.lightBg,
     borderRadius: 8,
   },
   dropdownText: {
     fontSize: 14,
-    color: '#000',
+    color: colors.black,
     fontFamily: 'Lato',
   },
   errorBorder: {
-    borderColor: '#DE3B40',
+    borderColor: colors.missingRed,
   },
   focusBorder: {
-    borderColor: '#58AD85',
+    borderColor: colors.jasmine,
   },
   selectedItemContainer: {
-    backgroundColor: '#AEDDC4',
+    backgroundColor: colors.lightBg,
   },
   selectedItemLabel: {
-    color: '#222222',
+    color: colors.black,
     fontFamily: 'Lato',
     fontSize: 14,
     fontWeight: '500',
