@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
 
   placeholder: {
     flex: 1,
-    backgroundColor: '#CBD5E1',
+    backgroundColor: colors.navInactive,
     justifyContent: 'center',
     alignItems: 'center',
   },
