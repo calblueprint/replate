@@ -239,6 +239,7 @@ export default function DonationLayout() {
             <RequiredInput
               label="Enter Donation’s Weight (lbs)"
               value={weight}
+              keyboardType="numeric"
               placeholder="Enter weight in pounds"
               onChangeText={text => setWeight(text.replace(/[^0-9.]/g, ''))}
               required

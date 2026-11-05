@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { KeyboardTypeOptions, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { styles } from './styles';
@@ -19,6 +19,7 @@ interface RequiredInputProps {
   required?: boolean;
   isPicker?: boolean;
   options?: { label: string; value: string }[];
+  keyboardType?: KeyboardTypeOptions;
 }
 
 export default function RequiredInput({
@@ -29,6 +30,7 @@ export default function RequiredInput({
   required,
   isPicker,
   options,
+  keyboardType,
 }: RequiredInputProps) {
   const [focused, setFocused] = useState(false);
   const [open, setOpen] = useState(false);
@@ -69,6 +71,7 @@ export default function RequiredInput({
         <TextInput
           placeholder={placeholder}
           placeholderTextColor="#A3A3A3"
+          keyboardType={keyboardType}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setFocused(true)}
