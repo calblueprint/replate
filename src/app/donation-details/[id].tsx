@@ -12,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import dateIcon from 'assets/date.png';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
@@ -330,6 +329,7 @@ export default function DonationLayout() {
         title="Mark task as missed?"
         subtitle="This action cannot be undone."
         onBack={() => setMissedModalVisible(false)}
+        destructive={true}
         onConfirm={handleMissed}
       />
     </SafeAreaView>
