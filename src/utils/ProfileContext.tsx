@@ -9,8 +9,8 @@ import {
   apiRequest,
   ApiError as ApiUtilError,
   validateResponse,
-} from '../../api/apiUtils';
-import { API_ENDPOINTS, BASE_URL } from '../../api/config';
+} from '~/api/apiUtils';
+import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import { useAuth } from './AuthContext';
 
 // Extended driver profile interface to include NPO/partner information

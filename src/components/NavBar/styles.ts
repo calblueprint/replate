@@ -1,5 +1,5 @@
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from 'react-native';
-import colors from '../../styles/colors';
+import colors from '@/styles/colors';
 
 const TEXT_GRAY = '#9CA3AF';
 

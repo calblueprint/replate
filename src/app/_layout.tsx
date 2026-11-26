@@ -12,10 +12,10 @@ void SplashScreen.preventAutoHideAsync();
 
 function StackLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Lato: require('../../assets/fonts/Lato/Lato-Regular.ttf'),
-    LatoBold: require('../../assets/fonts/Lato/Lato-Bold.ttf'),
-    LatoBlack: require('../../assets/fonts/Lato/Lato-Black.ttf'),
-    LatoLight: require('../../assets/fonts/Lato/Lato-Light.ttf'),
+    Lato: require('~/assets/fonts/Lato/Lato-Regular.ttf'),
+    LatoBold: require('~/assets/fonts/Lato/Lato-Bold.ttf'),
+    LatoBlack: require('~/assets/fonts/Lato/Lato-Black.ttf'),
+    LatoLight: require('~/assets/fonts/Lato/Lato-Light.ttf'),
   });
 
   useEffect(() => {
