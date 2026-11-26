@@ -5,6 +5,10 @@ export const styles = StyleSheet.create({
   container: {
     marginBottom: 24,
   },
+  pickerOpenContainer: {
+    zIndex: 1000,
+    elevation: 10,
+  },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -35,7 +39,7 @@ export const styles = StyleSheet.create({
     color: colors.filterGray,
   },
   dropdownInputOpen: {
-    borderColor: colors.jasmine,
+    borderColor: colors.primaryGreen,
   },
   dropdownContainer: {
     borderColor: colors.lightBg,
@@ -50,10 +54,10 @@ export const styles = StyleSheet.create({
     borderColor: colors.missingRed,
   },
   focusBorder: {
-    borderColor: colors.jasmine,
+    borderColor: colors.primaryGreen,
   },
   selectedItemContainer: {
-    backgroundColor: colors.lightBg,
+    backgroundColor: colors.profileBg,
   },
   selectedItemLabel: {
     color: colors.black,

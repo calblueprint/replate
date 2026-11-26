@@ -91,12 +91,12 @@ export default function UnderlineTabBar({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    marginHorizontal: 35,
     position: 'relative',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
   },
   tab: {
     paddingVertical: 10,
+    paddingHorizontal: 12,
   },
   underline: {
     position: 'absolute',

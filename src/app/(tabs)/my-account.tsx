@@ -6,6 +6,7 @@ import { getPartners } from '../../../api/config';
 import { myAccountStyles as styles } from '../../styles/tabs/my-account-styles';
 import { useAuth } from '../../utils/AuthContext';
 import { useProfile } from '../../utils/ProfileContext';
+import { formatPhoneNumber } from '../../utils/validation';
 
 export default function MyAccountPage() {
   const { driver, logout } = useAuth();
@@ -65,7 +66,9 @@ export default function MyAccountPage() {
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>Phone</Text>
-            <Text style={styles.fieldText}>{driver?.phone || ''}</Text>
+            <Text style={styles.fieldText}>
+              {driver?.phone ? formatPhoneNumber(driver.phone) : ''}
+            </Text>
           </View>
           <View style={styles.fieldContainerLast}>
             <Text style={styles.fieldLabel}>NPO</Text>

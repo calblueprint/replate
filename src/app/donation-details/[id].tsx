@@ -32,6 +32,7 @@ interface TaskPickupInfo {
   pickup_date: string | null;
   start_time: string | null;
   end_time: string | null;
+  address: string | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -40,6 +41,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseOptionalString(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
+}
+
+function parseTaskAddress(data: Record<string, unknown>): string | null {
+  const direct = parseOptionalString(data.address);
+  if (direct && direct.trim().length > 0) return direct.trim();
+  if (!isRecord(data.location)) return null;
+  const loc = data.location;
+  const parts = [loc.street_address, loc.city, loc.state, loc.zip_code].filter(
+    (v): v is string => typeof v === 'string' && v.trim().length > 0,
+  );
+  return parts.length > 0 ? parts.join(', ') : null;
 }
 
 export default function DonationLayout() {
@@ -102,6 +114,7 @@ export default function DonationLayout() {
             end_time:
               parseOptionalString(data.end_time) ??
               parseOptionalString(data.activity_end_time),
+            address: parseTaskAddress(data),
           });
         } catch {
           if (!cancelled) {
@@ -134,7 +147,8 @@ export default function DonationLayout() {
     return datePart ?? timePart;
   })();
 
-  const pickupSummaryAddress = params.location || 'Location details';
+  const pickupSummaryAddress =
+    task?.address || params.location || 'Location details';
 
   const handleComplete = async () => {
     if (!params.id || isSubmitting) return;

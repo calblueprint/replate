@@ -1,13 +1,14 @@
 import { StyleSheet } from 'react-native';
+import colors from './colors';
 
 const REGULAR = 'Lato';
 const BOLD = 'LatoBold';
-export const ERROR_COLOR = '#FF4444';
+export const ERROR_COLOR = colors.missingRed;
 
 export const authStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     padding: 20,
@@ -165,11 +166,11 @@ export const authStyles = StyleSheet.create({
     fontFamily: REGULAR,
   },
   errorText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: REGULAR,
     color: ERROR_COLOR,
-    marginTop: -16,
-    marginBottom: 6,
+    marginTop: -10,
+    marginBottom: 10,
     marginLeft: 2,
   },
   passwordRequirements: {
@@ -203,20 +204,20 @@ export const authStyles = StyleSheet.create({
     fontSize: 30,
     fontFamily: BOLD,
     textAlign: 'center',
-    marginBottom: 12,
-    color: '#000',
+    marginBottom: 8,
+    color: colors.secondaryGreen,
   },
   subtitleCentered: {
     fontSize: 15,
     fontFamily: REGULAR,
     textAlign: 'center',
     marginBottom: 24,
-    color: '#898989',
+    color: colors.textTertiary,
   },
   inputLabelDark: {
     fontSize: 12,
     fontFamily: BOLD,
-    color: '#525454',
+    color: colors.textTertiary,
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -230,13 +231,13 @@ export const authStyles = StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 8,
-    backgroundColor: '#898989',
+    backgroundColor: colors.textTertiary,
     marginRight: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   requirementCircleMet: {
-    backgroundColor: '#58ad85',
+    backgroundColor: colors.primaryGreen,
   },
   requirementCheckmark: {
     width: 9,
@@ -245,33 +246,36 @@ export const authStyles = StyleSheet.create({
   requirementTextDark: {
     fontSize: 12,
     fontFamily: REGULAR,
-    color: '#000',
+    color: colors.black,
     lineHeight: 19.2, // 1.6 * 12
   },
   grayButton: {
     width: '100%',
-    backgroundColor: '#58ad85',
+    backgroundColor: colors.primaryGreen,
     borderRadius: 10,
     paddingVertical: 13,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 50,
+    minHeight: 56,
+  },
+  buttonDisabled: {
+    backgroundColor: colors.fillInactive,
   },
   grayButtonText: {
     fontSize: 16,
     fontFamily: BOLD,
-    color: '#fff',
+    color: colors.white,
     lineHeight: 30,
   },
   linkTextSignup: {
     textAlign: 'center',
-    color: '#4f4f4f',
+    color: colors.textTertiary,
     fontFamily: REGULAR,
     fontSize: 14,
     marginTop: 16,
   },
   linkSignup: {
-    color: '#58ad85',
+    color: colors.secondaryGreen,
     textDecorationLine: 'underline',
     fontFamily: BOLD,
   },
@@ -284,14 +288,14 @@ export const authStyles = StyleSheet.create({
     paddingTop: 40,
   },
   textBlack: {
-    color: '#000',
+    color: colors.black,
   },
   forgotPasswordLink: {
-    alignSelf: 'flex-start',
-    marginBottom: 24,
+    alignSelf: 'flex-end',
+    marginBottom: 16,
   },
   forgotPasswordLinkText: {
-    fontSize: 12,
+    fontSize: 14,
   },
   hiddenInput: {
     height: 0.1,
@@ -299,14 +303,14 @@ export const authStyles = StyleSheet.create({
     position: 'absolute',
   },
   requirementCheckmarkMet: {
-    tintColor: '#58ad85',
+    tintColor: colors.white,
     opacity: 1,
   },
   requirementCheckmarkUnmet: {
-    tintColor: '#898989',
-    opacity: 0.5,
+    tintColor: colors.white,
+    opacity: 0.7,
   },
   buttonEnabled: {
-    backgroundColor: '#58ad85',
+    backgroundColor: colors.primaryGreen,
   },
 });

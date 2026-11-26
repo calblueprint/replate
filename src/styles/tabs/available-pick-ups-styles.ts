@@ -4,7 +4,7 @@ import Colors from '@/styles/colors';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 21,
+    gap: 12,
     backgroundColor: Colors.background,
   },
 
@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.white,
     paddingTop: 73,
-    paddingBottom: 17,
+    paddingBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -27,7 +27,6 @@ export const styles = StyleSheet.create({
     fontFamily: 'LatoBold',
     color: Colors.secondaryGreen,
     paddingHorizontal: 21,
-    marginBottom: 8,
   },
 
   /** SCROLLABLE CONTENT **/

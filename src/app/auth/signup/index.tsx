@@ -16,6 +16,7 @@ import {
 } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { DriverSignupData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
@@ -23,6 +24,7 @@ import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import AnimatedPressable from '../../../components/AnimatedPressable';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
+import colors from '../../../styles/colors';
 import { useAuth } from '../../../utils/AuthContext';
 import {
   INPUT_LIMITS,
@@ -134,7 +136,7 @@ export default function SignupPage() {
 
   const firstNameBorderColor = firstNameBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const lastNameBorderWidth = lastNameBorderAnim.interpolate({
@@ -144,7 +146,7 @@ export default function SignupPage() {
 
   const lastNameBorderColor = lastNameBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const emailBorderWidth = emailBorderAnim.interpolate({
@@ -154,7 +156,7 @@ export default function SignupPage() {
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const phoneBorderWidth = phoneBorderAnim.interpolate({
@@ -164,7 +166,7 @@ export default function SignupPage() {
 
   const phoneBorderColor = phoneBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const passwordBorderWidth = passwordBorderAnim.interpolate({
@@ -174,7 +176,7 @@ export default function SignupPage() {
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const confirmPasswordBorderWidth = confirmPasswordBorderAnim.interpolate({
@@ -184,7 +186,7 @@ export default function SignupPage() {
 
   const confirmPasswordBorderColor = confirmPasswordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const handleSignUp = async () => {
@@ -608,16 +610,15 @@ export default function SignupPage() {
               <TouchableOpacity
                 style={authStyles.showButton}
                 onPress={() => setShowPassword(!showPassword)}
+                accessibilityLabel={
+                  showPassword ? 'Hide password' : 'Show password'
+                }
               >
-                <Text
-                  style={
-                    showPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </Text>
+                <Ionicons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={20}
+                  color={colors.textTertiary}
+                />
               </TouchableOpacity>
             </Animated.View>
             <View style={authStyles.passwordRequirements}>
@@ -631,7 +632,7 @@ export default function SignupPage() {
                   met: /[A-Z]/.test(password),
                 },
                 {
-                  text: '1 lowercase letter number',
+                  text: '1 lowercase letter',
                   met: /[a-z]/.test(password),
                 },
                 {
@@ -708,16 +709,17 @@ export default function SignupPage() {
               <TouchableOpacity
                 style={authStyles.showButton}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                accessibilityLabel={
+                  showConfirmPassword
+                    ? 'Hide confirm password'
+                    : 'Show confirm password'
+                }
               >
-                <Text
-                  style={
-                    showConfirmPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
-                </Text>
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={20}
+                  color={colors.textTertiary}
+                />
               </TouchableOpacity>
             </Animated.View>
             {confirmPasswordError && (
@@ -727,22 +729,18 @@ export default function SignupPage() {
 
           <View style={authStyles.buttonContainer}>
             <AnimatedPressable
-              style={[
-                authStyles.grayButton,
-                {
-                  opacity:
-                    !email ||
-                    !password ||
-                    !confirmPassword ||
-                    !first_name ||
-                    !last_name ||
-                    !phone_number ||
-                    !isPasswordValid ||
-                    isLoading
-                      ? 0.5
-                      : 1,
-                },
-              ]}
+              style={
+                !email ||
+                !password ||
+                !confirmPassword ||
+                !first_name ||
+                !last_name ||
+                !phone_number ||
+                !isPasswordValid ||
+                isLoading
+                  ? [authStyles.grayButton, authStyles.buttonDisabled]
+                  : authStyles.grayButton
+              }
               disabled={
                 !email ||
                 !password ||
@@ -757,7 +755,7 @@ export default function SignupPage() {
               scaleValue={0.97}
             >
               <Text style={authStyles.grayButtonText}>
-                {isLoading ? 'Creating Account...' : 'Continue '}
+                {isLoading ? 'Creating Account...' : 'CONTINUE'}
               </Text>
             </AnimatedPressable>
           </View>

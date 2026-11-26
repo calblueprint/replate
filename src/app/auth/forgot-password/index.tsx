@@ -21,6 +21,7 @@ import { driverAPI } from '../../../../api/config';
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
+import colors from '../../../styles/colors';
 import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
 
 interface ApiErrorResponse {
@@ -60,7 +61,7 @@ export default function ForgotPasswordPage() {
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const handleEmailChange = (text: string) => {
@@ -128,18 +129,19 @@ export default function ForgotPasswordPage() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={authStyles.formCard}>
+            <BackButton />
             <View style={authStyles.logoContainer}>
               <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
             </View>
-            <Text style={authStyles.titleCentered}>Check your email</Text>
+            <Text style={authStyles.titleCentered}>Email Sent!</Text>
             <Text style={authStyles.subtitleCentered}>
-              We've sent password reset instructions to {email}
+              Check your email for password recovery
             </Text>
 
             <View style={authStyles.buttonContainer}>
               <TouchableOpacity
                 style={authStyles.grayButton}
-                onPress={() => router.push('/auth/login')}
+                onPress={() => router.replace('/auth/login')}
                 activeOpacity={0.8}
               >
                 <Text style={authStyles.grayButtonText}>Back to login</Text>
@@ -182,10 +184,9 @@ export default function ForgotPasswordPage() {
           <View style={authStyles.logoContainer}>
             <Image source={REPLATE_LOGO} style={authStyles.logoImage} />
           </View>
-          <Text style={authStyles.titleCentered}>Forgot Password?</Text>
+          <Text style={authStyles.titleCentered}>Reset your password</Text>
           <Text style={authStyles.subtitleCentered}>
-            Enter your email address and we'll send you instructions to reset
-            your password.
+            Please enter your email to reset the password
           </Text>
 
           <View>
@@ -201,8 +202,8 @@ export default function ForgotPasswordPage() {
             >
               <TextInput
                 style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="Enter your email"
-                placeholderTextColor="#989898"
+                placeholder="email@gmail.com..."
+                placeholderTextColor={colors.textTertiary}
                 value={email}
                 onChangeText={handleEmailChange}
                 onFocus={() => setEmailFocused(true)}
@@ -228,17 +229,16 @@ export default function ForgotPasswordPage() {
             <TouchableOpacity
               style={[
                 authStyles.grayButton,
-                authStyles.buttonEnabled,
-                {
-                  opacity: !email || !isEmailValid || isLoading ? 0.5 : 1,
-                },
+                !email || !isEmailValid || isLoading
+                  ? authStyles.buttonDisabled
+                  : authStyles.buttonEnabled,
               ]}
               disabled={!email || !isEmailValid || isLoading}
               onPress={handleRequestReset}
               activeOpacity={0.8}
             >
               <Text style={authStyles.grayButtonText}>
-                {isLoading ? 'Sending...' : 'Send Reset Link'}
+                {isLoading ? 'Sending...' : 'Reset Password'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -247,7 +247,7 @@ export default function ForgotPasswordPage() {
             Remember your password?{' '}
             <Text
               style={authStyles.linkSignup}
-              onPress={() => router.push('/auth/login')}
+              onPress={() => router.replace('/auth/login')}
             >
               Log in
             </Text>

@@ -116,7 +116,7 @@ export default function LandingPage() {
             onPress={() => router.replace('/auth/signup')}
             activeOpacity={0.8}
           >
-            <Text style={styles.signupButtonText}>SIGNUP</Text>
+            <Text style={styles.signupButtonText}>SIGN UP</Text>
           </AnimatedTouchable>
         </View>
       </View>
@@ -127,7 +127,7 @@ export default function LandingPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -159,14 +159,14 @@ const styles = StyleSheet.create({
     ...typography.h2,
     fontSize: 30,
     textAlign: 'center',
-    color: colors.black,
+    color: colors.secondaryGreen,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 15,
     fontFamily: 'Lato',
     textAlign: 'center',
-    color: colors.gray,
+    color: colors.textTertiary,
     lineHeight: 22,
   },
   buttonContainer: {
@@ -176,34 +176,34 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     width: '100%',
+    backgroundColor: colors.primaryGreen,
+    borderRadius: 10,
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 56,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    fontFamily: 'LatoBold',
+    color: colors.white,
+    lineHeight: 30,
+  },
+  signupButton: {
+    width: '100%',
     borderWidth: 1,
-    borderColor: colors.jasmine,
+    borderColor: colors.primaryGreen,
     borderRadius: 10,
     paddingVertical: 13,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    minHeight: 50,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    fontFamily: 'LatoBold',
-    color: colors.jasmine,
-    lineHeight: 30,
-  },
-  signupButton: {
-    width: '100%',
-    backgroundColor: colors.jasmine,
-    borderRadius: 10,
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 50,
+    minHeight: 56,
   },
   signupButtonText: {
     fontSize: 16,
     fontFamily: 'LatoBold',
-    color: colors.white,
+    color: colors.secondaryGreen,
     lineHeight: 30,
   },
 });

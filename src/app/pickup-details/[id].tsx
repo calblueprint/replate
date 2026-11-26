@@ -292,7 +292,7 @@ export default function PickupDetails() {
       {/* Header */}
       <Animated.View entering={FadeInUp.duration(300)} style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={Colors.black} />
+          <Ionicons name="arrow-back" size={24} color={Colors.black} />
         </Pressable>
         <Text style={styles.headerTitle}>Pick-Up</Text>
       </Animated.View>
@@ -304,33 +304,32 @@ export default function PickupDetails() {
         onUndo={handleUndoAdd}
       />
 
+      {/* Location Header on gray background */}
+      <Animated.View
+        entering={FadeInDown.delay(100).duration(350).springify()}
+        style={styles.locationSection}
+      >
+        <Ionicons name="location-sharp" size={24} color={Colors.black} />
+        <View style={styles.locationContent}>
+          <Text style={styles.locationTitle}>
+            {task.location_name ?? 'Pickup Location'} Details
+          </Text>
+          <Text style={styles.locationAddress}>{displayAddress}</Text>
+        </View>
+      </Animated.View>
+
       {/* Content */}
       <ScrollView
         style={styles.contentCard}
         showsVerticalScrollIndicator={false}
       >
-        {/* Location */}
-        <Animated.View
-          entering={FadeInDown.delay(100).duration(350).springify()}
-          style={styles.locationSection}
+        <Pressable
+          style={styles.openMapsRow}
+          onPress={() => setShowDirections(true)}
         >
-          <Ionicons name="location-sharp" size={24} color={Colors.black} />
-          <View style={styles.locationContent}>
-            <Text style={styles.locationTitle}>
-              {task.location_name ?? 'Pickup Location'} Details
-            </Text>
-            <Text style={styles.locationAddress}>{displayAddress}</Text>
-            <Pressable
-              style={styles.openMapsRow}
-              onPress={() => setShowDirections(true)}
-            >
-              <Ionicons name="map-outline" size={20} color={Colors.black} />
-              <Text style={styles.openMapsText}>Open in Maps</Text>
-            </Pressable>
-          </View>
-        </Animated.View>
-
-        <View style={styles.separator} />
+          <Ionicons name="map-outline" size={18} color={Colors.primaryGreen} />
+          <Text style={styles.openMapsText}>Open in Maps</Text>
+        </Pressable>
 
         {/* Schedule */}
         <Animated.View
@@ -368,16 +367,20 @@ export default function PickupDetails() {
                       onPress={() => handleMessage(task.contact_phone!)}
                     >
                       <Ionicons
-                        name="chatbubble"
-                        size={18}
-                        color={Colors.white}
+                        name="chatbubble-outline"
+                        size={20}
+                        color={Colors.primaryGreen}
                       />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.actionButton}
                       onPress={() => handleCall(task.contact_phone!)}
                     >
-                      <Ionicons name="call" size={18} color={Colors.white} />
+                      <Ionicons
+                        name="call-outline"
+                        size={20}
+                        color={Colors.primaryGreen}
+                      />
                     </TouchableOpacity>
                   </View>
                 </>
@@ -395,7 +398,7 @@ export default function PickupDetails() {
               style={styles.emailSection}
               onPress={() => handleEmail(task.contact_email!)}
             >
-              <Ionicons name="mail-outline" size={20} color="#4D1B1B" />
+              <Ionicons name="mail-outline" size={20} color={Colors.black} />
               <Text style={styles.emailText}>{task.contact_email}</Text>
             </Pressable>
           </Animated.View>
@@ -436,10 +439,7 @@ export default function PickupDetails() {
       </ScrollView>
 
       {/* Bottom button */}
-      <Animated.View
-        entering={FadeInDown.delay(600).duration(400)}
-        style={styles.bottomContainer}
-      >
+      <View style={styles.bottomContainer}>
         {isInProgress ? (
           <View style={styles.progressButton}>
             <Ionicons name="time-outline" size={24} color={Colors.white} />
@@ -452,7 +452,7 @@ export default function PickupDetails() {
             </Text>
           </TouchableOpacity>
         )}
-      </Animated.View>
+      </View>
 
       {/* Directions sheet */}
       <DirectionsSheet

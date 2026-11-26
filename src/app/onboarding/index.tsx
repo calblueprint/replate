@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
-import replateIcon from '/assets/replate-logo.png';
-import { iconStyles } from '@/components/NavBar/styles';
 import { ApiError } from '~/api/apiUtils';
 import { getPartners, updateDriverPartner } from '~/api/config';
 import { useAuth } from '~/src/utils/AuthContext';
+import colors from '../../styles/colors';
 import { styles } from '../../styles/pages/onboarding-styles';
 import { useProfile } from '../../utils/ProfileContext';
 
@@ -82,7 +81,7 @@ export default function OnboardingFlow() {
           { justifyContent: 'center', alignItems: 'center' },
         ]}
       >
-        <ActivityIndicator size="large" color="#58ad85" />
+        <ActivityIndicator size="large" color={colors.primaryGreen} />
         <Text style={{ marginTop: 12, color: '#6b7280' }}>
           Loading partners...
         </Text>
@@ -93,12 +92,9 @@ export default function OnboardingFlow() {
   return (
     <View style={styles.container}>
       <View>
-        <View style={styles.imageContainer}>
-          <Image
-            source={replateIcon}
-            style={[iconStyles.logo]}
-            resizeMode="contain"
-          />
+        <View style={styles.header}>
+          <Text style={styles.welcomeTitle}>Welcome!</Text>
+          <Text style={styles.welcomeSubtitle}>Please enter your details</Text>
         </View>
 
         <Text style={styles.title}>Which NPO are you partnered with?</Text>
@@ -125,7 +121,7 @@ export default function OnboardingFlow() {
           setOpen={setOpen}
           setValue={cb => setSelectedNPOId(cb(selectedNPOId))}
           setItems={setItems}
-          placeholder="Select an NPO"
+          placeholder="Select NPO Recipient"
           style={[styles.dropdownStyle, open && styles.dropdownOpenStyle]}
           placeholderStyle={styles.placeholderStyle}
           dropDownContainerStyle={styles.dropdownListStyle}

@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import elementIcon from 'assets/elements.png';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import QuickActionsSheet from '@/components/QuickActionsSheet';
@@ -131,11 +132,11 @@ export default function MyTasksPage() {
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const today = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
+  const now = new Date();
+  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const dayNum = now.getDate();
+  const monthName = now.toLocaleDateString('en-US', { month: 'long' });
+  const today = `${weekday}, ${dayNum} ${monthName}`;
 
   const fetchTasks = useCallback(
     async (isRefresh = false) => {
@@ -160,7 +161,11 @@ export default function MyTasksPage() {
           ),
         ]);
 
-        setTasks([...activeTasks, ...historyTasks]);
+        const mergedMap = new Map<number, Task>();
+        for (const task of [...activeTasks, ...historyTasks]) {
+          mergedMap.set(task.id, task);
+        }
+        setTasks(Array.from(mergedMap.values()));
       } catch (e: unknown) {
         const errorMessage =
           e instanceof ApiError ? e.message : 'Failed to load tasks';
@@ -335,7 +340,7 @@ export default function MyTasksPage() {
               key: 'active',
               label: activeCount > 0 ? `Active (${activeCount})` : 'Active',
             },
-            { key: 'completed', label: 'Completed' },
+            { key: 'completed', label: 'History' },
           ]}
           activeKey={activeTab}
           onChange={setActiveTab}
@@ -365,9 +370,16 @@ export default function MyTasksPage() {
 
         {displayedTasks.length > 0 ? (
           <View style={styles.taskListContainer}>
-            <Pressable style={styles.filterRow}>
-              <Text style={styles.filterText}>filter</Text>
-            </Pressable>
+            {activeTab === 'completed' && (
+              <Pressable style={styles.filterRow}>
+                <Ionicons
+                  name="filter-outline"
+                  size={13}
+                  color={Colors.filterGray}
+                />
+                <Text style={styles.filterText}>filter</Text>
+              </Pressable>
+            )}
             {displayedTasks.map(task => (
               <TaskCard
                 key={task.id}
@@ -416,7 +428,8 @@ export default function MyTasksPage() {
       <ConfirmationModal
         visible={confirmModalVisible}
         title="Mark task as missing?"
-        subtitle="This task will be removed."
+        subtitle="This action cannot be undone."
+        destructive
         onBack={handleCancelMissing}
         onConfirm={handleConfirmMissing}
       />

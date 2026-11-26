@@ -16,12 +16,14 @@ import {
 } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { driverAPI, PasswordResetData } from '../../../../api/config';
 import CHECK_ICON from '../../../../assets/check-icon.png';
 // Assets
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
+import colors from '../../../styles/colors';
 import {
   INPUT_LIMITS,
   validatePassword,
@@ -94,7 +96,7 @@ export default function ResetPasswordPage() {
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const confirmPasswordBorderWidth = confirmPasswordBorderAnim.interpolate({
@@ -104,7 +106,7 @@ export default function ResetPasswordPage() {
 
   const confirmPasswordBorderColor = confirmPasswordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const handlePasswordChange = (text: string) => {
@@ -368,16 +370,15 @@ export default function ResetPasswordPage() {
               <TouchableOpacity
                 style={authStyles.showButton}
                 onPress={() => setShowPassword(!showPassword)}
+                accessibilityLabel={
+                  showPassword ? 'Hide password' : 'Show password'
+                }
               >
-                <Text
-                  style={
-                    showPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </Text>
+                <Ionicons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={20}
+                  color={colors.textTertiary}
+                />
               </TouchableOpacity>
             </Animated.View>
             <View style={authStyles.passwordRequirements}>
@@ -471,16 +472,17 @@ export default function ResetPasswordPage() {
               <TouchableOpacity
                 style={authStyles.showButton}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                accessibilityLabel={
+                  showConfirmPassword
+                    ? 'Hide confirm password'
+                    : 'Show confirm password'
+                }
               >
-                <Text
-                  style={
-                    showConfirmPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
-                </Text>
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={20}
+                  color={colors.textTertiary}
+                />
               </TouchableOpacity>
             </Animated.View>
             {confirmPasswordError && (
@@ -492,16 +494,9 @@ export default function ResetPasswordPage() {
             <TouchableOpacity
               style={[
                 authStyles.grayButton,
-                authStyles.buttonEnabled,
-                {
-                  opacity:
-                    !password ||
-                    !confirmPassword ||
-                    !isPasswordValid ||
-                    isLoading
-                      ? 0.5
-                      : 1,
-                },
+                !password || !confirmPassword || !isPasswordValid || isLoading
+                  ? authStyles.buttonDisabled
+                  : authStyles.buttonEnabled,
               ]}
               disabled={
                 !password || !confirmPassword || !isPasswordValid || isLoading

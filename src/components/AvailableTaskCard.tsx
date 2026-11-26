@@ -71,21 +71,20 @@ const styles = StyleSheet.create({
   },
   locationName: {
     fontSize: 16,
-    fontFamily: 'Lato',
-    fontWeight: '500',
+    fontFamily: 'LatoBold',
     color: Colors.black,
     lineHeight: 24,
   },
   address: {
     fontSize: 12,
-    fontFamily: 'Lato',
+    fontFamily: 'LatoBold',
     color: Colors.dateGray,
     lineHeight: 16,
   },
   timeRange: {
     fontSize: 12,
-    fontFamily: 'Lato',
-    color: '#94A3B8',
+    fontFamily: 'LatoBold',
+    color: Colors.slateGray,
     lineHeight: 16,
   },
   arrowContainer: {

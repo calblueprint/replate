@@ -16,12 +16,14 @@ import {
 } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { DriverLoginData } from '../../../../api/config';
 // Assets
 import REPLATE_LOGO from '../../../../assets/replate-logo.png';
 import AnimatedPressable from '../../../components/AnimatedPressable';
 import BackButton from '../../../components/BackButton';
 import { authStyles, ERROR_COLOR } from '../../../styles/authStyles';
+import colors from '../../../styles/colors';
 import { useAuth } from '../../../utils/AuthContext';
 import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
 
@@ -76,7 +78,7 @@ export default function LoginPage() {
 
   const emailBorderColor = emailBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const passwordBorderWidth = passwordBorderAnim.interpolate({
@@ -86,7 +88,7 @@ export default function LoginPage() {
 
   const passwordBorderColor = passwordBorderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#a9a9a9', '#58ad85'],
+    outputRange: [colors.borderPrimary, colors.primaryGreen],
   });
 
   const handleLogin = async () => {
@@ -118,7 +120,7 @@ export default function LoginPage() {
 
       await login(loginData, true); // Keep user signed in
       setTimeout(() => {
-        router.push('/(tabs)/my-tasks');
+        router.replace('/(tabs)/my-tasks');
       }, 500);
     } catch (error: unknown) {
       // Handle backend errors
@@ -248,8 +250,8 @@ export default function LoginPage() {
             >
               <TextInput
                 style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="Email@gmail.com"
-                placeholderTextColor="#989898"
+                placeholder="email@gmail.com..."
+                placeholderTextColor={colors.textTertiary}
                 value={email}
                 onChangeText={handleEmailChange}
                 onFocus={() => setEmailFocused(true)}
@@ -283,7 +285,7 @@ export default function LoginPage() {
               <TextInput
                 style={[authStyles.passwordInput, authStyles.textBlack]}
                 placeholder="Enter password"
-                placeholderTextColor="#989898"
+                placeholderTextColor={colors.textTertiary}
                 value={password}
                 onChangeText={handlePasswordChange}
                 onFocus={() => setPasswordFocused(true)}
@@ -300,16 +302,15 @@ export default function LoginPage() {
               <TouchableOpacity
                 style={authStyles.showButton}
                 onPress={() => setShowPassword(!showPassword)}
+                accessibilityLabel={
+                  showPassword ? 'Hide password' : 'Show password'
+                }
               >
-                <Text
-                  style={
-                    showPassword
-                      ? authStyles.showButtonTextGrey
-                      : authStyles.showButtonText
-                  }
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </Text>
+                <Ionicons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={20}
+                  color={colors.textTertiary}
+                />
               </TouchableOpacity>
             </Animated.View>
             {passwordError && (
@@ -322,26 +323,30 @@ export default function LoginPage() {
             style={authStyles.forgotPasswordLink}
           >
             <Text
-              style={[authStyles.linkSignup, authStyles.forgotPasswordLinkText]}
+              style={[
+                authStyles.linkTextSignup,
+                authStyles.forgotPasswordLinkText,
+                { marginTop: 0 },
+              ]}
             >
-              Forgot password?
+              Forgot Password?{' '}
+              <Text style={authStyles.linkSignup}>Reset Here</Text>
             </Text>
           </TouchableOpacity>
 
           <View style={authStyles.buttonContainer}>
             <AnimatedPressable
-              style={[
-                authStyles.grayButton,
-                {
-                  opacity: !email || !password || isLoading ? 0.5 : 1,
-                },
-              ]}
+              style={
+                !email || !password || isLoading
+                  ? [authStyles.grayButton, authStyles.buttonDisabled]
+                  : authStyles.grayButton
+              }
               disabled={!email || !password || isLoading}
               onPress={handleLogin}
               scaleValue={0.97}
             >
               <Text style={authStyles.grayButtonText}>
-                {isLoading ? 'Logging in...' : 'Log in '}
+                {isLoading ? 'Logging in...' : 'LOGIN'}
               </Text>
             </AnimatedPressable>
           </View>
