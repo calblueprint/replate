@@ -6,6 +6,7 @@ interface ConfirmationModalProps {
   visible: boolean;
   title: string;
   subtitle: string;
+  destructive?: boolean;
   onBack: () => void;
   onConfirm: () => void;
 }
@@ -14,6 +15,7 @@ export default function ConfirmationModal({
   visible,
   title,
   subtitle,
+  destructive = false,
   onBack,
   onConfirm,
 }: ConfirmationModalProps) {
@@ -89,12 +91,20 @@ export default function ConfirmationModal({
             <Pressable
               style={({ pressed }) => [
                 styles.btn,
-                styles.confirmBtn,
+                destructive ? styles.destructiveConfirmBtn : styles.confirmBtn,
                 pressed && { opacity: 0.85 },
               ]}
               onPress={onConfirm}
             >
-              <Text style={styles.confirmText}>Confirm</Text>
+              <Text
+                style={
+                  destructive
+                    ? styles.destructiveConfirmText
+                    : styles.confirmText
+                }
+              >
+                Confirm
+              </Text>
             </Pressable>
 
             <Pressable
@@ -164,10 +174,19 @@ const styles = StyleSheet.create({
   confirmBtn: {
     backgroundColor: Colors.primaryGreen,
   },
+  destructiveConfirmBtn: {
+    backgroundColor: Colors.lightRed,
+  },
   confirmText: {
     fontSize: 14,
     fontFamily: 'LatoBold',
     color: Colors.white,
+    letterSpacing: 0.28,
+  },
+  destructiveConfirmText: {
+    fontSize: 14,
+    fontFamily: 'LatoBold',
+    color: Colors.missingRed,
     letterSpacing: 0.28,
   },
   backBtn: {

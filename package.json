@@ -67,6 +67,7 @@
     "eslint-config-expo": "~58.0.4",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-prettier": "^5.5.3",
+    "expo-mcp": "^0.2.4",
     "husky": "^9.1.7",
     "metro-react-native-babel-transformer": "^0.77.0",
     "prettier": "^3.6.2",

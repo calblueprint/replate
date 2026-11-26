@@ -5,6 +5,7 @@ import { Tabs } from 'expo-router';
 import homeIcon from 'assets/home.png';
 import profileIcon from 'assets/profile.png';
 import tasksIcon from 'assets/tasks.png';
+import Colors from '@/styles/colors';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -31,8 +32,8 @@ export default function TabLayout() {
           borderTopLeftRadius: 10,
           borderTopRightRadius: 10,
         },
-        tabBarActiveTintColor: '#06B97C',
-        tabBarInactiveTintColor: '#A0A0A0',
+        tabBarActiveTintColor: Colors.primaryGreen,
+        tabBarInactiveTintColor: Colors.borderPrimary,
         tabBarLabelStyle: {
           fontSize: 12,
           fontFamily: 'Lato',
@@ -81,8 +82,8 @@ export default function TabLayout() {
             <Image
               source={profileIcon}
               style={{
-                width: 40,
-                height: 40,
+                width: 26,
+                height: 26,
                 tintColor: color,
               }}
               resizeMode="contain"

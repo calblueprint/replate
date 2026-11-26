@@ -34,10 +34,11 @@ export default function RequiredInput({
 }: RequiredInputProps) {
   const [focused, setFocused] = useState(false);
   const [open, setOpen] = useState(false);
-  const hasError = required && value.trim().length === 0;
 
   return (
-    <View style={[styles.container, hasError && styles.errorBorder]}>
+    <View
+      style={[styles.container, isPicker && open && styles.pickerOpenContainer]}
+    >
       <View style={styles.labelRow}>
         <Text style={styles.label}>{label}</Text>
         {required && <Text style={styles.requiredText}>*</Text>}
@@ -51,6 +52,7 @@ export default function RequiredInput({
           setOpen={setOpen}
           setValue={callback => onChangeText(callback(value))}
           listMode="SCROLLVIEW"
+          zIndex={1000}
           placeholder={placeholder}
           style={[
             styles.input,

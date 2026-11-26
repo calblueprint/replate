@@ -75,8 +75,8 @@ export const styles = StyleSheet.create({
     color: Colors.black,
   },
   headerTitle: {
-    fontSize: 20,
-    fontFamily: 'LatoBold',
+    fontSize: 24,
+    fontFamily: 'Lato',
     color: Colors.black,
     lineHeight: 28,
   },
@@ -86,7 +86,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     marginTop: 0,
     paddingHorizontal: 19,
-    paddingTop: 28,
+    paddingTop: 18,
     paddingBottom: 120,
     flex: 1,
   },
@@ -95,7 +95,10 @@ export const styles = StyleSheet.create({
   locationSection: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 28,
+    paddingHorizontal: 19,
+    paddingTop: 16,
+    paddingBottom: 20,
+    backgroundColor: Colors.background,
     gap: 14,
   },
   locationIcon: {
@@ -117,18 +120,19 @@ export const styles = StyleSheet.create({
     fontFamily: 'Lato',
     fontWeight: '600',
     color: Colors.dateGray,
-    marginBottom: 12,
   },
   openMapsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    alignSelf: 'flex-end',
+    gap: 6,
+    marginBottom: 12,
   },
   openMapsText: {
     fontSize: 13,
     fontFamily: 'Lato',
     fontWeight: '500',
-    color: Colors.black,
+    color: Colors.primaryGreen,
     textDecorationLine: 'underline',
   },
 
@@ -149,7 +153,7 @@ export const styles = StyleSheet.create({
   scheduleIcon: {
     width: 26,
     height: 25,
-    tintColor: '#D9D9D9',
+    tintColor: Colors.black,
     marginTop: 2,
   },
   scheduleContent: {
@@ -197,13 +201,11 @@ export const styles = StyleSheet.create({
   },
   contactActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
   },
   actionButton: {
-    width: 44,
-    height: 36,
-    backgroundColor: Colors.primaryGreen,
-    borderRadius: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -217,13 +219,13 @@ export const styles = StyleSheet.create({
   },
   emailIcon: {
     fontSize: 20,
-    color: '#4D1B1B',
+    color: Colors.black,
   },
   emailText: {
     fontSize: 13,
     fontFamily: 'Lato',
     fontWeight: '500',
-    color: Colors.dateGray,
+    color: Colors.black,
   },
 
   /** DESCRIPTION SECTION **/
@@ -233,7 +235,7 @@ export const styles = StyleSheet.create({
   descriptionTitle: {
     fontSize: 15,
     fontFamily: 'Lato',
-    color: Colors.black,
+    color: Colors.secondaryGreen,
     marginBottom: 24,
   },
   descriptionRow: {

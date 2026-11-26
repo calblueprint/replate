@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
   },
 
   retryButton: {
-    backgroundColor: '#58ad85',
+    backgroundColor: colors.primaryGreen,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -51,7 +51,7 @@ export const styles = StyleSheet.create({
   },
 
   retryTextButtonText: {
-    color: '#58ad85',
+    color: colors.primaryGreen,
     fontFamily: 'LatoBold',
   },
 
@@ -124,7 +124,7 @@ export const styles = StyleSheet.create({
   pickupSummaryAddressText: {
     fontSize: 16,
     fontWeight: '100',
-    color: colors.jasmine,
+    color: colors.primaryGreen,
     fontFamily: 'LatoBold',
     lineHeight: 22,
     marginTop: 4,
@@ -162,7 +162,7 @@ export const styles = StyleSheet.create({
     marginRight: 3,
   },
   viewButton: {
-    backgroundColor: colors.jasmine,
+    backgroundColor: colors.primaryGreen,
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -244,14 +244,14 @@ export const styles = StyleSheet.create({
 
   completeButton: {
     flex: 1,
-    backgroundColor: colors.jasmine,
+    backgroundColor: colors.primaryGreen,
     borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
   },
   completeButtonDisabled: {
-    backgroundColor: '#A9A9A9',
+    backgroundColor: colors.fillInactive,
   },
   completeText: {
     color: colors.white,

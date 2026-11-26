@@ -110,24 +110,36 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    gap: 6,
+    gap: 8,
     alignItems: 'center',
   },
   dayItem: {
-    width: 65,
-    height: 85,
+    width: 61,
+    height: 80,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 1,
   },
   selectedDayItem: {
+    width: 71,
+    height: 92,
     backgroundColor: Colors.profileBg,
+    borderWidth: 1,
     borderColor: Colors.primaryGreen,
   },
   monthText: {
     fontSize: 10,
     fontFamily: 'LatoBold',
-    color: Colors.dateGray,
+    color: Colors.black,
     marginBottom: 2,
   },
   dayNumber: {
@@ -139,7 +151,7 @@ const styles = StyleSheet.create({
   weekdayText: {
     fontSize: 10,
     fontFamily: 'LatoBold',
-    color: Colors.dateGray,
+    color: Colors.black,
   },
   selectedText: {
     color: Colors.secondaryGreen,
