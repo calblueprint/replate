@@ -72,9 +72,8 @@ export default function DayCarousel({
       day: number;
     }[] = [];
     const today = new Date();
-    const offset = Math.floor(dayCount / 2);
 
-    for (let i = -offset; i < dayCount - offset; i++) {
+    for (let i = 0; i < dayCount; i++) {
       const d = new Date(today);
       d.setDate(d.getDate() + i);
       result.push({

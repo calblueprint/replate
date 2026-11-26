@@ -161,11 +161,7 @@ export default function MyTasksPage() {
           ),
         ]);
 
-        const mergedMap = new Map<number, Task>();
-        for (const task of [...activeTasks, ...historyTasks]) {
-          mergedMap.set(task.id, task);
-        }
-        setTasks(Array.from(mergedMap.values()));
+        setTasks([...activeTasks, ...historyTasks]);
       } catch (e: unknown) {
         const errorMessage =
           e instanceof ApiError ? e.message : 'Failed to load tasks';

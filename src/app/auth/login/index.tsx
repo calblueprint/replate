@@ -56,7 +56,7 @@ export default function LoginPage() {
     <AuthScreenLayout title="Welcome!" subtitle="Please enter your details">
       <AuthInput
         label="EMAIL"
-        placeholder="Enter your email"
+        placeholder="email@gmail.com..."
         value={email}
         onChangeText={text => {
           setEmail(text);

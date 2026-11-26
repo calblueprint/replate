@@ -50,9 +50,6 @@ export const styles = StyleSheet.create({
     color: colors.black,
     fontFamily: 'Lato',
   },
-  errorBorder: {
-    borderColor: colors.missingRed,
-  },
   focusBorder: {
     borderColor: colors.primaryGreen,
   },

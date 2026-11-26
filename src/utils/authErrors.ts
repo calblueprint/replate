@@ -182,8 +182,8 @@ export function parseResetPasswordApiErrors(error: unknown): {
 
   if (
     lower.includes('token') ||
-    lower.includes('invalid') ||
-    lower.includes('expired')
+    lower.includes('expired') ||
+    (lower.includes('invalid') && !lower.includes('password'))
   ) {
     fieldErrors.token = errorMessage;
   } else if (errors.length > 0) {

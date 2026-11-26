@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
       const errorMessage =
         message || 'Failed to send reset email. Please try again.';
       setEmailError(errorMessage);
-      Toast.show({ type: 'error', text1: 'Error', text2: errorMessage });
+      showAuthErrorToast('Error', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
     >
       <AuthInput
         label="EMAIL"
-        placeholder="Enter your email"
+        placeholder="email@gmail.com..."
         value={email}
         onChangeText={text => {
           setEmail(text);

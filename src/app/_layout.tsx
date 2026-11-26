@@ -33,10 +33,6 @@ function StackLayout() {
       <ProfileProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
-          <Stack.Screen name="auth/login" />
-          <Stack.Screen name="auth/signup" />
-          <Stack.Screen name="auth/forgot-password" />
-          <Stack.Screen name="auth/reset-password" />
           <Stack.Screen name="onboarding" />
           <Stack.Screen name="pickup-details" />
           <Stack.Screen name="donation-details" />

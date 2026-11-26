@@ -25,7 +25,6 @@ const STATUS_CONFIG: Record<
     badgeBg: string;
     badgeColor: string;
     timeColor: string;
-    dotColor: string;
     actionBg: string;
     actionText: string;
   }
@@ -36,7 +35,6 @@ const STATUS_CONFIG: Record<
     badgeBg: 'transparent',
     badgeColor: 'transparent',
     timeColor: Colors.secondaryGreen,
-    dotColor: Colors.primaryGreen,
     actionBg: Colors.primaryGreen,
     actionText: 'Add Details',
   },
@@ -46,7 +44,6 @@ const STATUS_CONFIG: Record<
     badgeBg: Colors.overdueBg,
     badgeColor: Colors.overdueYellow,
     timeColor: Colors.overdueYellow,
-    dotColor: Colors.overdueYellow,
     actionBg: Colors.overdueYellow,
     actionText: 'Add Details',
   },
@@ -56,7 +53,6 @@ const STATUS_CONFIG: Record<
     badgeBg: Colors.lightRed,
     badgeColor: Colors.missingRed,
     timeColor: Colors.missingRed,
-    dotColor: Colors.missingRed,
     actionBg: Colors.missingRed,
     actionText: 'Add Details',
   },
@@ -66,7 +62,6 @@ const STATUS_CONFIG: Record<
     badgeBg: Colors.profileBg,
     badgeColor: Colors.secondaryGreen,
     timeColor: Colors.secondaryGreen,
-    dotColor: Colors.primaryGreen,
     actionBg: Colors.primaryGreen,
     actionText: 'View Details',
   },
@@ -76,7 +71,6 @@ const STATUS_CONFIG: Record<
     badgeBg: Colors.background,
     badgeColor: Colors.slateGray,
     timeColor: Colors.filterGray,
-    dotColor: Colors.missedGray,
     actionBg: Colors.missedGray,
     actionText: 'View Details',
   },
