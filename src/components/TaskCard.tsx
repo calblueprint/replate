@@ -13,7 +13,6 @@ interface TaskCardProps {
   status: TaskStatus;
   completedDate?: string;
   onPress: () => void;
-  onLongPress?: () => void;
   onAddDetails?: () => void;
 }
 
@@ -83,7 +82,6 @@ export default function TaskCard({
   status,
   completedDate,
   onPress,
-  onLongPress,
   onAddDetails,
 }: TaskCardProps) {
   const config = STATUS_CONFIG[status];
@@ -155,13 +153,7 @@ export default function TaskCard({
       {isFinished ? (
         cardInner
       ) : (
-        <ScalePress
-          onPress={onPress}
-          onLongPress={onLongPress}
-          delayLongPress={400}
-        >
-          {cardInner}
-        </ScalePress>
+        <ScalePress onPress={onPress}>{cardInner}</ScalePress>
       )}
     </View>
   );

@@ -12,14 +12,13 @@ import {
 import { useFocusEffect, useRouter } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import elementIcon from 'assets/elements.png';
-import ConfirmationModal from '@/components/ConfirmationModal';
-import QuickActionsSheet from '@/components/QuickActionsSheet';
 import { TaskListSkeleton } from '@/components/SkeletonLoader';
 import TaskCard from '@/components/TaskCard';
 import UnderlineTabBar from '@/components/UnderlineTabBar';
 import Colors from '@/styles/colors';
 import styles from '@/styles/tabs/my-tasks-styles';
 import { useAuth } from '@/utils/AuthContext';
+import { formatShortStatusDate, isTaskPastEndTime } from '@/utils/dateHelpers';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 
@@ -97,26 +96,15 @@ function formatAddress(task: Task): string {
 function deriveTaskStatus(task: Task): TaskStatus {
   if (task.status === 'complete' || task.completed_at) return 'completed';
   if (task.status === 'failed') return 'missed';
-  if (task.status === 'in_progress') return 'active';
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const pickupDate = new Date(task.pickup_date);
-  pickupDate.setHours(0, 0, 0, 0);
-
-  if (pickupDate < today) return 'overdue';
+  if (isTaskPastEndTime(task.pickup_date, task.end_time)) return 'overdue';
   return 'active';
 }
 
 function formatStatusDate(task: Task): string | undefined {
-  const dateStr = task.completed_at ?? task.missed_at;
+  const dateStr = task.completed_at ?? task.missed_at ?? task.pickup_date;
   if (!dateStr) return undefined;
-  try {
-    const date = new Date(dateStr);
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  } catch {
-    return undefined;
-  }
+  return formatShortStatusDate(dateStr);
 }
 
 export default function MyTasksPage() {
@@ -127,10 +115,6 @@ export default function MyTasksPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('active');
-
-  const [quickActionsVisible, setQuickActionsVisible] = useState(false);
-  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const now = new Date();
   const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
@@ -161,7 +145,11 @@ export default function MyTasksPage() {
           ),
         ]);
 
-        setTasks([...activeTasks, ...historyTasks]);
+        const combined = new Map<number, Task>();
+        for (const task of [...activeTasks, ...historyTasks]) {
+          combined.set(task.id, task);
+        }
+        setTasks(Array.from(combined.values()));
       } catch (e: unknown) {
         const errorMessage =
           e instanceof ApiError ? e.message : 'Failed to load tasks';
@@ -234,67 +222,6 @@ export default function MyTasksPage() {
     [router],
   );
 
-  const handleCardLongPress = useCallback((task: Task) => {
-    setSelectedTask(task);
-    setQuickActionsVisible(true);
-  }, []);
-
-  const handleCloseQuickActions = useCallback(() => {
-    setQuickActionsVisible(false);
-    setSelectedTask(null);
-  }, []);
-
-  const handleMarkDelivered = useCallback(() => {
-    if (!selectedTask) return;
-
-    setQuickActionsVisible(false);
-    setSelectedTask(null);
-    router.push({
-      pathname: '/donation-details/[id]',
-      params: {
-        id: selectedTask.encrypted_id,
-        location: selectedTask.location_name ?? '',
-      },
-    });
-  }, [selectedTask, router]);
-
-  const handleMarkMissingPrompt = useCallback(() => {
-    setQuickActionsVisible(false);
-    setConfirmModalVisible(true);
-  }, []);
-
-  const handleConfirmMissing = useCallback(async () => {
-    if (!selectedTask || !driver?.id) return;
-
-    setConfirmModalVisible(false);
-    try {
-      const safeId = encodeURIComponent(selectedTask.encrypted_id);
-      await apiRequest(
-        `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/driver_mark_as_failed`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ driver_id: driver.id }),
-        },
-      );
-      fetchTasks(true);
-    } catch (e: unknown) {
-      const errorMessage =
-        e instanceof ApiError ? e.message : 'Failed to mark as missing';
-      setError(errorMessage);
-    } finally {
-      setSelectedTask(null);
-    }
-  }, [selectedTask, driver?.id, fetchTasks]);
-
-  const handleCancelMissing = useCallback(() => {
-    setConfirmModalVisible(false);
-    setSelectedTask(null);
-  }, []);
-
   const prevTab = useRef(activeTab);
   if (prevTab.current !== activeTab) {
     prevTab.current = activeTab;
@@ -347,7 +274,6 @@ export default function MyTasksPage() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        scrollEnabled={!quickActionsVisible && !confirmModalVisible}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -385,7 +311,6 @@ export default function MyTasksPage() {
                 status={task.derivedStatus}
                 completedDate={formatStatusDate(task)}
                 onPress={() => handleCardPress(task)}
-                onLongPress={() => handleCardLongPress(task)}
                 onAddDetails={() => handleAddDetails(task)}
               />
             ))}
@@ -400,7 +325,7 @@ export default function MyTasksPage() {
             <Text style={styles.emptyTitle}>
               {activeTab === 'active'
                 ? 'You have no active tasks'
-                : 'No completed tasks yet'}
+                : 'No finished tasks yet'}
             </Text>
             {activeTab === 'active' && (
               <TouchableOpacity
@@ -413,22 +338,6 @@ export default function MyTasksPage() {
           </View>
         )}
       </ScrollView>
-
-      <QuickActionsSheet
-        visible={quickActionsVisible}
-        onClose={handleCloseQuickActions}
-        onMarkDelivered={handleMarkDelivered}
-        onMarkMissing={handleMarkMissingPrompt}
-      />
-
-      <ConfirmationModal
-        visible={confirmModalVisible}
-        title="Mark task as missing?"
-        subtitle="This action cannot be undone."
-        destructive
-        onBack={handleCancelMissing}
-        onConfirm={handleConfirmMissing}
-      />
     </View>
   );
 }

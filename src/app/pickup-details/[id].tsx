@@ -28,6 +28,7 @@ interface TaskDetails {
   id: number;
   encrypted_id?: string;
   driver_id?: number | null;
+  status?: string | null;
   pickup_date: string;
   start_time: string | null;
   end_time: string | null;
@@ -132,6 +133,7 @@ export default function PickupDetails() {
           id: raw.id as number,
           encrypted_id: raw.encrypted_id as string | undefined,
           driver_id: (raw.driver_id as number | null) ?? null,
+          status: (raw.status as string | null) ?? null,
           pickup_date:
             (raw.pickup_date as string) ?? (raw.scheduled_date as string) ?? '',
           start_time:
@@ -285,7 +287,10 @@ export default function PickupDetails() {
         .join(' ')
     : 'Address not available';
 
-  const isInProgress = isTaskAdded || !!task.driver_id;
+  const isCompleted = task.status === 'complete';
+  const isMissed = task.status === 'failed';
+  const isInProgress =
+    !isCompleted && !isMissed && (isTaskAdded || !!task.driver_id);
 
   return (
     <View style={styles.container}>
@@ -440,7 +445,25 @@ export default function PickupDetails() {
 
       {/* Bottom button */}
       <View style={styles.bottomContainer}>
-        {isInProgress ? (
+        {isCompleted ? (
+          <View style={[styles.progressButton, styles.completedStatusButton]}>
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={24}
+              color={Colors.white}
+            />
+            <Text style={styles.progressButtonText}>Task completed</Text>
+          </View>
+        ) : isMissed ? (
+          <View style={[styles.progressButton, styles.missedStatusButton]}>
+            <Ionicons
+              name="close-circle-outline"
+              size={24}
+              color={Colors.white}
+            />
+            <Text style={styles.progressButtonText}>Task missed</Text>
+          </View>
+        ) : isInProgress ? (
           <View style={styles.progressButton}>
             <Ionicons name="time-outline" size={24} color={Colors.white} />
             <Text style={styles.progressButtonText}>Task in progress</Text>

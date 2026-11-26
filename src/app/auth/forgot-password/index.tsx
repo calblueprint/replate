@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
     >
       <AuthInput
         label="EMAIL"
-        placeholder="email@gmail.com..."
+        placeholder="Enter email"
         value={email}
         onChangeText={text => {
           setEmail(text);

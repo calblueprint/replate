@@ -12,10 +12,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import ConfirmationModal from '@/components/ConfirmationModal';
 import PhotoUpload from '@/components/PhotoUpload/PhotoUpload';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import { styles } from '@/styles/pages/donation-details-styles';
-import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
+import {
+  formatPickupDate,
+  formatTimeRangeAny,
+  hasTaskWindowStarted,
+} from '@/utils/dateHelpers';
+import { ApiError } from '~/api/apiUtils';
 import {
   getPartners,
   getTask,
@@ -65,7 +71,12 @@ export default function DonationLayout() {
   const [task, setTask] = useState<TaskPickupInfo | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmMissedVisible, setConfirmMissedVisible] = useState(false);
   const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
+  const canMarkMissed =
+    !isFetching &&
+    !isSubmitting &&
+    hasTaskWindowStarted(task?.pickup_date ?? null, task?.start_time ?? null);
 
   useEffect(() => {
     let cancelled = false;
@@ -150,6 +161,13 @@ export default function DonationLayout() {
   const pickupSummaryAddress =
     task?.address || params.location || 'Location details';
 
+  const getErrorMessage = (error: unknown): string | undefined => {
+    if (error instanceof ApiError || error instanceof Error) {
+      return error.message.trim() || undefined;
+    }
+    return undefined;
+  };
+
   const handleComplete = async () => {
     if (!params.id || isSubmitting) return;
     setIsSubmitting(true);
@@ -163,18 +181,20 @@ export default function DonationLayout() {
       });
       Toast.show({ type: 'success', text1: 'Donation recorded!' });
       router.replace('/(tabs)/my-tasks');
-    } catch {
+    } catch (e: unknown) {
       Toast.show({
         type: 'error',
-        text1: 'Could not save. Please try again.',
+        text1: 'Could not save.',
+        text2: getErrorMessage(e) || 'Please try again.',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleMissed = async () => {
-    if (!params.id || isSubmitting) return;
+  const handleConfirmMissed = async () => {
+    setConfirmMissedVisible(false);
+    if (!params.id || !canMarkMissed) return;
     setIsSubmitting(true);
     try {
       await submitTaskMissed(params.id);
@@ -184,10 +204,11 @@ export default function DonationLayout() {
         text2: `${params.location || 'Task'} marked as missed.`,
       });
       router.replace('/(tabs)/my-tasks');
-    } catch {
+    } catch (e: unknown) {
       Toast.show({
         type: 'error',
-        text1: 'Could not mark as missed. Please try again.',
+        text1: 'Could not mark as missed.',
+        text2: getErrorMessage(e) || 'Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -303,13 +324,15 @@ export default function DonationLayout() {
         <TouchableOpacity
           style={[
             styles.missedButton,
-            isSubmitting && styles.missedButtonDisabled,
+            !canMarkMissed && styles.missedButtonDisabled,
           ]}
-          onPress={handleMissed}
-          disabled={isSubmitting}
+          onPress={() => setConfirmMissedVisible(true)}
+          disabled={!canMarkMissed}
         >
           <Text
-            style={isSubmitting ? styles.missedTextDisabled : styles.missedText}
+            style={
+              !canMarkMissed ? styles.missedTextDisabled : styles.missedText
+            }
           >
             Missed
           </Text>
@@ -325,6 +348,15 @@ export default function DonationLayout() {
           <Text style={[styles.completeText]}>Complete</Text>
         </TouchableOpacity>
       </View>
+
+      <ConfirmationModal
+        visible={confirmMissedVisible}
+        title="Mark task as missed?"
+        subtitle="This action cannot be undone."
+        destructive
+        onBack={() => setConfirmMissedVisible(false)}
+        onConfirm={handleConfirmMissed}
+      />
     </SafeAreaView>
   );
 }

@@ -296,6 +296,12 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
   },
+  completedStatusButton: {
+    backgroundColor: Colors.primaryGreen,
+  },
+  missedStatusButton: {
+    backgroundColor: Colors.slateGray,
+  },
   progressButtonText: {
     fontSize: 14,
     fontFamily: 'LatoBold',
