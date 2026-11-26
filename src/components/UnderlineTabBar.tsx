@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
   },
   underline: {
     position: 'absolute',
+    left: 0,
     bottom: 0,
     height: 2,
     backgroundColor: Colors.primaryGreen,

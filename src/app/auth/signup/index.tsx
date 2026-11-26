@@ -527,7 +527,7 @@ export default function SignupPage() {
             >
               <TextInput
                 style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="Email@gmail.com"
+                placeholder="Enter your email"
                 placeholderTextColor="#989898"
                 value={email}
                 onChangeText={handleEmailChange}

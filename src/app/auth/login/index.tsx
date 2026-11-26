@@ -250,7 +250,7 @@ export default function LoginPage() {
             >
               <TextInput
                 style={[authStyles.inputInner, authStyles.textBlack]}
-                placeholder="email@gmail.com..."
+                placeholder="Enter your email"
                 placeholderTextColor={colors.textTertiary}
                 value={email}
                 onChangeText={handleEmailChange}
