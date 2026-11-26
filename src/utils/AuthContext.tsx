@@ -23,11 +23,8 @@ interface AuthContextType {
     credentials: DriverLoginData,
     staySignedIn?: boolean,
   ) => Promise<void>;
-  signup: (
-    driverData: DriverSignupData,
-    staySignedIn?: boolean,
-  ) => Promise<void>;
-  logout: () => void;
+  signup: (driverData: DriverSignupData) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,12 +41,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedDriver = await AsyncStorage.getItem('driver');
 
         if (storedDriver) {
-          const parsed = safeJsonParse<DriverResponse>(storedDriver);
-          // Sanitize the parsed data to prevent prototype pollution
-          const sanitized = sanitizeObject(
-            parsed as unknown as Record<string, unknown>,
-          ) as unknown as DriverResponse;
-          setDriver(sanitized);
+          const parsed = safeJsonParse<Record<string, unknown>>(storedDriver);
+          if (parsed && typeof parsed === 'object') {
+            setDriver(sanitizeObject(parsed) as unknown as DriverResponse);
+          }
         }
       } catch {
         // Failed to load stored driver, user will need to login again
