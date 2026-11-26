@@ -119,9 +119,9 @@ export const authStyles = StyleSheet.create({
     marginBottom: 2,
   },
   requirementCircle: {
-    width: 11,
-    height: 11,
-    borderRadius: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: colors.textTertiary,
     marginRight: 8,
     justifyContent: 'center',
@@ -129,18 +129,6 @@ export const authStyles = StyleSheet.create({
   },
   requirementCircleMet: {
     backgroundColor: colors.primaryGreen,
-  },
-  requirementCheckmark: {
-    width: 9,
-    height: 9,
-  },
-  requirementCheckmarkMet: {
-    tintColor: colors.white,
-    opacity: 1,
-  },
-  requirementCheckmarkUnmet: {
-    tintColor: colors.white,
-    opacity: 0.7,
   },
   requirementTextDark: {
     fontSize: 12,

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Image, Text, View } from 'react-native';
-import CHECK_ICON from '../../assets/check-icon.png';
+import { Text, View } from 'react-native';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { authStyles } from '../styles/authStyles';
+import colors from '../styles/colors';
 
 export function isPasswordValid(password: string): boolean {
   return (
@@ -22,15 +23,7 @@ function RequirementRow({ label, met }: { label: string; met: boolean }) {
           met && authStyles.requirementCircleMet,
         ]}
       >
-        <Image
-          source={CHECK_ICON}
-          style={[
-            authStyles.requirementCheckmark,
-            met
-              ? authStyles.requirementCheckmarkMet
-              : authStyles.requirementCheckmarkUnmet,
-          ]}
-        />
+        <Ionicons name="checkmark" size={9} color={colors.white} />
       </View>
       <Text style={authStyles.requirementTextDark}>{label}</Text>
     </View>
