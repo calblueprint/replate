@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
+import colors from '@/styles/colors';
+import { styles } from '@/styles/pages/onboarding-styles';
+import { useAuth } from '@/utils/AuthContext';
+import { useProfile } from '@/utils/ProfileContext';
 import { ApiError } from '~/api/apiUtils';
 import { getPartners, updateDriverPartner } from '~/api/config';
-import { useAuth } from '~/src/utils/AuthContext';
-import colors from '../../styles/colors';
-import { styles } from '../../styles/pages/onboarding-styles';
-import { useProfile } from '../../utils/ProfileContext';
 
 export default function OnboardingFlow() {
   type PartnerTuple = [number, string];

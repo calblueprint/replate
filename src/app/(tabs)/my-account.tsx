@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { getPartners } from '../../../api/config';
-import { myAccountStyles as styles } from '../../styles/tabs/my-account-styles';
-import { useAuth } from '../../utils/AuthContext';
-import { useProfile } from '../../utils/ProfileContext';
-import { formatPhoneNumber } from '../../utils/validation';
+import { myAccountStyles as styles } from '@/styles/tabs/my-account-styles';
+import { useAuth } from '@/utils/AuthContext';
+import { useProfile } from '@/utils/ProfileContext';
+import { formatPhoneNumber } from '@/utils/validation';
+import { getPartners } from '~/api/config';
 
 export default function MyAccountPage() {
   const { driver, logout } = useAuth();

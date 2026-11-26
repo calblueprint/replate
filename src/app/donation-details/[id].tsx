@@ -12,7 +12,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import PhotoUpload from '@/components/PhotoUpload/PhotoUpload';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
+import { styles } from '@/styles/pages/donation-details-styles';
 import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
 import {
   getPartners,
@@ -20,8 +22,6 @@ import {
   submitCompletionDetails,
   submitTaskMissed,
 } from '~/api/config';
-import PhotoUpload from '../../components/PhotoUpload/PhotoUpload';
-import { styles } from '../../styles/pages/donation-details-styles';
 
 interface NpoOption {
   label: string;

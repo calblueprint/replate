@@ -1,27 +1,24 @@
 import React, { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { DriverSignupData } from '../../../../api/config';
-import AuthButton from '../../../components/AuthButton';
-import AuthFooterLink from '../../../components/AuthFooterLink';
-import AuthInput from '../../../components/AuthInput';
-import AuthScreenLayout from '../../../components/AuthScreenLayout';
+import AuthButton from '@/components/AuthButton';
+import AuthFooterLink from '@/components/AuthFooterLink';
+import AuthInput from '@/components/AuthInput';
+import AuthScreenLayout from '@/components/AuthScreenLayout';
 import PasswordRequirements, {
   isPasswordValid,
-} from '../../../components/PasswordRequirements';
-import { authStyles } from '../../../styles/authStyles';
-import { useAuth } from '../../../utils/AuthContext';
-import {
-  parseSignupApiErrors,
-  showAuthErrorToast,
-} from '../../../utils/authErrors';
+} from '@/components/PasswordRequirements';
+import { authStyles } from '@/styles/authStyles';
+import { useAuth } from '@/utils/AuthContext';
+import { parseSignupApiErrors, showAuthErrorToast } from '@/utils/authErrors';
 import {
   INPUT_LIMITS,
   validateEmail,
   validateName,
   validatePasswordMatch,
   validatePhone,
-} from '../../../utils/validation';
+} from '@/utils/validation';
+import { DriverSignupData } from '~/api/config';
 
 interface SignupForm {
   firstName: string;

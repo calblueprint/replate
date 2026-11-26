@@ -2,20 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { TextInput } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
-import { driverAPI, PasswordResetData } from '../../../../api/config';
-import AuthButton from '../../../components/AuthButton';
-import AuthFooterLink from '../../../components/AuthFooterLink';
-import AuthInput from '../../../components/AuthInput';
-import AuthScreenLayout from '../../../components/AuthScreenLayout';
+import AuthButton from '@/components/AuthButton';
+import AuthFooterLink from '@/components/AuthFooterLink';
+import AuthInput from '@/components/AuthInput';
+import AuthScreenLayout from '@/components/AuthScreenLayout';
 import PasswordRequirements, {
   isPasswordValid,
-} from '../../../components/PasswordRequirements';
-import { authStyles } from '../../../styles/authStyles';
+} from '@/components/PasswordRequirements';
+import { authStyles } from '@/styles/authStyles';
 import {
   parseResetPasswordApiErrors,
   showAuthErrorToast,
-} from '../../../utils/authErrors';
-import { INPUT_LIMITS, validatePasswordMatch } from '../../../utils/validation';
+} from '@/utils/authErrors';
+import { INPUT_LIMITS, validatePasswordMatch } from '@/utils/validation';
+import { driverAPI, PasswordResetData } from '~/api/config';
 
 export default function ResetPasswordPage() {
   const { reset_password_token } = useLocalSearchParams<{

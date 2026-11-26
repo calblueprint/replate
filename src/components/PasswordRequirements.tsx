@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { authStyles } from '../styles/authStyles';
-import colors from '../styles/colors';
+import { authStyles } from '@/styles/authStyles';
+import colors from '@/styles/colors';
 
 export function isPasswordValid(password: string): boolean {
   return (

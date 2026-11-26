@@ -4,9 +4,9 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import REPLATE_LOGO from '../../assets/replate-logo.png';
-import { authStyles } from '../styles/authStyles';
-import BackButton from './BackButton';
+import BackButton from '@/components/BackButton';
+import { authStyles } from '@/styles/authStyles';
+import REPLATE_LOGO from '~/assets/replate-logo.png';
 
 interface AuthScreenLayoutProps {
   title: string;

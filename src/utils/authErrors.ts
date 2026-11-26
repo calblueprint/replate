@@ -1,5 +1,5 @@
 import Toast from 'react-native-toast-message';
-import { ApiError } from '../../api/apiUtils';
+import { ApiError } from '~/api/apiUtils';
 
 export interface AuthToastError {
   text1: string;

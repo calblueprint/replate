@@ -18,10 +18,10 @@ import { TaskListSkeleton } from '@/components/SkeletonLoader';
 import TaskCard from '@/components/TaskCard';
 import UnderlineTabBar from '@/components/UnderlineTabBar';
 import Colors from '@/styles/colors';
+import styles from '@/styles/tabs/my-tasks-styles';
+import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
-import styles from '../../styles/tabs/my-tasks-styles';
-import { useAuth } from '../../utils/AuthContext';
 
 interface Task {
   id: number;

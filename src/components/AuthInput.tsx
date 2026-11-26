@@ -10,8 +10,8 @@ import {
   View,
 } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { authStyles, ERROR_COLOR } from '../styles/authStyles';
-import colors from '../styles/colors';
+import { authStyles, ERROR_COLOR } from '@/styles/authStyles';
+import colors from '@/styles/colors';
 
 interface AuthInputProps extends TextInputProps {
   label: string;

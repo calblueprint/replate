@@ -11,7 +11,7 @@ import {
   DriverLoginData,
   DriverResponse,
   DriverSignupData,
-} from '../../api/config';
+} from '~/api/config';
 import { safeJsonParse, sanitizeObject } from './sanitization';
 
 // Simple AuthContext with persistence

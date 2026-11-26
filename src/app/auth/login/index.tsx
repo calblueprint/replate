@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { DriverLoginData } from '../../../../api/config';
-import AuthButton from '../../../components/AuthButton';
-import AuthFooterLink from '../../../components/AuthFooterLink';
-import AuthInput from '../../../components/AuthInput';
-import AuthScreenLayout from '../../../components/AuthScreenLayout';
-import { authStyles } from '../../../styles/authStyles';
-import { useAuth } from '../../../utils/AuthContext';
-import {
-  parseLoginApiErrors,
-  showAuthErrorToast,
-} from '../../../utils/authErrors';
-import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
+import AuthButton from '@/components/AuthButton';
+import AuthFooterLink from '@/components/AuthFooterLink';
+import AuthInput from '@/components/AuthInput';
+import AuthScreenLayout from '@/components/AuthScreenLayout';
+import { authStyles } from '@/styles/authStyles';
+import { useAuth } from '@/utils/AuthContext';
+import { parseLoginApiErrors, showAuthErrorToast } from '@/utils/authErrors';
+import { INPUT_LIMITS, validateEmail } from '@/utils/validation';
+import { DriverLoginData } from '~/api/config';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

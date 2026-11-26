@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from 'react-native';
-import { authStyles } from '../styles/authStyles';
+import { authStyles } from '@/styles/authStyles';
 
 interface AuthFooterLinkProps {
   prompt: string;

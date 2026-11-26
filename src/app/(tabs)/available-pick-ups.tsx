@@ -6,10 +6,10 @@ import AvailableTaskCard from '@/components/AvailableTaskCard';
 import DayCarousel from '@/components/DayCarousel';
 import { AvailableListSkeleton } from '@/components/SkeletonLoader';
 import Colors from '@/styles/colors';
+import { styles } from '@/styles/tabs/available-pick-ups-styles';
 import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
-import { styles } from '../../styles/tabs/available-pick-ups-styles';
 
 interface ApiTask {
   id: number;

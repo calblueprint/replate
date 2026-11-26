@@ -19,10 +19,10 @@ import dateIcon from 'assets/date.png';
 import DirectionsSheet from '@/components/DirectionsSheet';
 import TaskNotification from '@/components/TaskNotification';
 import Colors from '@/styles/colors';
+import { styles } from '@/styles/pages/pickup-details-styles';
 import { useAuth } from '@/utils/AuthContext';
 import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
-import { styles } from '../../styles/pages/pickup-details-styles';
 
 interface TaskDetails {
   id: number;

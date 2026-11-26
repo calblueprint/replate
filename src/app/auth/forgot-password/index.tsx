@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Keyboard } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
-import { driverAPI } from '../../../../api/config';
-import AuthButton from '../../../components/AuthButton';
-import AuthFooterLink from '../../../components/AuthFooterLink';
-import AuthInput from '../../../components/AuthInput';
-import AuthScreenLayout from '../../../components/AuthScreenLayout';
+import AuthButton from '@/components/AuthButton';
+import AuthFooterLink from '@/components/AuthFooterLink';
+import AuthInput from '@/components/AuthInput';
+import AuthScreenLayout from '@/components/AuthScreenLayout';
 import {
   extractApiErrorDetails,
   getNetworkOrServerToast,
   showAuthErrorToast,
-} from '../../../utils/authErrors';
-import { INPUT_LIMITS, validateEmail } from '../../../utils/validation';
+} from '@/utils/authErrors';
+import { INPUT_LIMITS, validateEmail } from '@/utils/validation';
+import { driverAPI } from '~/api/config';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

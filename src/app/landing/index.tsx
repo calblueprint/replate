@@ -15,9 +15,9 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 // Landing page image
-import REPLATE_IMAGE from '../../../assets/replate-logo.png';
-import colors from '../../styles/colors';
-import { typography } from '../../styles/typography';
+import colors from '@/styles/colors';
+import { typography } from '@/styles/typography';
+import REPLATE_IMAGE from '~/assets/replate-logo.png';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 

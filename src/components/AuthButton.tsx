@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { authStyles } from '../styles/authStyles';
+import { authStyles } from '@/styles/authStyles';
 
 interface AuthButtonProps {
   label: string;
