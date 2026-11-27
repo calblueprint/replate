@@ -1,90 +1,66 @@
+import { tz, TZDate } from '@date-fns/tz';
+import {
+  format,
+  isAfter,
+  isBefore,
+  isValid,
+  parse,
+  parseISO,
+  set,
+  startOfDay,
+} from 'date-fns';
+
 const PACIFIC_TIME_ZONE = 'America/Los_Angeles';
+const ptZone = tz(PACIFIC_TIME_ZONE);
 
-interface DateParts {
-  year: number;
-  month: number;
-  day: number;
+function parsePacificDate(dateStr: string): TZDate | null {
+  const parsed = parse(
+    dateStr.trim(),
+    'yyyy-MM-dd',
+    startOfDay(TZDate.tz(PACIFIC_TIME_ZONE)),
+    { in: ptZone },
+  );
+  return isValid(parsed) ? parsed : null;
 }
 
-interface PacificDateTimeParts extends DateParts {
-  hours: number;
-  minutes: number;
-}
+function parseTaskTime(
+  timeStr: string,
+  referenceDay: TZDate = startOfDay(TZDate.tz(PACIFIC_TIME_ZONE)),
+  fallbackDateISO?: string,
+): TZDate | null {
+  const trimmed = timeStr.trim();
+  const normalizedUtc = trimmed.includes('UTC')
+    ? trimmed.replace(' ', 'T').replace(' UTC', 'Z')
+    : trimmed.includes('T')
+      ? trimmed
+      : null;
 
-/** Parse a YYYY-MM-DD date string into calendar parts without UTC shift */
-export function parseISODateParts(dateStr: string): DateParts | null {
-  const match = dateStr.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return null;
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const probe = new Date(Date.UTC(year, month - 1, day));
-
-  if (
-    probe.getUTCFullYear() !== year ||
-    probe.getUTCMonth() !== month - 1 ||
-    probe.getUTCDate() !== day
-  ) {
-    return null;
+  if (normalizedUtc) {
+    const zoned = new TZDate(normalizedUtc, PACIFIC_TIME_ZONE);
+    return isValid(zoned)
+      ? set(referenceDay, {
+          hours: zoned.getHours(),
+          minutes: zoned.getMinutes(),
+          seconds: 0,
+          milliseconds: 0,
+        })
+      : null;
   }
 
-  return { year, month, day };
-}
-
-/** Return calendar date and 24h time parts in America/Los_Angeles */
-export function getPacificDateTimeParts(
-  date: Date = new Date(),
-): PacificDateTimeParts {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: PACIFIC_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
-
-  const parts = formatter.formatToParts(date);
-  const get = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find(p => p.type === type)?.value ?? 0);
-
-  const rawHours = get('hour');
-  return {
-    year: get('year'),
-    month: get('month'),
-    day: get('day'),
-    hours: rawHours === 24 ? 0 : rawHours,
-    minutes: get('minute'),
-  };
-}
-
-function compareDateParts(a: DateParts, b: DateParts): number {
-  if (a.year !== b.year) return a.year < b.year ? -1 : 1;
-  if (a.month !== b.month) return a.month < b.month ? -1 : 1;
-  if (a.day !== b.day) return a.day < b.day ? -1 : 1;
-  return 0;
-}
-
-/** Parse a backend time string into Pacific {h, m} */
-export function parsePacificHM(ts: string): { h: number; m: number } | null {
-  const s = ts.trim();
-  if (s.includes('UTC')) {
-    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
-    if (isNaN(d.getTime())) return null;
-    const pt = getPacificDateTimeParts(d);
-    return { h: pt.hours, m: pt.minutes };
+  for (const fmt of ['H:mm:ss', 'H:mm']) {
+    const parsed = parse(trimmed, fmt, referenceDay, { in: ptZone });
+    if (isValid(parsed)) return parsed;
   }
-  if (s.includes('T')) {
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return null;
-    const pt = getPacificDateTimeParts(d);
-    return { h: pt.hours, m: pt.minutes };
+
+  if (fallbackDateISO) {
+    const fallback = new TZDate(
+      `${fallbackDateISO}T${trimmed}`,
+      PACIFIC_TIME_ZONE,
+    );
+    if (isValid(fallback)) return fallback;
   }
-  const m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
-  if (!m) return null;
-  return { h: Number(m[1]), m: Number(m[2]) };
+
+  return null;
 }
 
 /** Return true when pickupDate is strictly before today's calendar date in Pacific Time */
@@ -92,32 +68,28 @@ export function isTaskBeforeTodayPT(
   pickupDate: string,
   now: Date = new Date(),
 ): boolean {
-  const pickupParts = parseISODateParts(pickupDate);
-  if (!pickupParts) return false;
-
-  const ptNow = getPacificDateTimeParts(now);
-  return compareDateParts(pickupParts, ptNow) < 0;
+  const day = parsePacificDate(pickupDate);
+  if (!day) return false;
+  const ptNow = new TZDate(now, PACIFIC_TIME_ZONE);
+  return isBefore(startOfDay(day), startOfDay(ptNow));
 }
 
-/** Return true when a task's pickup window has ended in Pacific Time */
-export function isTaskPastEndTime(
+/** Return true when an incomplete task's pickup date/window has passed in Pacific Time */
+export function isTaskOverdue(
   pickupDate: string,
   endTime: string | null,
   now: Date = new Date(),
 ): boolean {
-  const pickupParts = parseISODateParts(pickupDate);
-  if (!pickupParts) return false;
+  const day = parsePacificDate(pickupDate);
+  if (!day) return false;
 
-  const ptNow = getPacificDateTimeParts(now);
-  const cmp = compareDateParts(pickupParts, ptNow);
-  if (cmp < 0) return true;
-  if (cmp > 0) return false;
-
+  const ptNow = new TZDate(now, PACIFIC_TIME_ZONE);
+  if (isBefore(startOfDay(day), startOfDay(ptNow))) return true;
+  if (isAfter(startOfDay(day), startOfDay(ptNow))) return false;
   if (!endTime) return false;
-  const end = parsePacificHM(endTime);
-  if (!end) return false;
 
-  return ptNow.hours * 60 + ptNow.minutes > end.h * 60 + end.m;
+  const end = parseTaskTime(endTime, day);
+  return end ? isAfter(ptNow, end) : false;
 }
 
 /** Return true once the task's pickup window has started in Pacific Time */
@@ -127,79 +99,48 @@ export function hasTaskWindowStarted(
   now: Date = new Date(),
 ): boolean {
   if (!pickupDate) return false;
-  const pickupParts = parseISODateParts(pickupDate);
-  if (!pickupParts) return false;
+  const day = parsePacificDate(pickupDate);
+  if (!day) return false;
 
-  const ptNow = getPacificDateTimeParts(now);
-  const cmp = compareDateParts(pickupParts, ptNow);
-  if (cmp < 0) return true;
-  if (cmp > 0) return false;
-
+  const ptNow = new TZDate(now, PACIFIC_TIME_ZONE);
+  if (isBefore(startOfDay(day), startOfDay(ptNow))) return true;
+  if (isAfter(startOfDay(day), startOfDay(ptNow))) return false;
   if (!startTime) return true;
-  const start = parsePacificHM(startTime);
-  if (!start) return true;
 
-  return ptNow.hours * 60 + ptNow.minutes >= start.h * 60 + start.m;
+  const start = parseTaskTime(startTime, day);
+  return start ? !isBefore(ptNow, start) : true;
 }
 
-/** Format YYYY-MM-DD or an ISO timestamp into M/D without UTC date shift */
+/** Format YYYY-MM-DD or an ISO timestamp into M/D in Pacific Time */
 export function formatShortStatusDate(dateStr: string): string | undefined {
-  const dateOnly = parseISODateParts(dateStr);
-  if (dateOnly) {
-    return `${dateOnly.month}/${dateOnly.day}`;
-  }
+  const day = parsePacificDate(dateStr);
+  if (day) return format(day, 'M/d');
 
-  const parsed = new Date(dateStr);
-  if (isNaN(parsed.getTime())) return undefined;
-  const pt = getPacificDateTimeParts(parsed);
-  return `${pt.month}/${pt.day}`;
+  const parsed = parseISO(dateStr);
+  if (!isValid(parsed)) return undefined;
+  return format(new TZDate(parsed, PACIFIC_TIME_ZONE), 'M/d');
 }
 
 /** Format a local Date as YYYY-MM-DD */
 export function localISODate(d: Date): string {
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
+  return format(d, 'yyyy-MM-dd');
 }
 
-/** Parse a time string in any of the formats the backend returns into {h, m} */
-export function parseHMAny(
-  ts: string,
-  fallbackDateISO?: string,
-): { h: number; m: number } | null {
-  const s = ts.trim();
-  // "YYYY-MM-DD HH:MM:SS UTC"
-  if (s.includes('UTC')) {
-    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-  // ISO "YYYY-MM-DDTHH:MM:SSZ"
-  if (s.includes('T')) {
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-  // "HH:MM" or "HH:MM:SS"
-  const m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
-  if (m) {
-    return { h: Number(m[1]), m: Number(m[2]) };
-  }
-  if (fallbackDateISO) {
-    const d = new Date(`${fallbackDateISO}T${s}`);
-    if (!isNaN(d.getTime())) {
-      return { h: d.getHours(), m: d.getMinutes() };
-    }
-  }
-  return null;
-}
-
-/** Format hour + minute into 12-hour string (e.g. "1:00 PM" or "1:00pm") */
-export function fmt12(h: number, m: number, compactLower = false): string {
-  const ap = h >= 12 ? 'PM' : 'AM';
-  const hr12 = h % 12 || 12;
-  const suffix = compactLower ? ap.toLowerCase() : ` ${ap}`;
-  return `${hr12}:${String(m).padStart(2, '0')}${suffix}`;
+/** Format a single backend time string (e.g. "1:00 PM" or "1:00pm") */
+export function formatTimeLabel(
+  timeStr: string | null,
+  options: { compactLower?: boolean; fallbackDateISO?: string } = {},
+): string | null {
+  if (!timeStr) return null;
+  const parsed = parseTaskTime(
+    timeStr,
+    startOfDay(TZDate.tz(PACIFIC_TIME_ZONE)),
+    options.fallbackDateISO,
+  );
+  if (!parsed) return null;
+  return options.compactLower
+    ? format(parsed, 'h:mma').toLowerCase()
+    : format(parsed, 'h:mm a');
 }
 
 /** Format a time range from any backend time format (e.g. "1:00 PM - 4:00 PM") */
@@ -208,22 +149,16 @@ export function formatTimeRangeAny(
   endTime: string | null,
   options: { compactLower?: boolean; fallbackDateISO?: string } = {},
 ): string {
-  if (!startTime || !endTime) return 'Time TBD';
-  const s = parseHMAny(startTime, options.fallbackDateISO);
-  const e = parseHMAny(endTime, options.fallbackDateISO);
-  if (!s || !e) return 'Time TBD';
-  return `${fmt12(s.h, s.m, options.compactLower)} - ${fmt12(e.h, e.m, options.compactLower)}`;
+  const start = formatTimeLabel(startTime, options);
+  const end = formatTimeLabel(endTime, options);
+  return start && end ? `${start} - ${end}` : 'Time TBD';
 }
 
-/** Format a YYYY-MM-DD date string (e.g. "Mon Apr 20") */
-export function formatPickupDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr + 'T00:00:00');
-    const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const day = date.getDate();
-    return `${weekday} ${month} ${day}`;
-  } catch {
-    return dateStr;
-  }
+/** Format a YYYY-MM-DD date string with date-fns (default "Wed Oct 7") */
+export function formatPickupDate(
+  dateStr: string,
+  pattern = 'EEE MMM d',
+): string {
+  const day = parsePacificDate(dateStr);
+  return day ? format(day, pattern) : dateStr;
 }

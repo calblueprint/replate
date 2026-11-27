@@ -1,3 +1,4 @@
+import type { TaskPickupInfo } from '@/utils/taskHelpers';
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -21,6 +22,7 @@ import {
   formatTimeRangeAny,
   hasTaskWindowStarted,
 } from '@/utils/dateHelpers';
+import { parseTaskPickupInfo } from '@/utils/taskHelpers';
 import { ApiError } from '~/api/apiUtils';
 import {
   getPartners,
@@ -32,48 +34,6 @@ import {
 interface NpoOption {
   label: string;
   value: string;
-}
-
-interface TaskPickupInfo {
-  pickup_date: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  address: string | null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function parseOptionalString(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
-}
-
-function parseTaskAddress(data: Record<string, unknown>): string | null {
-  const direct = parseOptionalString(data.address);
-  if (direct && direct.trim().length > 0) return direct.trim();
-
-  if (isRecord(data.address)) {
-    const addr = data.address;
-    const streetLine = [addr.number, addr.street]
-      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
-      .join(' ');
-    const cityState = [
-      typeof addr.city === 'string' ? addr.city.trim() : '',
-      typeof addr.state === 'string' ? addr.state.trim() : '',
-    ]
-      .filter(Boolean)
-      .join(', ');
-    const full = [streetLine, cityState].filter(Boolean).join(', ');
-    if (full.length > 0) return full;
-  }
-
-  if (!isRecord(data.location)) return null;
-  const loc = data.location;
-  const parts = [loc.street_address, loc.city, loc.state, loc.zip_code].filter(
-    (v): v is string => typeof v === 'string' && v.trim().length > 0,
-  );
-  return parts.length > 0 ? parts.join(', ') : null;
 }
 
 export default function DonationLayout() {
@@ -125,19 +85,10 @@ export default function DonationLayout() {
         if (!params.id) return;
         try {
           const data = await getTask(params.id);
-          if (cancelled || !isRecord(data)) return;
-          setTask({
-            pickup_date:
-              parseOptionalString(data.pickup_date) ??
-              parseOptionalString(data.scheduled_date),
-            start_time:
-              parseOptionalString(data.start_time) ??
-              parseOptionalString(data.activity_start_time),
-            end_time:
-              parseOptionalString(data.end_time) ??
-              parseOptionalString(data.activity_end_time),
-            address: parseTaskAddress(data),
-          });
+          const parsed = parseTaskPickupInfo(data);
+          if (!cancelled && parsed) {
+            setTask(parsed);
+          }
         } catch {
           if (!cancelled) {
             Toast.show({

@@ -1,14 +1,13 @@
 // API Utility for robust network handling
-// Provides timeout, retry logic, and response validation
+// Provides timeout, retry logic, and Zod schema validation
 
-import { sanitizeObject } from '../src/utils/sanitization';
+import type { z } from 'zod';
 
 export interface ApiOptions extends RequestInit {
   timeout?: number; // in milliseconds
   retries?: number;
   retryDelay?: number; // in milliseconds
-  validateResponse?: (data: unknown) => boolean;
-  sanitize?: boolean; // Whether to sanitize response data (default: true)
+  schema?: z.ZodType;
 }
 
 export class ApiError extends Error {
@@ -78,45 +77,7 @@ function isRetryableError(error: unknown): boolean {
 }
 
 /**
- * Validates that response has expected structure
- */
-export function validateResponse(
-  data: unknown,
-  requiredFields: string[],
-): boolean {
-  if (!data || typeof data !== 'object') {
-    return false;
-  }
-
-  for (const field of requiredFields) {
-    if (!(field in data)) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
- * Validates an array response
- */
-export function validateArrayResponse(
-  data: unknown,
-  itemValidator?: (item: unknown) => boolean,
-): boolean {
-  if (!Array.isArray(data)) {
-    return false;
-  }
-
-  if (itemValidator) {
-    return data.every(itemValidator);
-  }
-
-  return true;
-}
-
-/**
- * Main API function with timeout, retry, and validation support
+ * Main API function with timeout, retry, and Zod schema validation
  */
 export async function apiRequest<T = unknown>(
   url: string,
@@ -126,8 +87,7 @@ export async function apiRequest<T = unknown>(
     timeout = 30000,
     retries = 2,
     retryDelay = 1000,
-    validateResponse: customValidator,
-    sanitize = true,
+    schema,
     ...fetchOptions
   } = options;
 
@@ -185,30 +145,21 @@ export async function apiRequest<T = unknown>(
       // undefined and skip JSON parsing.
       const contentLength = response.headers.get('content-length');
       const hasEmptyBody = response.status === 204 || contentLength === '0';
-      let data: unknown = hasEmptyBody ? undefined : await response.json();
+      const data: unknown = hasEmptyBody ? undefined : await response.json();
 
-      // Sanitize response to prevent prototype pollution
-      if (sanitize && typeof data === 'object' && data !== null) {
-        if (Array.isArray(data)) {
-          data = data.map(item =>
-            typeof item === 'object' && item !== null && !Array.isArray(item)
-              ? sanitizeObject(item)
-              : item,
+      // Validate response structure with Zod if schema provided. Skip validation
+      // for empty-body responses — schemas assume a body exists, and a 204
+      // isn't a structural failure.
+      if (!hasEmptyBody && schema) {
+        const result = schema.safeParse(data);
+        if (!result.success) {
+          throw new ApiError(
+            'Invalid response structure from server',
+            response.status,
+            ['validation_failed'],
           );
-        } else {
-          data = sanitizeObject(data);
         }
-      }
-
-      // Validate response structure if validator provided. Skip validation
-      // for empty-body responses — validators are written assuming a body
-      // exists, and a 204 isn't a structural failure.
-      if (!hasEmptyBody && customValidator && !customValidator(data)) {
-        throw new ApiError(
-          'Invalid response structure from server',
-          response.status,
-          ['validation_failed'],
-        );
+        return result.data as T;
       }
 
       return data as T;

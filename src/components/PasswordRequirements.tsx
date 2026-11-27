@@ -4,14 +4,20 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import { authStyles } from '@/styles/authStyles';
 import colors from '@/styles/colors';
 
+const PASSWORD_RULES: { label: string; test: (password: string) => boolean }[] =
+  [
+    { label: '8 characters', test: p => p.length >= 8 },
+    { label: '1 uppercase letter', test: p => /[A-Z]/.test(p) },
+    { label: '1 lowercase letter', test: p => /[a-z]/.test(p) },
+    {
+      label: '1 special character',
+      test: p => /[!@#$%^&*(),.?":{}|<>]/.test(p),
+    },
+    { label: '1 number', test: p => /[0-9]/.test(p) },
+  ];
+
 export function isPasswordValid(password: string): boolean {
-  return (
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /[!@#$%^&*(),.?":{}|<>]/.test(password) &&
-    /[0-9]/.test(password)
-  );
+  return PASSWORD_RULES.every(rule => rule.test(password));
 }
 
 function RequirementRow({ label, met }: { label: string; met: boolean }) {
@@ -37,14 +43,13 @@ export default function PasswordRequirements({
 }) {
   return (
     <View style={authStyles.passwordRequirements}>
-      <RequirementRow label="8 characters" met={password.length >= 8} />
-      <RequirementRow label="1 uppercase letter" met={/[A-Z]/.test(password)} />
-      <RequirementRow label="1 lowercase letter" met={/[a-z]/.test(password)} />
-      <RequirementRow
-        label="1 special character"
-        met={/[!@#$%^&*(),.?":{}|<>]/.test(password)}
-      />
-      <RequirementRow label="1 number" met={/[0-9]/.test(password)} />
+      {PASSWORD_RULES.map(rule => (
+        <RequirementRow
+          key={rule.label}
+          label={rule.label}
+          met={rule.test(password)}
+        />
+      ))}
     </View>
   );
 }

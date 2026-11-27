@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import elementIcon from 'assets/elements.png';
+import { z } from 'zod';
 import AvailableTaskCard from '@/components/AvailableTaskCard';
 import DayCarousel from '@/components/DayCarousel';
 import { AvailableListSkeleton } from '@/components/SkeletonLoader';
@@ -10,8 +11,10 @@ import { styles } from '@/styles/tabs/available-pick-ups-styles';
 import { useAuth } from '@/utils/AuthContext';
 import { formatTimeRangeAny, localISODate } from '@/utils/dateHelpers';
 import { formatTaskAddress } from '@/utils/taskHelpers';
-import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
+import { ApiError, apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
+
+const TaskArraySchema = z.array(z.unknown());
 
 interface ApiTask {
   id: number;
@@ -50,7 +53,7 @@ export default function AvailablePickupsPage() {
 
         const data = await apiRequest<ApiTask[]>(
           `${BASE_URL}${API_ENDPOINTS.TASKS}?driver_id=${driver.id}`,
-          { method: 'GET', validateResponse: validateArrayResponse },
+          { method: 'GET', schema: TaskArraySchema },
         );
 
         setTasks(data);

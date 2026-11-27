@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 // Input length limits
 export const INPUT_LIMITS = {
   NAME_MIN: 1,
@@ -9,27 +11,46 @@ export const INPUT_LIMITS = {
   PASSWORD_MAX: 128,
 };
 
+function runSchema(schema: z.ZodType, value: unknown): string | null {
+  const result = schema.safeParse(value);
+  return result.success ? null : (result.error.issues[0]?.message ?? 'Invalid');
+}
+
+const emailSchema = z
+  .string()
+  .trim()
+  .min(1, 'Email is required')
+  .max(
+    INPUT_LIMITS.EMAIL_MAX,
+    `Email must be less than ${INPUT_LIMITS.EMAIL_MAX} characters`,
+  )
+  .email('Please enter a valid email address');
+
+const phoneSchema = z
+  .string()
+  .trim()
+  .min(1, 'Phone number is required')
+  .transform(phone => phone.replace(/[\s\-().+]/g, ''))
+  .pipe(
+    z
+      .string()
+      .regex(
+        /^\d+$/,
+        'Phone number can only contain digits and formatting characters (spaces, hyphens, parentheses)',
+      )
+      .min(
+        INPUT_LIMITS.PHONE_MIN,
+        `Phone number must be at least ${INPUT_LIMITS.PHONE_MIN} digits`,
+      )
+      .max(
+        INPUT_LIMITS.PHONE_MAX,
+        `Phone number must be less than ${INPUT_LIMITS.PHONE_MAX} digits`,
+      ),
+  );
+
 // Email validation - accepts all valid email formats
-export const validateEmail = (email: string): string | null => {
-  if (!email || email.trim() === '') {
-    return 'Email is required';
-  }
-
-  // Check length limit
-  if (email.length > INPUT_LIMITS.EMAIL_MAX) {
-    return `Email must be less than ${INPUT_LIMITS.EMAIL_MAX} characters`;
-  }
-
-  // Comprehensive email format regex (RFC 5322 compliant)
-  const emailRegex =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
-  if (!emailRegex.test(email)) {
-    return 'Please enter a valid email address';
-  }
-
-  return null;
-};
+export const validateEmail = (email: string): string | null =>
+  runSchema(emailSchema, email);
 
 // Password match validation
 export const validatePasswordMatch = (
@@ -40,63 +61,30 @@ export const validatePasswordMatch = (
     return 'Please confirm your password';
   }
 
-  if (password !== confirmPassword) {
-    return 'Passwords do not match';
-  }
-
-  return null;
+  return password === confirmPassword ? null : 'Passwords do not match';
 };
 
 // Name validation with length limits
-export const validateName = (
-  name: string,
-  fieldName: string,
-): string | null => {
-  if (!name || name.trim() === '') {
-    return `${fieldName} is required`;
-  }
-
-  if (name.trim().length < INPUT_LIMITS.NAME_MIN) {
-    return `${fieldName} is required`;
-  }
-
-  if (name.length > INPUT_LIMITS.NAME_MAX) {
-    return `${fieldName} must be less than ${INPUT_LIMITS.NAME_MAX} characters`;
-  }
-
-  // Check for invalid characters (only letters, spaces, hyphens, and apostrophes)
-  if (!/^[a-zA-Z\s'-]+$/.test(name)) {
-    return `${fieldName} can only contain letters, spaces, hyphens, and apostrophes`;
-  }
-
-  return null;
-};
+export const validateName = (name: string, fieldName: string): string | null =>
+  runSchema(
+    z
+      .string()
+      .trim()
+      .min(INPUT_LIMITS.NAME_MIN, `${fieldName} is required`)
+      .max(
+        INPUT_LIMITS.NAME_MAX,
+        `${fieldName} must be less than ${INPUT_LIMITS.NAME_MAX} characters`,
+      )
+      .regex(
+        /^[a-zA-Z\s'-]+$/,
+        `${fieldName} can only contain letters, spaces, hyphens, and apostrophes`,
+      ),
+    name,
+  );
 
 // Phone validation with proper format checking
-export const validatePhone = (phone: string): string | null => {
-  if (!phone || phone.trim() === '') {
-    return 'Phone number is required';
-  }
-
-  // Remove common formatting characters for validation
-  const digitsOnly = phone.replace(/[\s\-().+]/g, '');
-
-  // Check if it contains only digits (and optional leading + for country code)
-  if (!/^\d+$/.test(digitsOnly)) {
-    return 'Phone number can only contain digits and formatting characters (spaces, hyphens, parentheses)';
-  }
-
-  // Check length limits
-  if (digitsOnly.length < INPUT_LIMITS.PHONE_MIN) {
-    return `Phone number must be at least ${INPUT_LIMITS.PHONE_MIN} digits`;
-  }
-
-  if (digitsOnly.length > INPUT_LIMITS.PHONE_MAX) {
-    return `Phone number must be less than ${INPUT_LIMITS.PHONE_MAX} digits`;
-  }
-
-  return null;
-};
+export const validatePhone = (phone: string): string | null =>
+  runSchema(phoneSchema, phone);
 
 // Format phone number for display (US format)
 export const formatPhoneNumber = (phone: string): string => {

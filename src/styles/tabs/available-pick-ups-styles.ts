@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Colors from '@/styles/colors';
+import { typography } from '@/styles/typography';
 
 export const styles = StyleSheet.create({
   container: {
@@ -23,8 +24,7 @@ export const styles = StyleSheet.create({
     elevation: 2, // Required for Android
   },
   pageTitle: {
-    fontSize: 24,
-    fontFamily: 'LatoBold',
+    ...typography.h3Bold,
     color: Colors.secondaryGreen,
     paddingHorizontal: 21,
   },

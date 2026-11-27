@@ -20,6 +20,7 @@
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.5.0",
     "@expo-google-fonts/lato": "^0.4.1",
     "@expo/metro-runtime": "~58.0.15",
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -30,6 +31,7 @@
     "@rneui/base": "4.0.0-rc.7",
     "@rneui/themed": "4.0.0-rc.8",
     "@supabase/supabase-js": "^2.53.0",
+    "date-fns": "^4.4.0",
     "expo": "~58.0.21",
     "expo-constants": "~58.0.14",
     "expo-doctor": "1.20.4",
@@ -51,7 +53,8 @@
     "react-native-screens": "~4.30.0",
     "react-native-toast-message": "^2.3.3",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-worklets": "0.13.0"
+    "react-native-worklets": "0.13.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

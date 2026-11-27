@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 // Landing page image
 import colors from '@/styles/colors';
+import { typography } from '@/styles/typography';
 import REPLATE_IMAGE from '~/assets/replate-logo.png';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -155,8 +156,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   welcomeText: {
-    fontFamily: 'LatoBold',
-    fontSize: 30,
+    ...typography.h2,
     textAlign: 'center',
     color: colors.secondaryGreen,
     marginBottom: 12,

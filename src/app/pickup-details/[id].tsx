@@ -16,14 +16,22 @@ import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import dateIcon from 'assets/date.png';
+import { z } from 'zod';
 import DirectionsSheet from '@/components/DirectionsSheet';
 import TaskNotification from '@/components/TaskNotification';
 import Colors from '@/styles/colors';
 import { styles } from '@/styles/pages/pickup-details-styles';
 import { useAuth } from '@/utils/AuthContext';
-import { fmt12, formatTimeRangeAny, parseHMAny } from '@/utils/dateHelpers';
+import {
+  formatPickupDate,
+  formatTimeLabel,
+  formatTimeRangeAny,
+} from '@/utils/dateHelpers';
+import { formatFullTaskAddress } from '@/utils/taskHelpers';
 import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
+
+const TaskDetailsSchema = z.object({ id: z.number() }).passthrough();
 
 interface TaskDetails {
   id: number;
@@ -53,22 +61,15 @@ interface TaskDetails {
 }
 
 function formatPickupWindow(task: TaskDetails): string {
-  const d = new Date(task.pickup_date + 'T00:00:00');
-  const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
-  const month = d.toLocaleDateString('en-US', { month: 'short' });
-  const day = d.getDate();
-
+  const dateStr = formatPickupDate(task.pickup_date, 'EEEE, MMM d');
   const timeStr = formatTimeRangeAny(task.start_time, task.end_time, {
     compactLower: true,
   });
-
-  return `${weekday}, ${month} ${day}: ${timeStr}`;
+  return `${dateStr}: ${timeStr}`;
 }
 
 function formatClaimTime(endTime: string | null): string {
-  if (!endTime) return '';
-  const hm = parseHMAny(endTime);
-  return hm ? fmt12(hm.h, hm.m, true) : '';
+  return formatTimeLabel(endTime, { compactLower: true }) ?? '';
 }
 
 export default function PickupDetails() {
@@ -94,10 +95,7 @@ export default function PickupDetails() {
 
         const data = await apiRequest<TaskDetails>(url, {
           method: 'GET',
-          validateResponse: r => {
-            if (!r || typeof r !== 'object' || Array.isArray(r)) return false;
-            return typeof (r as Record<string, unknown>).id === 'number';
-          },
+          schema: TaskDetailsSchema,
         });
 
         const raw = data as unknown as Record<string, unknown>;
@@ -171,11 +169,12 @@ export default function PickupDetails() {
   }, []);
 
   const getAddressString = useCallback(() => {
-    if (!task?.address) return '';
-    const addr = task.address;
-    return [addr.number, addr.street, addr.city, addr.state, addr.zip]
-      .filter(Boolean)
-      .join(' ');
+    return (
+      formatFullTaskAddress(task?.address, {
+        includeZip: true,
+        separator: ' ',
+      }) ?? ''
+    );
   }, [task]);
 
   const openInAppleMaps = useCallback(() => {
@@ -249,16 +248,9 @@ export default function PickupDetails() {
     );
   }
 
-  const addr = task.address;
-  const displayAddress = addr
-    ? [
-        addr.number,
-        addr.street,
-        addr.city && `${addr.city}, ${addr.state ?? ''}`,
-      ]
-        .filter(Boolean)
-        .join(' ')
-    : 'Address not available';
+  const displayAddress =
+    formatFullTaskAddress(task.address, { separator: ' ' }) ??
+    'Address not available';
 
   const isCompleted = task.status === 'complete';
   const isMissed = task.status === 'failed';

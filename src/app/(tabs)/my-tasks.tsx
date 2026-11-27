@@ -12,6 +12,7 @@ import {
 import { useFocusEffect, useRouter } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import elementIcon from 'assets/elements.png';
+import { z } from 'zod';
 import { TaskListSkeleton } from '@/components/SkeletonLoader';
 import TaskCard from '@/components/TaskCard';
 import UnderlineTabBar from '@/components/UnderlineTabBar';
@@ -22,11 +23,13 @@ import {
   formatShortStatusDate,
   formatTimeRangeAny,
   isTaskBeforeTodayPT,
-  isTaskPastEndTime,
+  isTaskOverdue,
 } from '@/utils/dateHelpers';
 import { formatTaskAddress } from '@/utils/taskHelpers';
-import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
+import { ApiError, apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
+
+const TaskArraySchema = z.array(z.unknown());
 
 interface Task {
   id: number;
@@ -50,8 +53,9 @@ interface Task {
 function deriveTaskStatus(task: Task): TaskStatus {
   if (task.status === 'complete' || task.completed_at) return 'completed';
   if (task.status === 'failed') return 'missed';
+  if (task.status === 'in_progress') return 'active';
 
-  if (isTaskPastEndTime(task.pickup_date, task.end_time)) return 'overdue';
+  if (isTaskOverdue(task.pickup_date, task.end_time)) return 'overdue';
   return 'active';
 }
 
@@ -99,11 +103,11 @@ export default function MyTasksPage() {
         const [activeTasks, historyTasks] = await Promise.all([
           apiRequest<Task[]>(
             `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}`,
-            { method: 'GET', validateResponse: validateArrayResponse },
+            { method: 'GET', schema: TaskArraySchema },
           ),
           apiRequest<Task[]>(
             `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}&status=complete,failed`,
-            { method: 'GET', validateResponse: validateArrayResponse },
+            { method: 'GET', schema: TaskArraySchema },
           ),
         ]);
 
