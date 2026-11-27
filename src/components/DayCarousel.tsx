@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import {
+  LayoutAnimation,
   ScrollView,
   ScrollViewInstance,
   StyleSheet,
@@ -93,7 +94,13 @@ export default function DayCarousel({
           key={item.iso}
           {...item}
           isSelected={item.iso === selectedDate}
-          onPress={() => onSelectDate(item.iso)}
+          onPress={() => {
+            LayoutAnimation.configureNext({
+              duration: 180,
+              update: { type: LayoutAnimation.Types.easeInEaseOut },
+            });
+            onSelectDate(item.iso);
+          }}
         />
       ))}
     </ScrollView>
