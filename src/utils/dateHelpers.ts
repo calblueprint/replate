@@ -155,8 +155,18 @@ export function formatShortStatusDate(dateStr: string): string | undefined {
   return `${pt.month}/${pt.day}`;
 }
 
+/** Format a local Date as YYYY-MM-DD */
+export function localISODate(d: Date): string {
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
+}
+
 /** Parse a time string in any of the formats the backend returns into {h, m} */
-export function parseHMAny(ts: string): { h: number; m: number } | null {
+export function parseHMAny(
+  ts: string,
+  fallbackDateISO?: string,
+): { h: number; m: number } | null {
   const s = ts.trim();
   // "YYYY-MM-DD HH:MM:SS UTC"
   if (s.includes('UTC')) {
@@ -172,27 +182,37 @@ export function parseHMAny(ts: string): { h: number; m: number } | null {
   }
   // "HH:MM" or "HH:MM:SS"
   const m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
-  if (!m) return null;
-  return { h: Number(m[1]), m: Number(m[2]) };
+  if (m) {
+    return { h: Number(m[1]), m: Number(m[2]) };
+  }
+  if (fallbackDateISO) {
+    const d = new Date(`${fallbackDateISO}T${s}`);
+    if (!isNaN(d.getTime())) {
+      return { h: d.getHours(), m: d.getMinutes() };
+    }
+  }
+  return null;
 }
 
-/** Format hour + minute into 12-hour string (e.g. "1:00 PM") */
-export function fmt12(h: number, m: number): string {
+/** Format hour + minute into 12-hour string (e.g. "1:00 PM" or "1:00pm") */
+export function fmt12(h: number, m: number, compactLower = false): string {
   const ap = h >= 12 ? 'PM' : 'AM';
   const hr12 = h % 12 || 12;
-  return `${hr12}:${String(m).padStart(2, '0')} ${ap}`;
+  const suffix = compactLower ? ap.toLowerCase() : ` ${ap}`;
+  return `${hr12}:${String(m).padStart(2, '0')}${suffix}`;
 }
 
 /** Format a time range from any backend time format (e.g. "1:00 PM - 4:00 PM") */
 export function formatTimeRangeAny(
   startTime: string | null,
   endTime: string | null,
+  options: { compactLower?: boolean; fallbackDateISO?: string } = {},
 ): string {
   if (!startTime || !endTime) return 'Time TBD';
-  const s = parseHMAny(startTime);
-  const e = parseHMAny(endTime);
+  const s = parseHMAny(startTime, options.fallbackDateISO);
+  const e = parseHMAny(endTime, options.fallbackDateISO);
   if (!s || !e) return 'Time TBD';
-  return `${fmt12(s.h, s.m)} - ${fmt12(e.h, e.m)}`;
+  return `${fmt12(s.h, s.m, options.compactLower)} - ${fmt12(e.h, e.m, options.compactLower)}`;
 }
 
 /** Format a YYYY-MM-DD date string (e.g. "Mon Apr 20") */
@@ -206,22 +226,4 @@ export function formatPickupDate(dateStr: string): string {
   } catch {
     return dateStr;
   }
-}
-
-/** Format two ISO times into a range (e.g. "9:00 am - 10:30 am") */
-export const fmtTimeRange = (startISO: string, endISO: string) => {
-  const s = new Date(startISO);
-  const e = new Date(endISO);
-  const to12h = (d: Date) =>
-    d
-      .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-      .toLowerCase();
-  return `${to12h(s)} - ${to12h(e)}`;
-};
-
-/** Format a single ISO time to 12-hour format (e.g. "9:00 am") */
-export function fmtTime(iso: string) {
-  return new Date(iso)
-    .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-    .toLowerCase();
 }

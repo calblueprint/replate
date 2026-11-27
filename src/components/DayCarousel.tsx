@@ -9,17 +9,12 @@ import {
   View,
 } from 'react-native';
 import Colors from '@/styles/colors';
+import { localISODate } from '@/utils/dateHelpers';
 
 interface DayCarouselProps {
   selectedDate: string; // YYYY-MM-DD
   onSelectDate: (date: string) => void;
   dayCount?: number;
-}
-
-function localISODate(d: Date): string {
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
 }
 
 function DayItem({

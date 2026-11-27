@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import PhotoUpload from '@/components/PhotoUpload/PhotoUpload';
@@ -103,17 +103,12 @@ export default function DonationLayout() {
       const partnersPromise = (async () => {
         try {
           const partnersList = await getPartners();
-          const safe: [number, string][] = Array.isArray(partnersList)
-            ? (partnersList as unknown[]).filter(
-                (x): x is [number, string] =>
-                  Array.isArray(x) &&
-                  typeof x[0] === 'number' &&
-                  typeof x[1] === 'string',
-              )
-            : [];
           if (!cancelled) {
             setNpoOptions(
-              safe.map(([id, name]) => ({ label: name, value: String(id) })),
+              partnersList.map(([id, name]) => ({
+                label: name,
+                value: String(id),
+              })),
             );
           }
         } catch {
@@ -233,11 +228,6 @@ export default function DonationLayout() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}

@@ -1,3 +1,4 @@
+import type { PartnerTuple } from '~/api/config';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -10,7 +11,6 @@ import { ApiError } from '~/api/apiUtils';
 import { getPartners, updateDriverPartner } from '~/api/config';
 
 export default function OnboardingFlow() {
-  type PartnerTuple = [number, string];
   type PickerItem = { label: string; value: number };
 
   const { driver } = useAuth();
@@ -30,17 +30,7 @@ export default function OnboardingFlow() {
         setIsLoading(true);
         setError(null);
 
-        const partnersList = await getPartners();
-
-        const safePartners: PartnerTuple[] = Array.isArray(partnersList)
-          ? (partnersList as unknown[]).filter((x): x is PartnerTuple => {
-              return (
-                Array.isArray(x) &&
-                typeof x[0] === 'number' &&
-                typeof x[1] === 'string'
-              );
-            })
-          : [];
+        const safePartners = await getPartners();
 
         setPartners(safePartners);
       } catch (err) {
