@@ -1,5 +1,5 @@
 import type { TaskStatus } from '@/components/TaskCard';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -20,9 +20,11 @@ import styles from '@/styles/tabs/my-tasks-styles';
 import { useAuth } from '@/utils/AuthContext';
 import {
   formatShortStatusDate,
+  formatTimeRangeAny,
   isTaskBeforeTodayPT,
   isTaskPastEndTime,
 } from '@/utils/dateHelpers';
+import { formatTaskAddress } from '@/utils/taskHelpers';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 
@@ -43,58 +45,6 @@ interface Task {
     state?: string | null;
     zip?: string | null;
   } | null;
-}
-
-function formatTimeRange(
-  startTime: string | null,
-  endTime: string | null,
-): string {
-  if (!startTime || !endTime) return 'Time TBD';
-
-  try {
-    const parseTime = (timeStr: string) => {
-      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
-      if (isNaN(hours) || isNaN(minutes)) return null;
-
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      const displayMinutes = minutes.toString().padStart(2, '0');
-      return `${displayHours}:${displayMinutes} ${ampm}`;
-    };
-
-    const startFormatted = parseTime(startTime);
-    const endFormatted = parseTime(endTime);
-
-    if (!startFormatted || !endFormatted) return 'Time TBD';
-
-    return `${startFormatted} - ${endFormatted}`;
-  } catch {
-    return 'Time TBD';
-  }
-}
-
-function formatAddress(task: Task): string {
-  if (task.address) {
-    const { street, city } = task.address;
-    const parts = [];
-    if (street) parts.push(street);
-    if (city) parts.push(city);
-    if (parts.length > 0) return parts.join(', ');
-  }
-
-  if (task.location_name) {
-    if (task.location_name.includes('Oakland')) return 'Oakland, CA';
-    if (task.location_name.includes('Berkeley')) return 'Berkeley, CA';
-    if (
-      task.location_name.includes('San Francisco') ||
-      task.location_name.includes('SF')
-    )
-      return 'San Francisco, CA';
-    if (task.location_name.includes('San Jose')) return 'San Jose, CA';
-    return 'Bay Area, CA';
-  }
-
-  return 'Address details in app';
 }
 
 function deriveTaskStatus(task: Task): TaskStatus {
@@ -234,11 +184,6 @@ export default function MyTasksPage() {
     [router],
   );
 
-  const prevTab = useRef(activeTab);
-  if (prevTab.current !== activeTab) {
-    prevTab.current = activeTab;
-  }
-
   if (isLoading && tasks.length === 0) {
     return (
       <View style={styles.container}>
@@ -318,8 +263,8 @@ export default function MyTasksPage() {
               <TaskCard
                 key={task.id}
                 locationName={task.location_name || 'Unknown Location'}
-                address={formatAddress(task)}
-                timeRange={formatTimeRange(task.start_time, task.end_time)}
+                address={formatTaskAddress(task)}
+                timeRange={formatTimeRangeAny(task.start_time, task.end_time)}
                 status={task.derivedStatus}
                 completedDate={formatStatusDate(task)}
                 onPress={() => handleCardPress(task)}

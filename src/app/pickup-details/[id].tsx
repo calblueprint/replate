@@ -21,6 +21,7 @@ import TaskNotification from '@/components/TaskNotification';
 import Colors from '@/styles/colors';
 import { styles } from '@/styles/pages/pickup-details-styles';
 import { useAuth } from '@/utils/AuthContext';
+import { fmt12, formatTimeRangeAny, parseHMAny } from '@/utils/dateHelpers';
 import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
 
@@ -51,51 +52,23 @@ interface TaskDetails {
   tray_count?: number | null;
 }
 
-function parseHM(ts: string): { h: number; m: number } | null {
-  const s = ts.trim();
-  if (s.includes('UTC')) {
-    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-  if (s.includes('T')) {
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-  const match = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
-  if (!match) return null;
-  return { h: Number(match[1]), m: Number(match[2]) };
-}
-
-function fmt12(h: number, m: number): string {
-  const ap = h >= 12 ? 'pm' : 'am';
-  const hr12 = h % 12 || 12;
-  return `${hr12}:${String(m).padStart(2, '0')}${ap}`;
-}
-
 function formatPickupWindow(task: TaskDetails): string {
   const d = new Date(task.pickup_date + 'T00:00:00');
   const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
   const month = d.toLocaleDateString('en-US', { month: 'short' });
   const day = d.getDate();
 
-  const start = task.start_time ? parseHM(task.start_time) : null;
-  const end = task.end_time ? parseHM(task.end_time) : null;
-
-  const timeStr =
-    start && end
-      ? `${fmt12(start.h, start.m)} - ${fmt12(end.h, end.m)}`
-      : 'Time TBD';
+  const timeStr = formatTimeRangeAny(task.start_time, task.end_time, {
+    compactLower: true,
+  });
 
   return `${weekday}, ${month} ${day}: ${timeStr}`;
 }
 
 function formatClaimTime(endTime: string | null): string {
   if (!endTime) return '';
-  const hm = parseHM(endTime);
-  if (!hm) return '';
-  return fmt12(hm.h, hm.m);
+  const hm = parseHMAny(endTime);
+  return hm ? fmt12(hm.h, hm.m, true) : '';
 }
 
 export default function PickupDetails() {
