@@ -18,7 +18,11 @@ import UnderlineTabBar from '@/components/UnderlineTabBar';
 import Colors from '@/styles/colors';
 import styles from '@/styles/tabs/my-tasks-styles';
 import { useAuth } from '@/utils/AuthContext';
-import { formatShortStatusDate, isTaskPastEndTime } from '@/utils/dateHelpers';
+import {
+  formatShortStatusDate,
+  isTaskBeforeTodayPT,
+  isTaskPastEndTime,
+} from '@/utils/dateHelpers';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 
@@ -101,7 +105,15 @@ function deriveTaskStatus(task: Task): TaskStatus {
   return 'active';
 }
 
-function formatStatusDate(task: Task): string | undefined {
+function formatStatusDate(
+  task: Task & { derivedStatus?: TaskStatus },
+): string | undefined {
+  if (task.derivedStatus === 'overdue') {
+    return isTaskBeforeTodayPT(task.pickup_date)
+      ? formatShortStatusDate(task.pickup_date)
+      : undefined;
+  }
+
   const dateStr = task.completed_at ?? task.missed_at ?? task.pickup_date;
   if (!dateStr) return undefined;
   return formatShortStatusDate(dateStr);

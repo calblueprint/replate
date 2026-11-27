@@ -52,6 +52,22 @@ function parseOptionalString(value: unknown): string | null {
 function parseTaskAddress(data: Record<string, unknown>): string | null {
   const direct = parseOptionalString(data.address);
   if (direct && direct.trim().length > 0) return direct.trim();
+
+  if (isRecord(data.address)) {
+    const addr = data.address;
+    const streetLine = [addr.number, addr.street]
+      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
+      .join(' ');
+    const cityState = [
+      typeof addr.city === 'string' ? addr.city.trim() : '',
+      typeof addr.state === 'string' ? addr.state.trim() : '',
+    ]
+      .filter(Boolean)
+      .join(', ');
+    const full = [streetLine, cityState].filter(Boolean).join(', ');
+    if (full.length > 0) return full;
+  }
+
   if (!isRecord(data.location)) return null;
   const loc = data.location;
   const parts = [loc.street_address, loc.city, loc.state, loc.zip_code].filter(

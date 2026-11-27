@@ -94,6 +94,9 @@ export default function TaskCard({
     if (status === 'missed' && completedDate) {
       return `Missed on ${completedDate}`;
     }
+    if (status === 'overdue' && completedDate) {
+      return `Due on ${completedDate}`;
+    }
     return timeRange;
   })();
 

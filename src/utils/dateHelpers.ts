@@ -87,6 +87,18 @@ export function parsePacificHM(ts: string): { h: number; m: number } | null {
   return { h: Number(m[1]), m: Number(m[2]) };
 }
 
+/** Return true when pickupDate is strictly before today's calendar date in Pacific Time */
+export function isTaskBeforeTodayPT(
+  pickupDate: string,
+  now: Date = new Date(),
+): boolean {
+  const pickupParts = parseISODateParts(pickupDate);
+  if (!pickupParts) return false;
+
+  const ptNow = getPacificDateTimeParts(now);
+  return compareDateParts(pickupParts, ptNow) < 0;
+}
+
 /** Return true when a task's pickup window has ended in Pacific Time */
 export function isTaskPastEndTime(
   pickupDate: string,
