@@ -34,15 +34,9 @@ function DayItem({
   isSelected: boolean;
   onPress: () => void;
 }) {
-  const dynamicStyle = {
-    borderWidth: isSelected ? 1 : 0,
-    backgroundColor: isSelected ? Colors.profileBg : Colors.white,
-    borderColor: Colors.primaryGreen,
-  };
-
   return (
     <TouchableOpacity onPress={onPress}>
-      <View style={[styles.dayItem, dynamicStyle]}>
+      <View style={[styles.dayItem, isSelected && styles.selectedDayItem]}>
         <Text style={[styles.monthText, isSelected && styles.selectedText]}>
           {month}
         </Text>
@@ -108,17 +102,20 @@ export default function DayCarousel({
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
+    justifyContent: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 4,
     gap: 8,
     alignItems: 'center',
   },
   dayItem: {
     width: 61,
     height: 80,
+    paddingVertical: 8,
     backgroundColor: Colors.white,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     borderRadius: 14,
     shadowColor: '#000',
     shadowOffset: {
@@ -132,6 +129,7 @@ const styles = StyleSheet.create({
   selectedDayItem: {
     width: 71,
     height: 92,
+    paddingVertical: 11,
     backgroundColor: Colors.profileBg,
     borderWidth: 1,
     borderColor: Colors.primaryGreen,
@@ -140,13 +138,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'LatoBold',
     color: Colors.black,
-    marginBottom: 2,
   },
   dayNumber: {
     fontSize: 18,
     fontFamily: 'LatoBold',
     color: Colors.secondaryGreen,
-    marginBottom: 2,
   },
   weekdayText: {
     fontSize: 10,

@@ -4,7 +4,7 @@ import Colors from '@/styles/colors';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 12,
+    gap: 11,
     backgroundColor: Colors.background,
   },
 
@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'LatoBold',
     color: Colors.black,
     paddingHorizontal: 21,
-    marginTop: 16,
+    marginTop: 2,
     marginBottom: 12,
   },
 
