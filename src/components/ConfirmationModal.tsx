@@ -9,7 +9,6 @@ interface ConfirmationModalProps {
   destructive?: boolean;
   onBack: () => void;
   onConfirm: () => void;
-  destructive?: boolean;
 }
 
 export default function ConfirmationModal({
@@ -19,7 +18,6 @@ export default function ConfirmationModal({
   destructive = false,
   onBack,
   onConfirm,
-  destructive = false,
 }: ConfirmationModalProps) {
   const scaleAnim = useRef(new Animated.Value(0.85)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -182,6 +180,7 @@ const styles = StyleSheet.create({
   confirmText: {
     fontSize: 14,
     fontFamily: 'LatoBold',
+    color: Colors.white,
     letterSpacing: 0.28,
   },
   destructiveConfirmText: {

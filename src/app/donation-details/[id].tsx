@@ -154,6 +154,7 @@ export default function DonationLayout() {
     task?.address || params.location || 'Location details';
 
   const handleComplete = async () => {
+    setConfirmModalVisible(false);
     if (!params.id || isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -166,11 +167,10 @@ export default function DonationLayout() {
       });
       Toast.show({ type: 'success', text1: 'Donation recorded!' });
       router.replace('/(tabs)/my-tasks');
-    } catch (e) {
-      console.log(JSON.stringify(e));
+    } catch {
       Toast.show({
         type: 'error',
-        text1: `Could not save. Please try again.`,
+        text1: 'Could not save. Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -178,6 +178,7 @@ export default function DonationLayout() {
   };
 
   const handleMissed = async () => {
+    setMissedModalVisible(false);
     if (!params.id || isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -188,8 +189,7 @@ export default function DonationLayout() {
         text2: `${params.location || 'Task'} marked as missed.`,
       });
       router.replace('/(tabs)/my-tasks');
-    } catch (e) {
-      console.log(JSON.stringify(e));
+    } catch {
       Toast.show({
         type: 'error',
         text1: 'Could not mark as missed. Please try again.',

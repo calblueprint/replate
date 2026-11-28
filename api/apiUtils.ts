@@ -134,8 +134,6 @@ export async function apiRequest<T = unknown>(
   let lastError: Error | ApiError | null = null;
   let attempt = 0;
 
-  console.log(`Fetching from ${url}`);
-
   while (attempt <= retries) {
     try {
       const response = await fetchWithTimeout(url, {
