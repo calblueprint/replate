@@ -47,6 +47,7 @@ export default function DonationLayout() {
   const [task, setTask] = useState<TaskPickupInfo | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [confirmMissedVisible, setConfirmMissedVisible] = useState(false);
   const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
   const canMarkMissed =
@@ -131,6 +132,7 @@ export default function DonationLayout() {
   };
 
   const handleComplete = async () => {
+    setConfirmModalVisible(false);
     if (!params.id || isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -299,12 +301,20 @@ export default function DonationLayout() {
             styles.completeButton,
             (!isFormValid || isSubmitting) && styles.completeButtonDisabled,
           ]}
-          onPress={handleComplete}
+          onPress={() => setConfirmModalVisible(true)}
           disabled={!isFormValid || isSubmitting}
         >
           <Text style={[styles.completeText]}>Complete</Text>
         </TouchableOpacity>
       </View>
+
+      <ConfirmationModal
+        visible={confirmModalVisible}
+        title="Mark task as completed?"
+        subtitle="This action cannot be undone."
+        onBack={() => setConfirmModalVisible(false)}
+        onConfirm={handleComplete}
+      />
 
       <ConfirmationModal
         visible={confirmMissedVisible}
