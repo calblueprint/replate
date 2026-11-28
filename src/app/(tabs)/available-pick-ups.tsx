@@ -6,10 +6,10 @@ import AvailableTaskCard from '@/components/AvailableTaskCard';
 import DayCarousel from '@/components/DayCarousel';
 import { AvailableListSkeleton } from '@/components/SkeletonLoader';
 import Colors from '@/styles/colors';
+import { styles } from '@/styles/tabs/available-pick-ups-styles';
 import { useAuth } from '@/utils/AuthContext';
 import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
-import { styles } from '../../styles/tabs/available-pick-ups-styles';
 
 interface ApiTask {
   id: number;
@@ -138,12 +138,12 @@ export default function AvailablePickupsPage() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.pageTitle}>Today's Available Tasks</Text>
-          <DayCarousel
-            selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
-            dayCount={5}
-          />
         </View>
+        <DayCarousel
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          dayCount={5}
+        />
         <AvailableListSkeleton count={4} />
       </View>
     );
@@ -154,12 +154,12 @@ export default function AvailablePickupsPage() {
       {/* Fixed white header */}
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Today's Available Tasks</Text>
-        <DayCarousel
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-          dayCount={5}
-        />
       </View>
+      <DayCarousel
+        selectedDate={selectedDate}
+        onSelectDate={setSelectedDate}
+        dayCount={5}
+      />
 
       {/* Scrollable content */}
       <ScrollView

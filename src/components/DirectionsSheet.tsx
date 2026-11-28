@@ -75,7 +75,7 @@ export default function DirectionsSheet({
             onPress={onAppleMaps}
           >
             <Text style={styles.optionText}>Open in Apple Maps</Text>
-            <Text style={styles.optionArrow}>{'\u203A'}</Text>
+            <Text style={styles.optionArrow}>{'\u2192'}</Text>
           </Pressable>
 
           <Pressable
@@ -86,7 +86,7 @@ export default function DirectionsSheet({
             onPress={onGoogleMaps}
           >
             <Text style={styles.optionText}>Open in Google Maps</Text>
-            <Text style={styles.optionArrow}>{'\u203A'}</Text>
+            <Text style={styles.optionArrow}>{'\u2192'}</Text>
           </Pressable>
         </View>
       </Animated.View>

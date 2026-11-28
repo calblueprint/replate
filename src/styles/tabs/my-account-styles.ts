@@ -52,6 +52,11 @@ export const myAccountStyles = StyleSheet.create({
     paddingBottom: 50 + 47,
     flex: 1,
     justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
   },
 
   /** FORM FIELDS **/
@@ -72,7 +77,7 @@ export const myAccountStyles = StyleSheet.create({
     fontSize: 17,
     fontFamily: REGULAR,
     color: Colors.black,
-    lineHeight: 16,
+    lineHeight: 22,
   },
   fieldTextCapitalize: {
     textTransform: 'capitalize',
@@ -88,7 +93,7 @@ export const myAccountStyles = StyleSheet.create({
   logoutButtonText: {
     color: Colors.white,
     fontSize: 16,
-    fontFamily: 'AvenirBold',
+    fontFamily: BOLD,
     lineHeight: 30,
   },
 });

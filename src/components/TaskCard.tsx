@@ -25,7 +25,6 @@ const STATUS_CONFIG: Record<
     badgeBg: string;
     badgeColor: string;
     timeColor: string;
-    dotColor: string;
     actionBg: string;
     actionText: string;
   }
@@ -36,27 +35,24 @@ const STATUS_CONFIG: Record<
     badgeBg: 'transparent',
     badgeColor: 'transparent',
     timeColor: Colors.secondaryGreen,
-    dotColor: Colors.primaryGreen,
     actionBg: Colors.primaryGreen,
     actionText: 'Add Details',
   },
   overdue: {
     accentColor: Colors.overdueYellow,
     badgeText: 'Overdue',
-    badgeBg: '#FEFCE8',
+    badgeBg: Colors.overdueBg,
     badgeColor: Colors.overdueYellow,
     timeColor: Colors.overdueYellow,
-    dotColor: Colors.overdueYellow,
     actionBg: Colors.overdueYellow,
     actionText: 'Add Details',
   },
   missing: {
     accentColor: Colors.missingRed,
     badgeText: 'Missing',
-    badgeBg: '#FEF2F2',
+    badgeBg: Colors.lightRed,
     badgeColor: Colors.missingRed,
     timeColor: Colors.missingRed,
-    dotColor: Colors.missingRed,
     actionBg: Colors.missingRed,
     actionText: 'Add Details',
   },
@@ -66,7 +62,6 @@ const STATUS_CONFIG: Record<
     badgeBg: Colors.profileBg,
     badgeColor: Colors.secondaryGreen,
     timeColor: Colors.secondaryGreen,
-    dotColor: Colors.primaryGreen,
     actionBg: Colors.primaryGreen,
     actionText: 'View Details',
   },
@@ -76,7 +71,6 @@ const STATUS_CONFIG: Record<
     badgeBg: Colors.background,
     badgeColor: Colors.slateGray,
     timeColor: Colors.filterGray,
-    dotColor: Colors.missedGray,
     actionBg: Colors.missedGray,
     actionText: 'View Details',
   },
@@ -115,21 +109,11 @@ export default function TaskCard({
       />
 
       <View style={styles.cardBody}>
-        {/* Top row: time info + badge pill */}
+        {/* Top row: title + badge pill */}
         <View style={styles.topRow}>
-          <View style={styles.timeRow}>
-            <View style={[styles.dot, { backgroundColor: config.dotColor }]} />
-            <Text
-              style={[
-                styles.timeText,
-                { color: config.timeColor },
-                (status === 'overdue' || status === 'missing') &&
-                  styles.timeBold,
-              ]}
-            >
-              {timeLabel}
-            </Text>
-          </View>
+          <Text style={styles.title} numberOfLines={1}>
+            Pickup from {locationName}
+          </Text>
           {config.badgeText && (
             <View style={[styles.badge, { backgroundColor: config.badgeBg }]}>
               <Text style={[styles.badgeText, { color: config.badgeColor }]}>
@@ -139,14 +123,20 @@ export default function TaskCard({
           )}
         </View>
 
-        {/* Title */}
-        <Text style={styles.title} numberOfLines={1}>
-          Pickup from {locationName}
-        </Text>
-
         {/* Address */}
         <Text style={styles.address} numberOfLines={1}>
           {address}
+        </Text>
+
+        {/* Time / status date */}
+        <Text
+          style={[
+            styles.timeText,
+            { color: config.timeColor },
+            (status === 'overdue' || status === 'missing') && styles.timeBold,
+          ]}
+        >
+          {timeLabel}
         </Text>
 
         {/* Action button */}
@@ -203,22 +193,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
-  },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    gap: 8,
+    marginBottom: 2,
   },
   timeText: {
     fontSize: 12,
     fontFamily: 'Lato',
     lineHeight: 16,
+    marginTop: 4,
   },
   timeBold: {
     fontFamily: 'LatoBold',
@@ -232,14 +214,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Lato',
     fontWeight: '600',
-    lineHeight: 24,
+    lineHeight: 20,
   },
   title: {
+    flex: 1,
     fontSize: 14,
     fontFamily: 'LatoBold',
     color: Colors.cardTitle,
     lineHeight: 20,
-    marginBottom: 2,
   },
   address: {
     fontSize: 12,

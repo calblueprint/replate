@@ -1,92 +1,97 @@
 import { StyleSheet } from 'react-native';
+import colors from '@/styles/colors';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: colors.backgroundSecondary,
+    paddingHorizontal: 16,
+    paddingTop: 65,
+    paddingBottom: 20,
     justifyContent: 'space-between',
   },
-  imageContainer: {
-    width: '100%',
+  header: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40, // pushes the icon down from the header
-    marginBottom: 10,
+    marginBottom: 38,
+  },
+  welcomeTitle: {
+    fontSize: 30,
+    fontFamily: 'LatoBold',
+    color: colors.secondaryGreen,
+    marginBottom: 4,
+  },
+  welcomeSubtitle: {
+    fontSize: 15,
+    fontFamily: 'Lato',
+    color: colors.textTertiary,
   },
   title: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#000',
-    marginTop: 50,
-    marginBottom: 42,
+    fontFamily: 'LatoBold',
+    color: colors.black,
+    marginBottom: 16,
   },
   textStyle: {
-    fontSize: 15,
+    fontSize: 14,
+    fontFamily: 'Lato',
   },
   dropdownStyle: {
-    width: 355,
-    height: 60,
-    borderColor: '#b0b0b0',
+    width: '100%',
+    height: 48,
+    borderColor: colors.borderPrimary,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 7,
+    backgroundColor: colors.white,
+    paddingHorizontal: 18,
   },
   dropdownOpenStyle: {
-    borderColor: '#2D8A62', // green outline
+    borderColor: colors.primaryGreen,
   },
   placeholderStyle: {
-    color: '#888',
+    color: colors.textTertiary,
+    fontFamily: 'Lato',
+    fontSize: 14,
   },
   dropdownListStyle: {
-    borderColor: '#b0b0b0',
-    borderWidth: 1,
-    marginTop: 28,
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    borderRadius: 8,
+    borderColor: colors.white,
+    borderWidth: 0,
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRadius: 16,
+    backgroundColor: colors.white,
+    shadowColor: '#2D8A62',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 6,
   },
   selectedItemContainer: {
-    backgroundColor: '#AEDDC4',
+    backgroundColor: colors.profileBg,
     borderRadius: 8,
   },
   itemContainerStyle: {
-    height: 50, // each item height
-    width: 355, // inner width
-    alignSelf: 'center', // centers the 319px items inside the 327px list
+    height: 46,
+    width: '100%',
     justifyContent: 'center',
+    paddingHorizontal: 16,
   },
   buttonBase: {
-    marginBottom: 35,
-    paddingVertical: 16,
-    borderRadius: 8,
+    marginBottom: 26,
+    height: 56,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonEnabled: {
-    backgroundColor: '#58AD85',
+    backgroundColor: colors.primaryGreen,
   },
   buttonDisabled: {
-    backgroundColor: '#cccccc',
+    backgroundColor: colors.fillInactive,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  backButton: {
-    marginTop: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  backIcon: {
-    fontSize: 23,
-    color: '#888',
-    marginRight: 4,
-    transform: [{ translateY: -1 }],
-  },
-  backText: {
-    fontSize: 17,
-    color: '#888',
+    color: colors.white,
+    fontSize: 16,
+    fontFamily: 'LatoBold',
   },
 });

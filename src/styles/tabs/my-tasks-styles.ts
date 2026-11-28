@@ -12,6 +12,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingTop: 56,
     paddingBottom: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1,
   },
   date: {
     fontSize: 15,
@@ -67,6 +73,7 @@ const styles = StyleSheet.create({
   /** TASK CARDS CONTAINER **/
   taskListContainer: {
     paddingHorizontal: 20,
+    paddingTop: 16,
   },
 
   /** EMPTY STATE **/
@@ -90,9 +97,10 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   emptyButton: {
-    height: 41,
-    paddingHorizontal: 32,
-    borderRadius: 10,
+    height: 36,
+    minWidth: 131,
+    paddingHorizontal: 24,
+    borderRadius: 8,
     backgroundColor: Colors.primaryGreen,
     alignItems: 'center',
     justifyContent: 'center',

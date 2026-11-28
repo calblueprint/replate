@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     left: 24,
     right: 24,
     height: 42,
-    backgroundColor: '#EEF6F3',
+    backgroundColor: Colors.notifFill,
     borderRadius: 5,
     borderWidth: 0.5,
     borderColor: Colors.primaryGreen,
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   undoText: {
     fontSize: 14,
     fontFamily: 'LatoLight',
-    color: Colors.black,
+    color: Colors.dateGray,
     marginRight: 16,
     lineHeight: 20,
   },
