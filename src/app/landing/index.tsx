@@ -157,7 +157,6 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     ...typography.h2,
-    fontSize: 30,
     textAlign: 'center',
     color: colors.secondaryGreen,
     marginBottom: 12,

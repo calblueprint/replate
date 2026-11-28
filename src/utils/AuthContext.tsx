@@ -6,13 +6,25 @@ import React, {
   useState,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { z } from 'zod';
 import {
   driverAPI,
   DriverLoginData,
   DriverResponse,
   DriverSignupData,
 } from '~/api/config';
-import { safeJsonParse, sanitizeObject } from './sanitization';
+
+const DriverResponseSchema = z.object({
+  id: z.number(),
+  email: z.string().trim(),
+  first_name: z.string().trim(),
+  last_name: z.string().trim(),
+  phone: z
+    .string()
+    .trim()
+    .nullish()
+    .transform(v => v ?? undefined),
+});
 
 // Simple AuthContext with persistence
 interface AuthContextType {
@@ -41,9 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedDriver = await AsyncStorage.getItem('driver');
 
         if (storedDriver) {
-          const parsed = safeJsonParse<Record<string, unknown>>(storedDriver);
-          if (parsed && typeof parsed === 'object') {
-            setDriver(sanitizeObject(parsed) as unknown as DriverResponse);
+          const parsed = DriverResponseSchema.safeParse(
+            JSON.parse(storedDriver),
+          );
+          if (parsed.success) {
+            setDriver(parsed.data);
           }
         }
       } catch {

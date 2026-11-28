@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
 import Colors from '@/styles/colors';
+import { typography } from '@/styles/typography';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 12,
+    gap: 11,
     backgroundColor: Colors.background,
   },
 
@@ -23,8 +24,7 @@ export const styles = StyleSheet.create({
     elevation: 2, // Required for Android
   },
   pageTitle: {
-    fontSize: 24,
-    fontFamily: 'LatoBold',
+    ...typography.h3Bold,
     color: Colors.secondaryGreen,
     paddingHorizontal: 21,
   },
@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'LatoBold',
     color: Colors.black,
     paddingHorizontal: 21,
-    marginTop: 16,
+    marginTop: 2,
     marginBottom: 12,
   },
 

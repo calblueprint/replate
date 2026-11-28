@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import colors from './colors';
+import { typography } from './typography';
 
 const REGULAR = 'Lato';
 const BOLD = 'LatoBold';
@@ -31,8 +32,7 @@ export const authStyles = StyleSheet.create({
     resizeMode: 'contain',
   },
   titleCentered: {
-    fontSize: 30,
-    fontFamily: BOLD,
+    ...typography.h2,
     textAlign: 'center',
     marginBottom: 8,
     color: colors.secondaryGreen,

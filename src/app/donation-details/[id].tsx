@@ -1,3 +1,4 @@
+import type { TaskPickupInfo } from '@/utils/taskHelpers';
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -10,13 +11,19 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import PhotoUpload from '@/components/PhotoUpload/PhotoUpload';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import { styles } from '@/styles/pages/donation-details-styles';
-import { formatPickupDate, formatTimeRangeAny } from '@/utils/dateHelpers';
+import {
+  formatPickupDate,
+  formatTimeRangeAny,
+  hasTaskWindowStarted,
+} from '@/utils/dateHelpers';
+import { parseTaskPickupInfo } from '@/utils/taskHelpers';
+import { ApiError } from '~/api/apiUtils';
 import {
   getPartners,
   getTask,
@@ -27,32 +34,6 @@ import {
 interface NpoOption {
   label: string;
   value: string;
-}
-
-interface TaskPickupInfo {
-  pickup_date: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  address: string | null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function parseOptionalString(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
-}
-
-function parseTaskAddress(data: Record<string, unknown>): string | null {
-  const direct = parseOptionalString(data.address);
-  if (direct && direct.trim().length > 0) return direct.trim();
-  if (!isRecord(data.location)) return null;
-  const loc = data.location;
-  const parts = [loc.street_address, loc.city, loc.state, loc.zip_code].filter(
-    (v): v is string => typeof v === 'string' && v.trim().length > 0,
-  );
-  return parts.length > 0 ? parts.join(', ') : null;
 }
 
 export default function DonationLayout() {
@@ -67,8 +48,12 @@ export default function DonationLayout() {
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-  const [missedModalVisible, setMissedModalVisible] = useState(false);
+  const [confirmMissedVisible, setConfirmMissedVisible] = useState(false);
   const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
+  const canMarkMissed =
+    !isFetching &&
+    !isSubmitting &&
+    hasTaskWindowStarted(task?.pickup_date ?? null, task?.start_time ?? null);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,17 +64,12 @@ export default function DonationLayout() {
       const partnersPromise = (async () => {
         try {
           const partnersList = await getPartners();
-          const safe: [number, string][] = Array.isArray(partnersList)
-            ? (partnersList as unknown[]).filter(
-                (x): x is [number, string] =>
-                  Array.isArray(x) &&
-                  typeof x[0] === 'number' &&
-                  typeof x[1] === 'string',
-              )
-            : [];
           if (!cancelled) {
             setNpoOptions(
-              safe.map(([id, name]) => ({ label: name, value: String(id) })),
+              partnersList.map(([id, name]) => ({
+                label: name,
+                value: String(id),
+              })),
             );
           }
         } catch {
@@ -106,19 +86,10 @@ export default function DonationLayout() {
         if (!params.id) return;
         try {
           const data = await getTask(params.id);
-          if (cancelled || !isRecord(data)) return;
-          setTask({
-            pickup_date:
-              parseOptionalString(data.pickup_date) ??
-              parseOptionalString(data.scheduled_date),
-            start_time:
-              parseOptionalString(data.start_time) ??
-              parseOptionalString(data.activity_start_time),
-            end_time:
-              parseOptionalString(data.end_time) ??
-              parseOptionalString(data.activity_end_time),
-            address: parseTaskAddress(data),
-          });
+          const parsed = parseTaskPickupInfo(data);
+          if (!cancelled && parsed) {
+            setTask(parsed);
+          }
         } catch {
           if (!cancelled) {
             Toast.show({
@@ -153,6 +124,13 @@ export default function DonationLayout() {
   const pickupSummaryAddress =
     task?.address || params.location || 'Location details';
 
+  const getErrorMessage = (error: unknown): string | undefined => {
+    if (error instanceof ApiError || error instanceof Error) {
+      return error.message.trim() || undefined;
+    }
+    return undefined;
+  };
+
   const handleComplete = async () => {
     setConfirmModalVisible(false);
     if (!params.id || isSubmitting) return;
@@ -167,19 +145,20 @@ export default function DonationLayout() {
       });
       Toast.show({ type: 'success', text1: 'Donation recorded!' });
       router.replace('/(tabs)/my-tasks');
-    } catch {
+    } catch (e: unknown) {
       Toast.show({
         type: 'error',
-        text1: 'Could not save. Please try again.',
+        text1: 'Could not save.',
+        text2: getErrorMessage(e) || 'Please try again.',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleMissed = async () => {
-    setMissedModalVisible(false);
-    if (!params.id || isSubmitting) return;
+  const handleConfirmMissed = async () => {
+    setConfirmMissedVisible(false);
+    if (!params.id || !canMarkMissed) return;
     setIsSubmitting(true);
     try {
       await submitTaskMissed(params.id);
@@ -189,10 +168,11 @@ export default function DonationLayout() {
         text2: `${params.location || 'Task'} marked as missed.`,
       });
       router.replace('/(tabs)/my-tasks');
-    } catch {
+    } catch (e: unknown) {
       Toast.show({
         type: 'error',
-        text1: 'Could not mark as missed. Please try again.',
+        text1: 'Could not mark as missed.',
+        text2: getErrorMessage(e) || 'Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -201,11 +181,6 @@ export default function DonationLayout() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -308,13 +283,15 @@ export default function DonationLayout() {
         <TouchableOpacity
           style={[
             styles.missedButton,
-            isSubmitting && styles.missedButtonDisabled,
+            !canMarkMissed && styles.missedButtonDisabled,
           ]}
-          onPress={() => setMissedModalVisible(true)}
-          disabled={isSubmitting}
+          onPress={() => setConfirmMissedVisible(true)}
+          disabled={!canMarkMissed}
         >
           <Text
-            style={isSubmitting ? styles.missedTextDisabled : styles.missedText}
+            style={
+              !canMarkMissed ? styles.missedTextDisabled : styles.missedText
+            }
           >
             Missed
           </Text>
@@ -340,12 +317,12 @@ export default function DonationLayout() {
       />
 
       <ConfirmationModal
-        visible={missedModalVisible}
+        visible={confirmMissedVisible}
         title="Mark task as missed?"
         subtitle="This action cannot be undone."
-        onBack={() => setMissedModalVisible(false)}
-        destructive={true}
-        onConfirm={handleMissed}
+        destructive
+        onBack={() => setConfirmMissedVisible(false)}
+        onConfirm={handleConfirmMissed}
       />
     </SafeAreaView>
   );

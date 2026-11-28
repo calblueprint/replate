@@ -1,3 +1,4 @@
+import type { PartnerTuple } from '~/api/config';
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,13 +12,13 @@ import { getPartners } from '~/api/config';
 export default function MyAccountPage() {
   const { driver, logout } = useAuth();
   const { profile } = useProfile();
-  const [partners, setPartners] = useState<[number, string][]>([]);
+  const [partners, setPartners] = useState<PartnerTuple[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
         const list = await getPartners();
-        setPartners(list as [number, string][]);
+        setPartners(list);
       } catch (e) {
         console.log('failed to load partners', e);
       }

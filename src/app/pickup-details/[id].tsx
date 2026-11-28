@@ -16,18 +16,28 @@ import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import dateIcon from 'assets/date.png';
+import { z } from 'zod';
 import DirectionsSheet from '@/components/DirectionsSheet';
 import TaskNotification from '@/components/TaskNotification';
 import Colors from '@/styles/colors';
 import { styles } from '@/styles/pages/pickup-details-styles';
 import { useAuth } from '@/utils/AuthContext';
+import {
+  formatPickupDate,
+  formatTimeLabel,
+  formatTimeRangeAny,
+} from '@/utils/dateHelpers';
+import { formatFullTaskAddress } from '@/utils/taskHelpers';
 import { apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL, claimTask } from '~/api/config';
+
+const TaskDetailsSchema = z.object({ id: z.number() }).passthrough();
 
 interface TaskDetails {
   id: number;
   encrypted_id?: string;
   driver_id?: number | null;
+  status?: string | null;
   pickup_date: string;
   start_time: string | null;
   end_time: string | null;
@@ -50,51 +60,16 @@ interface TaskDetails {
   tray_count?: number | null;
 }
 
-function parseHM(ts: string): { h: number; m: number } | null {
-  const s = ts.trim();
-  if (s.includes('UTC')) {
-    const d = new Date(s.replace(' ', 'T').replace(' UTC', 'Z'));
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-  if (s.includes('T')) {
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return null;
-    return { h: d.getHours(), m: d.getMinutes() };
-  }
-  const match = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
-  if (!match) return null;
-  return { h: Number(match[1]), m: Number(match[2]) };
-}
-
-function fmt12(h: number, m: number): string {
-  const ap = h >= 12 ? 'pm' : 'am';
-  const hr12 = h % 12 || 12;
-  return `${hr12}:${String(m).padStart(2, '0')}${ap}`;
-}
-
 function formatPickupWindow(task: TaskDetails): string {
-  const d = new Date(task.pickup_date + 'T00:00:00');
-  const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
-  const month = d.toLocaleDateString('en-US', { month: 'short' });
-  const day = d.getDate();
-
-  const start = task.start_time ? parseHM(task.start_time) : null;
-  const end = task.end_time ? parseHM(task.end_time) : null;
-
-  const timeStr =
-    start && end
-      ? `${fmt12(start.h, start.m)} - ${fmt12(end.h, end.m)}`
-      : 'Time TBD';
-
-  return `${weekday}, ${month} ${day}: ${timeStr}`;
+  const dateStr = formatPickupDate(task.pickup_date, 'EEEE, MMM d');
+  const timeStr = formatTimeRangeAny(task.start_time, task.end_time, {
+    compactLower: true,
+  });
+  return `${dateStr}: ${timeStr}`;
 }
 
 function formatClaimTime(endTime: string | null): string {
-  if (!endTime) return '';
-  const hm = parseHM(endTime);
-  if (!hm) return '';
-  return fmt12(hm.h, hm.m);
+  return formatTimeLabel(endTime, { compactLower: true }) ?? '';
 }
 
 export default function PickupDetails() {
@@ -120,10 +95,7 @@ export default function PickupDetails() {
 
         const data = await apiRequest<TaskDetails>(url, {
           method: 'GET',
-          validateResponse: r => {
-            if (!r || typeof r !== 'object' || Array.isArray(r)) return false;
-            return typeof (r as Record<string, unknown>).id === 'number';
-          },
+          schema: TaskDetailsSchema,
         });
 
         const raw = data as unknown as Record<string, unknown>;
@@ -132,6 +104,7 @@ export default function PickupDetails() {
           id: raw.id as number,
           encrypted_id: raw.encrypted_id as string | undefined,
           driver_id: (raw.driver_id as number | null) ?? null,
+          status: (raw.status as string | null) ?? null,
           pickup_date:
             (raw.pickup_date as string) ?? (raw.scheduled_date as string) ?? '',
           start_time:
@@ -196,11 +169,12 @@ export default function PickupDetails() {
   }, []);
 
   const getAddressString = useCallback(() => {
-    if (!task?.address) return '';
-    const addr = task.address;
-    return [addr.number, addr.street, addr.city, addr.state, addr.zip]
-      .filter(Boolean)
-      .join(' ');
+    return (
+      formatFullTaskAddress(task?.address, {
+        includeZip: true,
+        separator: ' ',
+      }) ?? ''
+    );
   }, [task]);
 
   const openInAppleMaps = useCallback(() => {
@@ -274,18 +248,14 @@ export default function PickupDetails() {
     );
   }
 
-  const addr = task.address;
-  const displayAddress = addr
-    ? [
-        addr.number,
-        addr.street,
-        addr.city && `${addr.city}, ${addr.state ?? ''}`,
-      ]
-        .filter(Boolean)
-        .join(' ')
-    : 'Address not available';
+  const displayAddress =
+    formatFullTaskAddress(task.address, { separator: ' ' }) ??
+    'Address not available';
 
-  const isInProgress = isTaskAdded || !!task.driver_id;
+  const isCompleted = task.status === 'complete';
+  const isMissed = task.status === 'failed';
+  const isInProgress =
+    !isCompleted && !isMissed && (isTaskAdded || !!task.driver_id);
 
   return (
     <View style={styles.container}>
@@ -440,7 +410,25 @@ export default function PickupDetails() {
 
       {/* Bottom button */}
       <View style={styles.bottomContainer}>
-        {isInProgress ? (
+        {isCompleted ? (
+          <View style={[styles.progressButton, styles.completedStatusButton]}>
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={24}
+              color={Colors.white}
+            />
+            <Text style={styles.progressButtonText}>Task completed</Text>
+          </View>
+        ) : isMissed ? (
+          <View style={[styles.progressButton, styles.missedStatusButton]}>
+            <Ionicons
+              name="close-circle-outline"
+              size={24}
+              color={Colors.white}
+            />
+            <Text style={styles.progressButtonText}>Task missed</Text>
+          </View>
+        ) : isInProgress ? (
           <View style={styles.progressButton}>
             <Ionicons name="time-outline" size={24} color={Colors.white} />
             <Text style={styles.progressButtonText}>Task in progress</Text>

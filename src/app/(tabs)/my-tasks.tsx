@@ -1,5 +1,5 @@
 import type { TaskStatus } from '@/components/TaskCard';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -12,16 +12,24 @@ import {
 import { useFocusEffect, useRouter } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import elementIcon from 'assets/elements.png';
-import ConfirmationModal from '@/components/ConfirmationModal';
-import QuickActionsSheet from '@/components/QuickActionsSheet';
+import { z } from 'zod';
 import { TaskListSkeleton } from '@/components/SkeletonLoader';
 import TaskCard from '@/components/TaskCard';
 import UnderlineTabBar from '@/components/UnderlineTabBar';
 import Colors from '@/styles/colors';
 import styles from '@/styles/tabs/my-tasks-styles';
 import { useAuth } from '@/utils/AuthContext';
-import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
+import {
+  formatShortStatusDate,
+  formatTimeRangeAny,
+  isTaskBeforeTodayPT,
+  isTaskOverdue,
+} from '@/utils/dateHelpers';
+import { formatTaskAddress } from '@/utils/taskHelpers';
+import { ApiError, apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
+
+const TaskArraySchema = z.array(z.unknown());
 
 interface Task {
   id: number;
@@ -42,81 +50,27 @@ interface Task {
   } | null;
 }
 
-function formatTimeRange(
-  startTime: string | null,
-  endTime: string | null,
-): string {
-  if (!startTime || !endTime) return 'Time TBD';
-
-  try {
-    const parseTime = (timeStr: string) => {
-      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
-      if (isNaN(hours) || isNaN(minutes)) return null;
-
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      const displayMinutes = minutes.toString().padStart(2, '0');
-      return `${displayHours}:${displayMinutes} ${ampm}`;
-    };
-
-    const startFormatted = parseTime(startTime);
-    const endFormatted = parseTime(endTime);
-
-    if (!startFormatted || !endFormatted) return 'Time TBD';
-
-    return `${startFormatted} - ${endFormatted}`;
-  } catch {
-    return 'Time TBD';
-  }
-}
-
-function formatAddress(task: Task): string {
-  if (task.address) {
-    const { street, city } = task.address;
-    const parts = [];
-    if (street) parts.push(street);
-    if (city) parts.push(city);
-    if (parts.length > 0) return parts.join(', ');
-  }
-
-  if (task.location_name) {
-    if (task.location_name.includes('Oakland')) return 'Oakland, CA';
-    if (task.location_name.includes('Berkeley')) return 'Berkeley, CA';
-    if (
-      task.location_name.includes('San Francisco') ||
-      task.location_name.includes('SF')
-    )
-      return 'San Francisco, CA';
-    if (task.location_name.includes('San Jose')) return 'San Jose, CA';
-    return 'Bay Area, CA';
-  }
-
-  return 'Address details in app';
-}
-
 function deriveTaskStatus(task: Task): TaskStatus {
   if (task.status === 'complete' || task.completed_at) return 'completed';
   if (task.status === 'failed') return 'missed';
   if (task.status === 'in_progress') return 'active';
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const pickupDate = new Date(task.pickup_date);
-  pickupDate.setHours(0, 0, 0, 0);
-
-  if (pickupDate < today) return 'overdue';
+  if (isTaskOverdue(task.pickup_date, task.end_time)) return 'overdue';
   return 'active';
 }
 
-function formatStatusDate(task: Task): string | undefined {
-  const dateStr = task.completed_at ?? task.missed_at;
-  if (!dateStr) return undefined;
-  try {
-    const date = new Date(dateStr);
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  } catch {
-    return undefined;
+function formatStatusDate(
+  task: Task & { derivedStatus?: TaskStatus },
+): string | undefined {
+  if (task.derivedStatus === 'overdue') {
+    return isTaskBeforeTodayPT(task.pickup_date)
+      ? formatShortStatusDate(task.pickup_date)
+      : undefined;
   }
+
+  const dateStr = task.completed_at ?? task.missed_at ?? task.pickup_date;
+  if (!dateStr) return undefined;
+  return formatShortStatusDate(dateStr);
 }
 
 export default function MyTasksPage() {
@@ -127,10 +81,6 @@ export default function MyTasksPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('active');
-
-  const [quickActionsVisible, setQuickActionsVisible] = useState(false);
-  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const now = new Date();
   const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
@@ -153,15 +103,19 @@ export default function MyTasksPage() {
         const [activeTasks, historyTasks] = await Promise.all([
           apiRequest<Task[]>(
             `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}`,
-            { method: 'GET', validateResponse: validateArrayResponse },
+            { method: 'GET', schema: TaskArraySchema },
           ),
           apiRequest<Task[]>(
             `${BASE_URL}${API_ENDPOINTS.MY_TASKS}?driver_id=${driver.id}&status=complete,failed`,
-            { method: 'GET', validateResponse: validateArrayResponse },
+            { method: 'GET', schema: TaskArraySchema },
           ),
         ]);
 
-        setTasks([...activeTasks, ...historyTasks]);
+        const combined = new Map<number, Task>();
+        for (const task of [...activeTasks, ...historyTasks]) {
+          combined.set(task.id, task);
+        }
+        setTasks(Array.from(combined.values()));
       } catch (e: unknown) {
         const errorMessage =
           e instanceof ApiError ? e.message : 'Failed to load tasks';
@@ -234,72 +188,6 @@ export default function MyTasksPage() {
     [router],
   );
 
-  const handleCardLongPress = useCallback((task: Task) => {
-    setSelectedTask(task);
-    setQuickActionsVisible(true);
-  }, []);
-
-  const handleCloseQuickActions = useCallback(() => {
-    setQuickActionsVisible(false);
-    setSelectedTask(null);
-  }, []);
-
-  const handleMarkDelivered = useCallback(() => {
-    if (!selectedTask) return;
-
-    setQuickActionsVisible(false);
-    setSelectedTask(null);
-    router.push({
-      pathname: '/donation-details/[id]',
-      params: {
-        id: selectedTask.encrypted_id,
-        location: selectedTask.location_name ?? '',
-      },
-    });
-  }, [selectedTask, router]);
-
-  const handleMarkMissingPrompt = useCallback(() => {
-    setQuickActionsVisible(false);
-    setConfirmModalVisible(true);
-  }, []);
-
-  const handleConfirmMissing = useCallback(async () => {
-    if (!selectedTask || !driver?.id) return;
-
-    setConfirmModalVisible(false);
-    try {
-      const safeId = encodeURIComponent(selectedTask.encrypted_id);
-      await apiRequest(
-        `${BASE_URL}${API_ENDPOINTS.TASKS}/${safeId}/driver_mark_as_failed`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ driver_id: driver.id }),
-        },
-      );
-      fetchTasks(true);
-    } catch (e: unknown) {
-      const errorMessage =
-        e instanceof ApiError ? e.message : 'Failed to mark as missing';
-      setError(errorMessage);
-    } finally {
-      setSelectedTask(null);
-    }
-  }, [selectedTask, driver?.id, fetchTasks]);
-
-  const handleCancelMissing = useCallback(() => {
-    setConfirmModalVisible(false);
-    setSelectedTask(null);
-  }, []);
-
-  const prevTab = useRef(activeTab);
-  if (prevTab.current !== activeTab) {
-    prevTab.current = activeTab;
-  }
-
   if (isLoading && tasks.length === 0) {
     return (
       <View style={styles.container}>
@@ -347,7 +235,6 @@ export default function MyTasksPage() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        scrollEnabled={!quickActionsVisible && !confirmModalVisible}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -380,12 +267,11 @@ export default function MyTasksPage() {
               <TaskCard
                 key={task.id}
                 locationName={task.location_name || 'Unknown Location'}
-                address={formatAddress(task)}
-                timeRange={formatTimeRange(task.start_time, task.end_time)}
+                address={formatTaskAddress(task)}
+                timeRange={formatTimeRangeAny(task.start_time, task.end_time)}
                 status={task.derivedStatus}
                 completedDate={formatStatusDate(task)}
                 onPress={() => handleCardPress(task)}
-                onLongPress={() => handleCardLongPress(task)}
                 onAddDetails={() => handleAddDetails(task)}
               />
             ))}
@@ -400,7 +286,7 @@ export default function MyTasksPage() {
             <Text style={styles.emptyTitle}>
               {activeTab === 'active'
                 ? 'You have no active tasks'
-                : 'No completed tasks yet'}
+                : 'No finished tasks yet'}
             </Text>
             {activeTab === 'active' && (
               <TouchableOpacity
@@ -413,22 +299,6 @@ export default function MyTasksPage() {
           </View>
         )}
       </ScrollView>
-
-      <QuickActionsSheet
-        visible={quickActionsVisible}
-        onClose={handleCloseQuickActions}
-        onMarkDelivered={handleMarkDelivered}
-        onMarkMissing={handleMarkMissingPrompt}
-      />
-
-      <ConfirmationModal
-        visible={confirmModalVisible}
-        title="Mark task as missing?"
-        subtitle="This action cannot be undone."
-        destructive
-        onBack={handleCancelMissing}
-        onConfirm={handleConfirmMissing}
-      />
     </View>
   );
 }

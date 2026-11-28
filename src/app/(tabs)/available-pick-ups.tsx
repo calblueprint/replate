@@ -2,14 +2,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import elementIcon from 'assets/elements.png';
+import { z } from 'zod';
 import AvailableTaskCard from '@/components/AvailableTaskCard';
 import DayCarousel from '@/components/DayCarousel';
 import { AvailableListSkeleton } from '@/components/SkeletonLoader';
 import Colors from '@/styles/colors';
 import { styles } from '@/styles/tabs/available-pick-ups-styles';
 import { useAuth } from '@/utils/AuthContext';
-import { ApiError, apiRequest, validateArrayResponse } from '~/api/apiUtils';
+import { formatTimeRangeAny, localISODate } from '@/utils/dateHelpers';
+import { formatTaskAddress } from '@/utils/taskHelpers';
+import { ApiError, apiRequest } from '~/api/apiUtils';
 import { API_ENDPOINTS, BASE_URL } from '~/api/config';
+
+const TaskArraySchema = z.array(z.unknown());
 
 interface ApiTask {
   id: number;
@@ -23,61 +28,6 @@ interface ApiTask {
     city?: string | null;
     state?: string | null;
   } | null;
-}
-
-function localISODate(d: Date): string {
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
-}
-
-function formatTimeRange(
-  dateISO: string,
-  startTime: string | null,
-  endTime: string | null,
-): string {
-  if (!startTime || !endTime) return 'Time TBD';
-
-  const parseTime = (timeStr: string) => {
-    if (/^\d{2}:\d{2}$/.test(timeStr)) {
-      const [hours, minutes] = timeStr.split(':').map(n => parseInt(n, 10));
-      if (isNaN(hours) || isNaN(minutes)) return null;
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      const displayMinutes = minutes.toString().padStart(2, '0');
-      return `${displayHours}:${displayMinutes} ${ampm}`;
-    }
-    const d = new Date(
-      timeStr.includes('T') ? timeStr : `${dateISO}T${timeStr}`,
-    );
-    if (isNaN(d.getTime())) return null;
-    const h = d.getHours();
-    const m = d.getMinutes();
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const hr12 = h % 12 || 12;
-    return `${hr12}:${m.toString().padStart(2, '0')} ${ampm}`;
-  };
-
-  const start = parseTime(startTime);
-  const end = parseTime(endTime);
-  if (!start || !end) return 'Time TBD';
-  return `${start} - ${end}`;
-}
-
-function formatAddress(task: ApiTask): string {
-  if (task.address) {
-    const { street, city } = task.address;
-    const parts = [];
-    if (street) parts.push(street);
-    if (city) parts.push(city);
-    if (parts.length > 0) return parts.join(', ');
-  }
-  if (task.location_name) {
-    if (task.location_name.includes('Oakland')) return 'Oakland, CA';
-    if (task.location_name.includes('Berkeley')) return 'Berkeley, CA';
-    return 'Bay Area, CA';
-  }
-  return 'Address details in app';
 }
 
 export default function AvailablePickupsPage() {
@@ -103,7 +53,7 @@ export default function AvailablePickupsPage() {
 
         const data = await apiRequest<ApiTask[]>(
           `${BASE_URL}${API_ENDPOINTS.TASKS}?driver_id=${driver.id}`,
-          { method: 'GET', validateResponse: validateArrayResponse },
+          { method: 'GET', schema: TaskArraySchema },
         );
 
         setTasks(data);
@@ -189,12 +139,10 @@ export default function AvailablePickupsPage() {
               <AvailableTaskCard
                 key={task.encrypted_id}
                 locationName={task.location_name ?? 'Unknown Location'}
-                address={formatAddress(task)}
-                timeRange={formatTimeRange(
-                  task.pickup_date,
-                  task.start_time,
-                  task.end_time,
-                )}
+                address={formatTaskAddress(task)}
+                timeRange={formatTimeRangeAny(task.start_time, task.end_time, {
+                  fallbackDateISO: task.pickup_date,
+                })}
                 onPress={() =>
                   router.push({
                     pathname: '/pickup-details/[id]',

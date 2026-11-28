@@ -5,13 +5,24 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import {
-  apiRequest,
-  ApiError as ApiUtilError,
-  validateResponse,
-} from '../../api/apiUtils';
-import { API_ENDPOINTS, BASE_URL } from '../../api/config';
+import { z } from 'zod';
+import { apiRequest, ApiError as ApiUtilError } from '~/api/apiUtils';
+import { API_ENDPOINTS, BASE_URL } from '~/api/config';
 import { useAuth } from './AuthContext';
+
+const DriverProfileSchema = z
+  .object({
+    id: z.number(),
+    email: z.string(),
+    first_name: z.string(),
+    last_name: z.string(),
+  })
+  .passthrough();
+
+const ProfileResponseSchema = z.union([
+  DriverProfileSchema,
+  z.object({ driver: DriverProfileSchema }),
+]);
 
 // Extended driver profile interface to include NPO/partner information
 export interface DriverProfile {
@@ -63,21 +74,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
-          validateResponse: response => {
-            // Response can be either { driver: {...} } or {...}
-            const profileData =
-              typeof response === 'object' &&
-              response !== null &&
-              'driver' in response
-                ? response.driver
-                : response;
-            return validateResponse(profileData, [
-              'id',
-              'email',
-              'first_name',
-              'last_name',
-            ]);
-          },
+          schema: ProfileResponseSchema,
         },
       );
 
