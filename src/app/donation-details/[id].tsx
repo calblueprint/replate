@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import ConfirmationModal from '@/components/ConfirmationModal';
 import PhotoUpload from '@/components/PhotoUpload/PhotoUpload';
 import RequiredInput from '@/components/RequiredInput/RequiredInput';
 import { styles } from '@/styles/pages/donation-details-styles';
@@ -65,6 +66,8 @@ export default function DonationLayout() {
   const [task, setTask] = useState<TaskPickupInfo | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [missedModalVisible, setMissedModalVisible] = useState(false);
   const isFormValid = weight.trim().length > 0 && selectedNPO.trim().length > 0;
 
   useEffect(() => {
@@ -151,6 +154,7 @@ export default function DonationLayout() {
     task?.address || params.location || 'Location details';
 
   const handleComplete = async () => {
+    setConfirmModalVisible(false);
     if (!params.id || isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -174,6 +178,7 @@ export default function DonationLayout() {
   };
 
   const handleMissed = async () => {
+    setMissedModalVisible(false);
     if (!params.id || isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -305,7 +310,7 @@ export default function DonationLayout() {
             styles.missedButton,
             isSubmitting && styles.missedButtonDisabled,
           ]}
-          onPress={handleMissed}
+          onPress={() => setMissedModalVisible(true)}
           disabled={isSubmitting}
         >
           <Text
@@ -319,12 +324,29 @@ export default function DonationLayout() {
             styles.completeButton,
             (!isFormValid || isSubmitting) && styles.completeButtonDisabled,
           ]}
-          onPress={handleComplete}
+          onPress={() => setConfirmModalVisible(true)}
           disabled={!isFormValid || isSubmitting}
         >
           <Text style={[styles.completeText]}>Complete</Text>
         </TouchableOpacity>
       </View>
+
+      <ConfirmationModal
+        visible={confirmModalVisible}
+        title="Mark task as completed?"
+        subtitle="This action cannot be undone."
+        onBack={() => setConfirmModalVisible(false)}
+        onConfirm={handleComplete}
+      />
+
+      <ConfirmationModal
+        visible={missedModalVisible}
+        title="Mark task as missed?"
+        subtitle="This action cannot be undone."
+        onBack={() => setMissedModalVisible(false)}
+        destructive={true}
+        onConfirm={handleMissed}
+      />
     </SafeAreaView>
   );
 }
